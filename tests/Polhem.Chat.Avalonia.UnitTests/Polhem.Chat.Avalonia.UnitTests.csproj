@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- NOTE: The headless platform, the themes and Skia stay on the lowest Avalonia version the control supports, so the
+       tests run against it. Skia lays out real text: the headless platform's stand-in text layout never returns when a
+       wrapping text block with a line break is measured with unbounded height, which is what a scroll viewer does. The
+       two themes are the ones the control promises to work with. -->
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Skia" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.0" />
+    <PackageReference Include="Semi.Avalonia" Version="12.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polhem.Chat.Avalonia\Polhem.Chat.Avalonia.csproj" />
+  </ItemGroup>
+
+  <!-- The runner is driven by the same scripted client as the model tests, so neither calls a real model. -->
+  <ItemGroup>
+    <Compile Include="..\Polhem.Chat.UnitTests\ScriptedChatClient.cs" Link="Shared\ScriptedChatClient.cs" />
+  </ItemGroup>
+
+</Project>

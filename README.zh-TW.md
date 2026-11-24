@@ -21,6 +21,25 @@
 
 這些套件仍在開發中，尚未發佈，API 也還沒定案。
 
+## 開始使用
+
+把 `ChatTheme` 加進應用程式的樣式，放在基礎主題之後（支援 Fluent 與 Semi，淺色與深色皆可），在視窗裡放一個
+`ChatView`，再給它一個包住你 client 的 runner：
+
+```xml
+<Application.Styles>
+  <FluentTheme />
+  <chat:ChatTheme />
+</Application.Styles>
+```
+
+```csharp
+chatView.Runner = new ChatRunner(chatClient);
+```
+
+自己跑迴圈的應用程式改設 `Conversation`，並處理 `PromptSubmitted` 與 `StopRequested`。樣板、文字與顏色的自訂方式見
+[套件 README](src/Polhem.Chat.Avalonia/README.md)（英文）。
+
 ## 建置
 
 ```bash

@@ -1,0 +1,81 @@
+using System.Globalization;
+using System.Text;
+using Avalonia.Data.Converters;
+
+namespace Polhem.Chat.Avalonia;
+
+/// <summary>The converters the default entry templates use to turn entry values into text.</summary>
+internal static class EntryConverters
+{
+    /// <summary>Converts a <see cref="ToolCallStatus"/> and the view's <see cref="ChatViewStrings"/> to the status word.</summary>
+    public static IMultiValueConverter ToolStatus { get; } = new FuncMultiValueConverter<object?, string>(values =>
+    {
+        var list = values.ToList();
+        if (list is not [ToolCallStatus status, ChatViewStrings strings])
+        {
+            return string.Empty;
+        }
+        return status switch
+        {
+            ToolCallStatus.Running => strings.ToolRunning,
+            ToolCallStatus.Completed => strings.ToolCompleted,
+            ToolCallStatus.Failed => strings.ToolFailed,
+            _ => strings.ToolCanceled,
+        };
+    });
+
+    /// <summary>Converts the arguments of a tool call to whether there are any.</summary>
+    public static IValueConverter HasArguments { get; } =
+        new FuncValueConverter<IDictionary<string, object?>?, bool>(arguments => arguments is { Count: > 0 });
+
+    /// <summary>Converts a <see cref="TurnSummaryEntry"/> and the view's <see cref="ChatViewStrings"/> to one line.</summary>
+    public static IMultiValueConverter TurnSummary { get; } = new FuncMultiValueConverter<object?, string>(values =>
+    {
+        var list = values.ToList();
+        return list is [TurnSummaryEntry summary, ChatViewStrings strings] ? DescribeTurn(summary, strings) : string.Empty;
+    });
+
+    /// <summary>Converts the arguments of a tool call to one <c>name: value</c> line each.</summary>
+    public static IValueConverter ToolArguments { get; } =
+        new FuncValueConverter<IDictionary<string, object?>?, string>(arguments =>
+        {
+            if (arguments is null || arguments.Count == 0)
+            {
+                return string.Empty;
+            }
+            var text = new StringBuilder();
+            foreach (var (name, value) in arguments)
+            {
+                if (text.Length > 0)
+                {
+                    text.Append('\n');
+                }
+                text.Append(name).Append(": ").Append(FormatValue(value));
+            }
+            return text.ToString();
+        });
+
+    /// <summary>Converts the result of a tool call to text.</summary>
+    public static IValueConverter ToolResult { get; } = new FuncValueConverter<object?, string>(FormatValue);
+
+    internal static string DescribeTurn(TurnSummaryEntry summary, ChatViewStrings strings)
+    {
+        var parts = new List<string> { strings.FormatElapsed(summary.Elapsed) };
+        if (summary.Usage is { } usage && (usage.InputTokenCount is not null || usage.OutputTokenCount is not null))
+        {
+            parts.Add(strings.FormatTokens(usage.InputTokenCount ?? 0, usage.OutputTokenCount ?? 0));
+        }
+        if (summary.Outcome == TurnOutcome.Stopped)
+        {
+            parts.Add(strings.Stopped);
+        }
+        else if (summary.Outcome == TurnOutcome.Failed)
+        {
+            parts.Add(strings.TurnFailed);
+        }
+        return string.Join(" · ", parts);
+    }
+
+    // A JSON element, which is what most providers return for arguments and results, formats as its JSON text.
+    private static string FormatValue(object? value) => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
+}

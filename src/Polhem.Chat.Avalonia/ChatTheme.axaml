@@ -1,0 +1,125 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:Polhem.Chat.Avalonia"
+        x:Class="Polhem.Chat.Avalonia.ChatTheme">
+
+  <Styles.Resources>
+    <ResourceDictionary>
+      <!-- NOTE: The colors are translucent so that they sit on any base theme: Fluent and Semi, light and dark, draw
+           their own background and text color, and these only tint it. An application changes one by declaring the
+           same key in its own resources. -->
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="PolhemChatPromptBackground" Color="#263B82F6" />
+          <SolidColorBrush x:Key="PolhemChatCardBackground" Color="#08000000" />
+          <SolidColorBrush x:Key="PolhemChatCardBorderBrush" Color="#1F000000" />
+          <SolidColorBrush x:Key="PolhemChatErrorBackground" Color="#14DC2626" />
+          <SolidColorBrush x:Key="PolhemChatErrorBorderBrush" Color="#66DC2626" />
+          <SolidColorBrush x:Key="PolhemChatErrorForeground" Color="#B91C1C" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="PolhemChatPromptBackground" Color="#4D3B82F6" />
+          <SolidColorBrush x:Key="PolhemChatCardBackground" Color="#0FFFFFFF" />
+          <SolidColorBrush x:Key="PolhemChatCardBorderBrush" Color="#29FFFFFF" />
+          <SolidColorBrush x:Key="PolhemChatErrorBackground" Color="#29F87171" />
+          <SolidColorBrush x:Key="PolhemChatErrorBorderBrush" Color="#80F87171" />
+          <SolidColorBrush x:Key="PolhemChatErrorForeground" Color="#FCA5A5" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+
+      <ControlTheme x:Key="{x:Type local:ChatView}" TargetType="local:ChatView">
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Grid RowDefinitions="*,Auto" Background="{TemplateBinding Background}">
+              <ScrollViewer Name="PART_ScrollViewer" HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl Name="PART_Entries" Margin="16,12">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Spacing="12" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                </ItemsControl>
+              </ScrollViewer>
+
+              <StackPanel Name="PART_EmptyState"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Margin="24"
+                          Spacing="16"
+                          IsVisible="False">
+                <Panel HorizontalAlignment="Center">
+                  <TextBlock Name="PART_EmptyTitle"
+                             Text="{Binding $parent[local:ChatView].Strings.EmptyTitle}"
+                             FontSize="18"
+                             IsVisible="{TemplateBinding EmptyContent, Converter={x:Static ObjectConverters.IsNull}}" />
+                  <ContentPresenter Content="{TemplateBinding EmptyContent}"
+                                    ContentTemplate="{TemplateBinding EmptyContentTemplate}" />
+                </Panel>
+                <ItemsControl Name="PART_Suggestions" ItemsSource="{TemplateBinding Suggestions}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                      <Button Classes="polhemChatSuggestion"
+                              Margin="4"
+                              Content="{Binding}"
+                              Command="{Binding $parent[local:ChatView].SubmitCommand}"
+                              CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <Button Name="PART_ScrollToLatest"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Bottom"
+                      Margin="0,0,0,12"
+                      IsVisible="False"
+                      Content="{Binding $parent[local:ChatView].Strings.JumpToLatest}"
+                      Command="{Binding $parent[local:ChatView].ScrollToLatestCommand}" />
+
+              <Border Grid.Row="1"
+                      Padding="12"
+                      BorderThickness="0,1,0,0"
+                      BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
+                <Grid ColumnDefinitions="*,Auto">
+                  <local:ChatPromptBox Name="PART_PromptBox"
+                                       MaxHeight="160"
+                                       VerticalContentAlignment="Center"
+                                       Text="{TemplateBinding Prompt, Mode=TwoWay}"
+                                       PlaceholderText="{Binding $parent[local:ChatView].Strings.PromptPlaceholder}" />
+                  <Panel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Bottom">
+                    <Button Name="PART_SendButton"
+                            Content="{Binding $parent[local:ChatView].Strings.Send}"
+                            Command="{Binding $parent[local:ChatView].SubmitCommand}" />
+                    <Button Name="PART_StopButton"
+                            IsVisible="False"
+                            Content="{Binding $parent[local:ChatView].Strings.Stop}"
+                            Command="{Binding $parent[local:ChatView].StopCommand}" />
+                  </Panel>
+                </Grid>
+              </Border>
+            </Grid>
+          </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:empty /template/ StackPanel#PART_EmptyState">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:scrolledup /template/ Button#PART_ScrollToLatest">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:generating /template/ Button#PART_SendButton">
+          <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^:generating /template/ Button#PART_StopButton">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
+      </ControlTheme>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+</Styles>
