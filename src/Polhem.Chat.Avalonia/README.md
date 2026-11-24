@@ -6,7 +6,7 @@ usage, stop and copy. The conversation model is in `Polhem.Chat`.
 
 ## Getting started
 
-Add the theme after your base theme (Fluent, Semi or another):
+The control needs Avalonia 12 or later. Add the theme after your base theme (Fluent, Semi or another):
 
 ```xml
 <Application.Styles>
@@ -41,4 +41,4 @@ An application with its own tool loop sets `Conversation` instead of `Runner`, h
 - The colors are brushes in the theme's resources (see `ChatTheme`); declare the same key in your resources to change
   one.
 
-The packages are in preview; their API is not settled yet. See the [repository](https://github.com/polhem-dev/polhem-chat).
+The packages are at 0.x: a minor version may still change the API. See the [repository](https://github.com/polhem-dev/polhem-chat).

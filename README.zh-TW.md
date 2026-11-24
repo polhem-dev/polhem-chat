@@ -19,23 +19,54 @@
 | `Polhem.Chat` | 對話模型：把串流更新轉成對話項目，並負責執行每一輪。不含 UI |
 | `Polhem.Chat.Avalonia` | Avalonia 的聊天控制項，以 [Polhem.Markdown.Avalonia](https://github.com/polhem-dev/polhem-markdown) 呈現 Markdown |
 
-這些套件仍在開發中，尚未發佈，API 也還沒定案。
+套件發佈在 [nuget.org](https://www.nuget.org/packages?q=Polhem.Chat)，各版變更見 [CHANGELOG](CHANGELOG.zh-TW.md)。
+目前是 0.x：minor 版仍可能變更 API，CHANGELOG 會寫明。
 
 ## 開始使用
 
-把 `ChatTheme` 加進應用程式的樣式，放在基礎主題之後（支援 Fluent 與 Semi，淺色與深色皆可），在視窗裡放一個
-`ChatView`，再給它一個包住你 client 的 runner：
+控制項需要 Avalonia 12 以上。從一個 Avalonia 應用程式開始（例如用 `dotnet new avalonia.app` 建立），加入控制項和你的
+模型用戶端。任何 `IChatClient` 都可以，這個範例用 OpenAI：
+
+```bash
+dotnet add package Polhem.Chat.Avalonia
+dotnet add package Microsoft.Extensions.AI.OpenAI
+```
+
+把 `ChatTheme` 加進應用程式的樣式，放在基礎主題之後（支援 Fluent 與 Semi，淺色與深色皆可）：
 
 ```xml
-<Application.Styles>
-  <FluentTheme />
-  <chat:ChatTheme />
-</Application.Styles>
+<Application xmlns:chat="using:Polhem.Chat.Avalonia" ...>
+  <Application.Styles>
+    <FluentTheme />
+    <chat:ChatTheme />
+  </Application.Styles>
+</Application>
 ```
 
-```csharp
-chatView.Runner = new ChatRunner(chatClient);
+在視窗裡放一個 `ChatView`：
+
+```xml
+<Window xmlns:chat="using:Polhem.Chat.Avalonia" ...>
+  <chat:ChatView x:Name="Chat" />
+</Window>
 ```
+
+再在視窗的建構式裡給它一個包住你 client 的 runner：
+
+```csharp
+using Microsoft.Extensions.AI;
+using OpenAI;
+using Polhem.Chat;
+
+InitializeComponent();
+IChatClient client = new OpenAIClient(System.Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
+    .GetChatClient("gpt-4.1-mini")
+    .AsIChatClient();
+Chat.Runner = new ChatRunner(client);
+```
+
+設定 `OPENAI_API_KEY` 後執行應用程式即可。Enter 送出、Shift+Enter 換行，Esc 或停止鈕停止回覆。要讓模型呼叫工具，
+以 `UseFunctionInvocation()` 包住 client，並把工具放進 runner 的 `Options`。
 
 自己跑迴圈的應用程式改設 `Conversation`，並處理 `PromptSubmitted` 與 `StopRequested`。樣板、文字與顏色的自訂方式見
 [套件 README](src/Polhem.Chat.Avalonia/README.md)（英文）。

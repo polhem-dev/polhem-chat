@@ -7,6 +7,8 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-24
+
 ### 新增
 
 - `Polhem.Chat`：`ChatConversation` 保存送給模型的歷史，以及 UI 顯示的項目（`UserPromptEntry`、`AssistantReplyEntry`、
@@ -20,3 +22,6 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
   Enter 不會送出。Esc 或停止鈕可停止回覆並保留已收到的內容；完成的回覆可複製 Markdown 原文；畫面會跟著新文字捲動，
   使用者往上捲之後改顯示「回到最新」。`ChatViewStrings` 內建英文與繁體中文，應用程式可替換；`ChatTheme` 在 Fluent 與
   Semi 的淺色、深色下都能使用。
+
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0

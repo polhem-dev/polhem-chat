@@ -8,4 +8,4 @@ front-end package:
 
 - `Polhem.Chat.Avalonia`: a chat control for Avalonia.
 
-The packages are in preview; their API is not settled yet. See the [repository](https://github.com/polhem-dev/polhem-chat).
+The packages are at 0.x: a minor version may still change the API. See the [repository](https://github.com/polhem-dev/polhem-chat).
