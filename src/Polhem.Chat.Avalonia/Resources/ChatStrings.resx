@@ -69,4 +69,13 @@
   <data name="TokensFormat" xml:space="preserve">
     <value>{0:N0} in · {1:N0} out</value>
   </data>
+  <data name="CachedTokensFormat" xml:space="preserve">
+    <value>{0:N0} in ({1:N0} cached) · {2:N0} out</value>
+  </data>
+  <data name="CallsFormat" xml:space="preserve">
+    <value>{0} calls</value>
+  </data>
+  <data name="ProgressFormat" xml:space="preserve">
+    <value>Call {0} · {1:0} s</value>
+  </data>
 </root>

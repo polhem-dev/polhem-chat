@@ -69,4 +69,13 @@
   <data name="TokensFormat" xml:space="preserve">
     <value>輸入 {0:N0} · 輸出 {1:N0}</value>
   </data>
+  <data name="CachedTokensFormat" xml:space="preserve">
+    <value>輸入 {0:N0}（快取 {1:N0}）· 輸出 {2:N0}</value>
+  </data>
+  <data name="CallsFormat" xml:space="preserve">
+    <value>{0} 次呼叫</value>
+  </data>
+  <data name="ProgressFormat" xml:space="preserve">
+    <value>第 {0} 次呼叫 · {1:0} 秒</value>
+  </data>
 </root>

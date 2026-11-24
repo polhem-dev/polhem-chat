@@ -1,1 +1,10 @@
 #nullable enable
+Polhem.Chat.Avalonia.ChatViewStrings.CachedTokensFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.CachedTokensFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.CallsFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.CallsFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ProgressFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ProgressFormat.set -> void
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) -> string!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCalls(int calls) -> string!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed) -> string!

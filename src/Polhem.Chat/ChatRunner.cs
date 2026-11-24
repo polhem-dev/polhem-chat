@@ -118,8 +118,18 @@ public sealed class ChatRunner : INotifyPropertyChanged
         try
         {
             var messages = Conversation.CreateRequestMessages();
+            // NOTE: A client that runs tools, such as FunctionInvokingChatClient, sends several requests inside one stream.
+            // Each response the model sent has its own ResponseId, so a new one is another request; a client that sets
+            // none counts as one.
+            var responses = new HashSet<string>(StringComparer.Ordinal);
+            turn.BeginCall();
             await foreach (var update in _client.GetStreamingResponseAsync(messages, Options, stop.Token).WithCancellation(stop.Token))
             {
+                if ((update.Role is null || update.Role == ChatRole.Assistant) && update.ResponseId is { } responseId
+                    && responses.Add(responseId) && responses.Count > 1)
+                {
+                    turn.BeginCall();
+                }
                 turn.Apply(update);
             }
             result = turn.Complete();

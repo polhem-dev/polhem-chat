@@ -61,9 +61,16 @@ internal static class EntryConverters
     internal static string DescribeTurn(TurnSummaryEntry summary, ChatViewStrings strings)
     {
         var parts = new List<string> { strings.FormatElapsed(summary.Elapsed) };
+        // One request is the usual case and says nothing; the count is worth a place only when a turn took several.
+        if (summary.Calls > 1)
+        {
+            parts.Add(strings.FormatCalls(summary.Calls));
+        }
         if (summary.Usage is { } usage && (usage.InputTokenCount is not null || usage.OutputTokenCount is not null))
         {
-            parts.Add(strings.FormatTokens(usage.InputTokenCount ?? 0, usage.OutputTokenCount ?? 0));
+            parts.Add(usage.CachedInputTokenCount is > 0
+                ? strings.FormatCachedTokens(usage.InputTokenCount ?? 0, usage.CachedInputTokenCount.Value, usage.OutputTokenCount ?? 0)
+                : strings.FormatTokens(usage.InputTokenCount ?? 0, usage.OutputTokenCount ?? 0));
         }
         if (summary.Outcome == TurnOutcome.Stopped)
         {

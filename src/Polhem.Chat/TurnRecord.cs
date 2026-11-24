@@ -13,6 +13,7 @@ internal static class TurnRecord
 {
     public const string ElapsedKey = "polhem.chat.elapsedMilliseconds";
     public const string OutcomeKey = "polhem.chat.outcome";
+    public const string CallsKey = "polhem.chat.calls";
 
     public static UsageContent Create(TurnSummaryEntry summary) =>
         new(summary.Usage ?? new UsageDetails())
@@ -21,6 +22,7 @@ internal static class TurnRecord
             {
                 [ElapsedKey] = (long)summary.Elapsed.TotalMilliseconds,
                 [OutcomeKey] = summary.Outcome.ToString(),
+                [CallsKey] = (long)summary.Calls,
             },
         };
 
@@ -42,7 +44,11 @@ internal static class TurnRecord
         var usage = content.Details;
         var reported = usage.InputTokenCount is not null || usage.OutputTokenCount is not null
             || usage.TotalTokenCount is not null;
-        return new TurnSummaryEntry(TimeSpan.FromMilliseconds(elapsed), reported ? usage : null, outcome);
+        // A history saved before the calls were recorded has none: 0 means not counted.
+        var calls = properties.TryGetValue(CallsKey, out var callsValue) && ReadInt64(callsValue) is { } count
+            ? (int)Math.Clamp(count, 0, int.MaxValue)
+            : 0;
+        return new TurnSummaryEntry(TimeSpan.FromMilliseconds(elapsed), reported ? usage : null, outcome, calls);
     }
 
     // After a round trip through JSON the values come back as JsonElement rather than as the types written.
