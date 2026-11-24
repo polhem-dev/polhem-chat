@@ -40,19 +40,33 @@ public class SlotTests(HeadlessSession session)
         Assert.False(below.IsVisible);
     });
 
-    [Fact(DisplayName = "A slot shows plain data through its template")]
-    public Task Slot_UsesItsTemplate() => session.RunAsync(() =>
+    [Fact(DisplayName = "Each slot shows plain data through its own template")]
+    public Task Slots_UseTheirTemplates() => session.RunAsync(() =>
     {
+        IDataTemplate Note(string prefix) => new FuncDataTemplate<string>((text, _) => new TextBlock { Text = prefix + text });
+        var header = Note("Header: ");
+        var above = Note("Above: ");
+        var below = Note("Below: ");
         var view = new ChatView
         {
             Conversation = new ChatConversation(),
+            HeaderContent = "Trip",
+            HeaderContentTemplate = header,
+            PromptHeaderContent = "Kyoto",
+            PromptHeaderContentTemplate = above,
             PromptFooterContent = "Answers can be wrong.",
-            PromptFooterContentTemplate = new FuncDataTemplate<string>((text, _) => new TextBlock { Text = "Note: " + text }),
+            PromptFooterContentTemplate = below,
         };
         Show(view);
 
-        var block = Part<ContentPresenter>(view, "PART_PromptFooter").GetVisualDescendants().OfType<TextBlock>().Single();
-        Assert.Equal("Note: Answers can be wrong.", block.Text);
+        string Shown(string part) => Part<ContentPresenter>(view, part).GetVisualDescendants().OfType<TextBlock>().Single().Text!;
+        Assert.Equal("Header: Trip", Shown("PART_Header"));
+        Assert.Equal("Above: Kyoto", Shown("PART_PromptHeader"));
+        Assert.Equal("Below: Answers can be wrong.", Shown("PART_PromptFooter"));
+        Assert.Equal(("Trip", "Kyoto", "Answers can be wrong."), (view.HeaderContent, view.PromptHeaderContent, view.PromptFooterContent));
+        Assert.Same(header, view.HeaderContentTemplate);
+        Assert.Same(above, view.PromptHeaderContentTemplate);
+        Assert.Same(below, view.PromptFooterContentTemplate);
     });
 
     [Fact(DisplayName = "The header stays in place while the conversation scrolls")]
