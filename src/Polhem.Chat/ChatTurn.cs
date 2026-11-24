@@ -28,7 +28,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
     private TimeSpan _waited;
     private long? _waitStart;
     private readonly List<ChatMessage> _toSend = [];
-    private readonly HashSet<AIContent> _dropped = new(ReferenceEqualityComparer.Instance);
+    private readonly List<AIContent> _dropped = [];
     private TaskCompletionSource? _decided;
 
     internal ChatTurn(ChatConversation conversation)
@@ -331,7 +331,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
         // The combined response reports usage in ChatResponse.Usage; the history keeps the turn's own record instead.
         // A message that held nothing but a dropped request is left out: a provider rejects an empty message.
         _messages.AddRange(_updates.ToChatResponse().Messages
-            .Where(message => message.Contents.Count == 0 || message.Contents.Any(content => !_dropped.Contains(content)))
+            .Where(message => message.Contents.Count == 0 || message.Contents.Any(content => !IsDropped(content)))
             .Select(CopyForHistory));
         _updates.Clear();
     }
@@ -358,8 +358,11 @@ public sealed class ChatTurn : INotifyPropertyChanged
         _conversation.Projector.AddRejectedRequest(request, RepeatedCallReason);
     }
 
+    // Compared by reference: the dropped request is that very content, and another request may equal it.
+    private bool IsDropped(AIContent content) => _dropped.Exists(dropped => ReferenceEquals(dropped, content));
+
     private ChatMessage CopyForHistory(ChatMessage message) =>
-        new(message.Role, message.Contents.Where(content => content is not UsageContent && !_dropped.Contains(content)).ToList())
+        new(message.Role, message.Contents.Where(content => content is not UsageContent && !IsDropped(content)).ToList())
         {
             AuthorName = message.AuthorName,
             CreatedAt = message.CreatedAt,

@@ -198,7 +198,7 @@ public sealed class ChatRunner : INotifyPropertyChanged
     /// </remarks>
     private sealed class RequestCounter
     {
-        private readonly HashSet<string> _responses = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _responses = [];
         private bool _continuing;
 
         /// <summary>Marks that the next stream continues the turn, so its first response is a new request.</summary>
