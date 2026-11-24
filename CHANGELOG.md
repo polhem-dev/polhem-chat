@@ -9,6 +9,14 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-25
+
+Details and migration steps: [docs/en/changelogs/0.1.2.md](docs/en/changelogs/0.1.2.md)
+
+- **Changed:** `Polhem.Markdown.Avalonia` 0.2.1: replies render highlighted code, math, Mermaid diagrams, footnotes, alerts and allowed raw HTML. It brings `Svg.Skia` and `Avalonia.AvaloniaEdit` as new dependencies.
+- **Security:** Replies load no images, written in Markdown or in HTML, so a prompt injection cannot send data out through an image address. `ChatView.MarkdownOptions` allows them.
+- `ChatView.CjkFontFamily` draws bold CJK text in replies bold.
+
 ## [0.1.1] - 2026-11-24
 
 Details and migration steps: [docs/en/changelogs/0.1.1.md](docs/en/changelogs/0.1.1.md)
@@ -31,6 +39,7 @@ Details: [docs/en/changelogs/0.1.0.md](docs/en/changelogs/0.1.0.md)
 - The prompt box sends on Enter and ignores the Enter that confirms an input method's composition.
 - English and Traditional Chinese texts, and a theme for Fluent and Semi, light and dark.
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0

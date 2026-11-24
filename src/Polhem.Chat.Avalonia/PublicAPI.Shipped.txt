@@ -9,6 +9,8 @@ Polhem.Chat.Avalonia.ChatView
 Polhem.Chat.Avalonia.ChatView.ActivityIcon.get -> System.Uri?
 Polhem.Chat.Avalonia.ChatView.ActivityIcon.set -> void
 Polhem.Chat.Avalonia.ChatView.ChatView() -> void
+Polhem.Chat.Avalonia.ChatView.CjkFontFamily.get -> Avalonia.Media.FontFamily?
+Polhem.Chat.Avalonia.ChatView.CjkFontFamily.set -> void
 Polhem.Chat.Avalonia.ChatView.Conversation.get -> Polhem.Chat.ChatConversation?
 Polhem.Chat.Avalonia.ChatView.Conversation.set -> void
 Polhem.Chat.Avalonia.ChatView.CopyCommand.get -> System.Windows.Input.ICommand!
@@ -19,6 +21,8 @@ Polhem.Chat.Avalonia.ChatView.EmptyContentTemplate.set -> void
 Polhem.Chat.Avalonia.ChatView.FollowsLatest.get -> bool
 Polhem.Chat.Avalonia.ChatView.IsGenerating.get -> bool
 Polhem.Chat.Avalonia.ChatView.IsGenerating.set -> void
+Polhem.Chat.Avalonia.ChatView.MarkdownOptions.get -> Polhem.Markdown.MarkdownOptions?
+Polhem.Chat.Avalonia.ChatView.MarkdownOptions.set -> void
 Polhem.Chat.Avalonia.ChatView.Prompt.get -> string?
 Polhem.Chat.Avalonia.ChatView.Prompt.set -> void
 Polhem.Chat.Avalonia.ChatView.PromptSubmitted -> System.EventHandler<Polhem.Chat.Avalonia.PromptSubmittedEventArgs!>?
@@ -101,10 +105,12 @@ override Polhem.Chat.Avalonia.ChatView.OnPropertyChanged(Avalonia.AvaloniaProper
 static Polhem.Chat.Avalonia.ChatViewStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.Avalonia.ChatViewStrings!
 static readonly Polhem.Chat.Avalonia.ChatPromptBox.SubmitRequestedEvent -> Avalonia.Interactivity.RoutedEvent<Avalonia.Interactivity.RoutedEventArgs!>!
 static readonly Polhem.Chat.Avalonia.ChatView.ActivityIconProperty -> Avalonia.StyledProperty<System.Uri?>!
+static readonly Polhem.Chat.Avalonia.ChatView.CjkFontFamilyProperty -> Avalonia.StyledProperty<Avalonia.Media.FontFamily?>!
 static readonly Polhem.Chat.Avalonia.ChatView.ConversationProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatConversation?>!
 static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentProperty -> Avalonia.StyledProperty<object?>!
 static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
 static readonly Polhem.Chat.Avalonia.ChatView.IsGeneratingProperty -> Avalonia.StyledProperty<bool>!
+static readonly Polhem.Chat.Avalonia.ChatView.MarkdownOptionsProperty -> Avalonia.StyledProperty<Polhem.Markdown.MarkdownOptions?>!
 static readonly Polhem.Chat.Avalonia.ChatView.PromptProperty -> Avalonia.StyledProperty<string?>!
 static readonly Polhem.Chat.Avalonia.ChatView.RunnerProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatRunner?>!
 static readonly Polhem.Chat.Avalonia.ChatView.ShowsActivityProperty -> Avalonia.StyledProperty<bool>!
