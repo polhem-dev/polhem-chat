@@ -19,8 +19,9 @@ public partial class ChatView
         }
         // NOTE: One layout pass can both grow the content and move the offset, so the deltas cannot tell who moved it
         // from their size alone. The direction can: the view only ever scrolls down, so an offset that went up while the
-        // content did not shrink was the user leaving the end.
-        if (e.OffsetDelta.Y < 0 && e.ExtentDelta.Y >= 0)
+        // content did not shrink was the user leaving the end. Unless the viewport grew in that pass: then the layout
+        // moved the offset (a line under the view went away, the window got taller), and the view follows on.
+        if (e.OffsetDelta.Y < 0 && e.ExtentDelta.Y >= 0 && e.ViewportDelta.Y <= 0)
         {
             SetFollowsLatest(IsAtEnd(scrollViewer));
         }

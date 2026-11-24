@@ -29,6 +29,12 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
   user, and the activity line tells what the model is doing. The entries stay in the conversation and its history.
   `ChatView.ShowsActivity`, or the › at the end of the activity line, shows them again.
 
+### Fixed
+
+- `ChatView` no longer stops following the newest entry when entries arrive while it grows taller, such as when a line
+  under it goes away at the end of a turn. It took the offset the layout moved for the user scrolling up, and showed
+  Jump to latest.
+
 ## [0.1.0] - 2026-11-24
 
 ### Added
