@@ -7,6 +7,8 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-24
+
 ### Added
 
 - `Polhem.Chat`: `ChatConversation` keeps the history sent to the model and the entries a user interface shows
@@ -24,3 +26,6 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
   Markdown; the view follows new text until the user scrolls up and then offers Jump to latest. `ChatViewStrings` ships
   English and Traditional Chinese texts that applications can replace, and `ChatTheme` works on Fluent and Semi, light
   and dark.
+
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0

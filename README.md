@@ -19,23 +19,57 @@ bring the `IChatClient` you already use.
 | `Polhem.Chat` | The conversation model: streamed updates turned into conversation entries, and a runner for each turn. No UI |
 | `Polhem.Chat.Avalonia` | The chat control for Avalonia, rendering Markdown with [Polhem.Markdown.Avalonia](https://github.com/polhem-dev/polhem-markdown) |
 
-The packages are in development and not yet published; their API is not settled.
+The packages are published on [nuget.org](https://www.nuget.org/packages?q=Polhem.Chat); the changes of each release
+are in the [CHANGELOG](CHANGELOG.md). They are at 0.x: a minor version may still change the API, and the CHANGELOG says
+when it does.
 
 ## Getting started
 
-Add `ChatTheme` to the application's styles after the base theme (Fluent and Semi are both supported, light and dark),
-put a `ChatView` in a window, and give it a runner for your client:
+The control needs Avalonia 12 or later. Start from an Avalonia application, for example one made with
+`dotnet new avalonia.app`, and add the control and a client for your model. Any `IChatClient` works; this example uses
+OpenAI:
+
+```bash
+dotnet add package Polhem.Chat.Avalonia
+dotnet add package Microsoft.Extensions.AI.OpenAI
+```
+
+Add `ChatTheme` to the application's styles, after the base theme (Fluent and Semi are both supported, light and dark):
 
 ```xml
-<Application.Styles>
-  <FluentTheme />
-  <chat:ChatTheme />
-</Application.Styles>
+<Application xmlns:chat="using:Polhem.Chat.Avalonia" ...>
+  <Application.Styles>
+    <FluentTheme />
+    <chat:ChatTheme />
+  </Application.Styles>
+</Application>
 ```
 
-```csharp
-chatView.Runner = new ChatRunner(chatClient);
+Put a `ChatView` in a window:
+
+```xml
+<Window xmlns:chat="using:Polhem.Chat.Avalonia" ...>
+  <chat:ChatView x:Name="Chat" />
+</Window>
 ```
+
+and give it a runner for your client in the window's constructor:
+
+```csharp
+using Microsoft.Extensions.AI;
+using OpenAI;
+using Polhem.Chat;
+
+InitializeComponent();
+IChatClient client = new OpenAIClient(System.Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
+    .GetChatClient("gpt-4.1-mini")
+    .AsIChatClient();
+Chat.Runner = new ChatRunner(client);
+```
+
+Set `OPENAI_API_KEY` and run the application. Enter sends, Shift+Enter starts a new line, and Esc or the stop button
+stops the reply. For tool calls, wrap the client with `UseFunctionInvocation()` and pass the tools in the runner's
+`Options`.
 
 An application that runs its own loop sets `Conversation` instead and handles `PromptSubmitted` and `StopRequested`.
 The [package README](src/Polhem.Chat.Avalonia/README.md) covers templates, texts and colors.
