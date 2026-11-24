@@ -82,6 +82,8 @@ public partial class ChatView : TemplatedControl
     private readonly ViewCommand _stopCommand;
     private readonly ViewCommand _copyCommand;
     private readonly ViewCommand _scrollToLatestCommand;
+    private readonly ViewCommand _approveCommand;
+    private readonly ViewCommand _rejectCommand;
     private ScrollViewer? _scrollViewer;
     private ItemsControl? _entries;
     private ChatRunner? _activeRunner;
@@ -96,6 +98,8 @@ public partial class ChatView : TemplatedControl
         _stopCommand = new ViewCommand(_ => Stop(), _ => IsGenerating);
         _copyCommand = new ViewCommand(parameter => _ = CopyAsync(parameter), parameter => CopyText(parameter) is not null);
         _scrollToLatestCommand = new ViewCommand(_ => ScrollToLatest(), _ => true);
+        _approveCommand = new ViewCommand(parameter => Decide(parameter, approved: true), IsPendingApproval);
+        _rejectCommand = new ViewCommand(parameter => Decide(parameter, approved: false), IsPendingApproval);
         CoerceValue(StringsProperty);
         PseudoClasses.Set(EmptyPseudoClass, true);
         AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
@@ -203,6 +207,18 @@ public partial class ChatView : TemplatedControl
     /// of a <see cref="UserPromptEntry"/> or <see cref="ReasoningEntry"/>, or a string.
     /// </summary>
     public ICommand CopyCommand => _copyCommand;
+
+    /// <summary>
+    /// Gets the command that approves a <see cref="ToolCallEntry"/> waiting for the user's approval in the turn in
+    /// progress, so the client runs it. The default tool call template uses it, and so can an application's own.
+    /// </summary>
+    public ICommand ApproveToolCallCommand => _approveCommand;
+
+    /// <summary>
+    /// Gets the command that rejects a <see cref="ToolCallEntry"/> waiting for the user's approval in the turn in progress,
+    /// so the client does not run it.
+    /// </summary>
+    public ICommand RejectToolCallCommand => _rejectCommand;
 
     /// <summary>Gets the command that scrolls to the newest entry and follows new entries again.</summary>
     public ICommand ScrollToLatestCommand => _scrollToLatestCommand;
@@ -357,6 +373,25 @@ public partial class ChatView : TemplatedControl
         string text when text.Length > 0 => text,
         _ => null,
     };
+
+    private bool IsPendingApproval(object? parameter) =>
+        parameter is ToolCallEntry entry && _shown?.CurrentTurn?.PendingApprovals.Contains(entry) == true;
+
+    private void Decide(object? parameter, bool approved)
+    {
+        if (parameter is not ToolCallEntry entry || _shown?.CurrentTurn is not { } turn)
+        {
+            return;
+        }
+        if (approved)
+        {
+            turn.Approve(entry);
+        }
+        else
+        {
+            turn.Reject(entry);
+        }
+    }
 
     private void Stop()
     {

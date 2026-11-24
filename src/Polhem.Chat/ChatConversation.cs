@@ -96,7 +96,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
         return _currentTurn;
     }
 
-    /// <summary>Replaces the conversation with a saved history.</summary>
+    /// <summary>
+    /// Replaces the conversation with a saved history. A tool call the history asked approval for and never answered is
+    /// rejected, and the rejection is added to the history.
+    /// </summary>
     /// <param name="messages">A history saved with <see cref="SaveHistory"/>, or any list of messages.</param>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
     public void LoadHistory(IEnumerable<ChatMessage> messages)
@@ -107,6 +110,7 @@ public sealed class ChatConversation : INotifyPropertyChanged
         {
             AppendMessage(message);
         }
+        RejectUnansweredApprovals();
     }
 
     /// <summary>
@@ -158,6 +162,30 @@ public sealed class ChatConversation : INotifyPropertyChanged
         return messages;
     }
 
+    // IMPORTANT: A history saved while a call waited for approval ends with the request and no answer. It is answered
+    // with a rejection here, so that a request sent later cannot run a call the user never approved.
+    private void RejectUnansweredApprovals()
+    {
+        var answered = _history.SelectMany(message => message.Contents).OfType<ToolApprovalResponseContent>()
+            .Select(response => response.RequestId).ToHashSet(StringComparer.Ordinal);
+        var unanswered = _history.SelectMany(message => message.Contents).OfType<ToolApprovalRequestContent>()
+            .Where(request => !answered.Contains(request.RequestId)).ToList();
+        if (unanswered.Count == 0)
+        {
+            return;
+        }
+        var rejections = unanswered.Select(request => (AIContent)request.CreateResponse(false, ChatTurn.UndecidedReason)).ToList();
+        _history.Add(new ChatMessage(ChatRole.User, rejections));
+        foreach (var request in unanswered)
+        {
+            if (_projector.FindToolCall(request.ToolCall.CallId) is { Status: ToolCallStatus.AwaitingApproval } entry)
+            {
+                entry.RejectionReason = ChatTurn.UndecidedReason;
+                entry.Status = ToolCallStatus.Canceled;
+            }
+        }
+    }
+
     internal void EndTurn(ChatTurn turn, IEnumerable<ChatMessage> messages)
     {
         _history.AddRange(messages);
@@ -180,6 +208,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
             if (text.Length > 0)
             {
                 _projector.AddEntry(new UserPromptEntry(text));
+            }
+            foreach (var response in message.Contents.OfType<ToolApprovalResponseContent>())
+            {
+                _projector.ApplyApprovalResponse(response);
             }
             return;
         }

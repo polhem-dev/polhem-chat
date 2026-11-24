@@ -43,6 +43,12 @@ public partial class ChatView
         {
             UpdateWaiting();
         }
+        if (e.PropertyName == nameof(ToolCallEntry.Status))
+        {
+            UpdateEntryVisibility();
+            _approveCommand.RaiseCanExecuteChanged();
+            _rejectCommand.RaiseCanExecuteChanged();
+        }
         // A streaming reply changes its text with every update; asking every copy button again for each of those would
         // cost more than it tells, and a reply cannot be copied before it stops streaming anyway.
         if (e.PropertyName == nameof(AssistantReplyEntry.IsStreaming)
@@ -64,6 +70,10 @@ public partial class ChatView
             if (!IsGenerating)
             {
                 return null;
+            }
+            if (_shown?.CurrentTurn is { IsAwaitingApproval: true })
+            {
+                return Strings.AwaitingApproval + "…";
             }
             var last = _shown?.Entries.LastOrDefault();
             if (ShowsActivity)
@@ -96,7 +106,10 @@ public partial class ChatView
         }
     }
 
-    private static bool IsActivity(object? item) => item is ReasoningEntry or ToolCallEntry;
+    // A call that waits for the user's approval is shown however ShowsActivity is set: hiding it would leave the turn
+    // waiting for a decision nobody can make.
+    private static bool IsActivity(object? item) =>
+        item is ReasoningEntry or ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval };
 
     // NOTE: Hidden entries stay in the conversation and its history; only their containers are hidden, so they take no
     // room and no spacing in the list.

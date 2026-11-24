@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Avalonia;
 using Avalonia.Data.Converters;
 
 namespace Polhem.Chat.Avalonia;
@@ -20,9 +21,26 @@ internal static class EntryConverters
             ToolCallStatus.Running => strings.ToolRunning,
             ToolCallStatus.Completed => strings.ToolCompleted,
             ToolCallStatus.Failed => strings.ToolFailed,
+            ToolCallStatus.AwaitingApproval => strings.ToolAwaitingApproval,
+            ToolCallStatus.Rejected => strings.ToolRejected,
             _ => strings.ToolCanceled,
         };
     });
+
+    /// <summary>Converts the state of a tool call to whether it waits for the user's approval.</summary>
+    public static IValueConverter IsAwaitingApproval { get; } =
+        new FuncValueConverter<ToolCallStatus, bool>(status => status == ToolCallStatus.AwaitingApproval);
+
+    /// <summary>Converts text from the model to text whose hidden characters show as escapes.</summary>
+    public static IValueConverter Visible { get; } = new FuncValueConverter<string?, string>(VisibleText.Escape);
+
+    /// <summary>Converts the arguments of a tool call to indented JSON in full, for the user to approve.</summary>
+    public static IValueConverter ApprovalArguments { get; } =
+        new FuncValueConverter<IDictionary<string, object?>?, string>(VisibleText.FormatArguments);
+
+    /// <summary>Converts the extent and the viewport of a scroll viewer to whether its content is taller than its area.</summary>
+    public static IMultiValueConverter IsOverflowing { get; } = new FuncMultiValueConverter<object?, bool>(values =>
+        values.ToList() is [Size extent, Size viewport] && extent.Height > viewport.Height + 1);
 
     /// <summary>Converts the arguments of a tool call to whether there are any.</summary>
     public static IValueConverter HasArguments { get; } =
@@ -50,7 +68,7 @@ internal static class EntryConverters
                 {
                     text.Append('\n');
                 }
-                text.Append(name).Append(": ").Append(FormatValue(value));
+                text.Append(VisibleText.Escape(name)).Append(": ").Append(FormatValue(value));
             }
             return text.ToString();
         });
@@ -84,5 +102,5 @@ internal static class EntryConverters
     }
 
     // A JSON element, which is what most providers return for arguments and results, formats as its JSON text.
-    private static string FormatValue(object? value) => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
+    private static string FormatValue(object? value) => VisibleText.Escape(Convert.ToString(value, CultureInfo.InvariantCulture));
 }

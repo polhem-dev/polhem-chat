@@ -9,6 +9,12 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- The approval tests run the real FunctionInvokingChatClient over a scripted model, to check that the turn reads and
+       writes the messages the way that client does. Only the tests take it; the packages do not. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>

@@ -17,10 +17,18 @@ public sealed class ChatTurn : INotifyPropertyChanged
 {
     private readonly ChatConversation _conversation;
     private readonly List<ChatResponseUpdate> _updates = [];
+    private readonly List<ChatResponseUpdate> _allUpdates = [];
+    private readonly List<ChatMessage> _messages = [];
+    private readonly List<ToolCallEntry> _pending = [];
+    private readonly List<AIContent> _decisions = [];
     private readonly long _startTimestamp;
     private UsageDetails? _usage;
     private ChatTurnResult? _result;
     private int _calls;
+    private TimeSpan _waited;
+    private long? _waitStart;
+    private TaskCompletionSource<ChatMessage>? _decided;
+    private ChatMessage? _undelivered;
 
     internal ChatTurn(ChatConversation conversation)
     {
@@ -29,14 +37,27 @@ public sealed class ChatTurn : INotifyPropertyChanged
         conversation.Projector.Break();
     }
 
-    /// <summary>Occurs when <see cref="Calls"/> changes.</summary>
+    /// <summary>Occurs when <see cref="Calls"/> or <see cref="IsAwaitingApproval"/> changes.</summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Gets the requests sent to the model in this turn so far, as <see cref="BeginCall"/> counted them.</summary>
     public int Calls => _calls;
 
-    /// <summary>Gets the time since the turn began, or the time it took once it has ended.</summary>
-    public TimeSpan Elapsed => _result?.Summary.Elapsed ?? _conversation.TimeProvider.GetElapsedTime(_startTimestamp);
+    /// <summary>
+    /// Gets the time since the turn began, or the time it took once it has ended. The time the turn spent waiting for the
+    /// user to approve tool calls is left out.
+    /// </summary>
+    public TimeSpan Elapsed => _result?.Summary.Elapsed ?? MeasureElapsed();
+
+    /// <summary>
+    /// Gets the tool calls that wait for the user's approval, in the order they arrived. A call is added when an update
+    /// with a <see cref="ToolApprovalRequestContent"/> is applied, and leaves when <see cref="Approve"/> or
+    /// <see cref="Reject"/> decides it.
+    /// </summary>
+    public IReadOnlyList<ToolCallEntry> PendingApprovals => _pending;
+
+    /// <summary>Gets a value indicating whether any tool call waits for the user's approval.</summary>
+    public bool IsAwaitingApproval => _pending.Count > 0;
 
     /// <summary>Gets a value indicating whether the turn has ended.</summary>
     public bool IsEnded => _result is not null;
@@ -55,7 +76,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
         ThrowIfEnded();
         _conversation.Projector.Break();
         _calls++;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Calls)));
+        OnPropertyChanged(nameof(Calls));
     }
 
     /// <summary>
@@ -81,6 +102,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
         ArgumentNullException.ThrowIfNull(update);
         ThrowIfEnded();
         _updates.Add(update);
+        _allUpdates.Add(update);
         foreach (var content in update.Contents)
         {
             if (content is UsageContent usage)
@@ -89,8 +111,66 @@ public sealed class ChatTurn : INotifyPropertyChanged
                 continue;
             }
             _conversation.Projector.Add(content, streaming: true);
+            if (content is ToolApprovalRequestContent request
+                && _conversation.Projector.FindToolCall(request.ToolCall.CallId) is { Status: ToolCallStatus.AwaitingApproval } entry
+                && !_pending.Contains(entry))
+            {
+                _pending.Add(entry);
+                if (_pending.Count == 1)
+                {
+                    _waitStart = _conversation.TimeProvider.GetTimestamp();
+                    OnPropertyChanged(nameof(IsAwaitingApproval));
+                }
+            }
         }
     }
+
+    /// <summary>Approves a tool call that waits for the user's approval, so the client runs it.</summary>
+    /// <param name="entry">One of the <see cref="PendingApprovals"/>.</param>
+    /// <exception cref="ArgumentException">The call does not wait for approval in this turn.</exception>
+    /// <exception cref="InvalidOperationException">The turn has ended.</exception>
+    public void Approve(ToolCallEntry entry) => Decide(entry, approved: true, reason: null);
+
+    /// <summary>Rejects a tool call that waits for the user's approval, so the client does not run it.</summary>
+    /// <param name="entry">One of the <see cref="PendingApprovals"/>.</param>
+    /// <param name="reason">Why, for the model and for <see cref="ToolCallEntry.RejectionReason"/>; optional.</param>
+    /// <exception cref="ArgumentException">The call does not wait for approval in this turn.</exception>
+    /// <exception cref="InvalidOperationException">The turn has ended.</exception>
+    public void Reject(ToolCallEntry entry, string? reason = null) => Decide(entry, approved: false, reason);
+
+    /// <summary>
+    /// Waits until the user has decided on every call in <see cref="PendingApprovals"/>, and returns the message that
+    /// carries the decisions: a user message with a <see cref="ToolApprovalResponseContent"/> for each call. The turn
+    /// keeps the message in its history; an application that runs its own loop also sends it to the model with its next
+    /// request. When the user decided before this was called, it returns that message at once.
+    /// </summary>
+    /// <param name="cancellationToken">Stops waiting. The calls stay undecided until the turn ends, and ending it rejects
+    /// them.</param>
+    /// <returns>The message with the decisions.</returns>
+    /// <exception cref="InvalidOperationException">The turn has ended, or no call waits for approval and no decision
+    /// is left to return.</exception>
+    /// <exception cref="OperationCanceledException">The token was canceled.</exception>
+    public Task<ChatMessage> WaitForApprovalsAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfEnded();
+        if (_pending.Count == 0)
+        {
+            if (_undelivered is { } message)
+            {
+                _undelivered = null;
+                return Task.FromResult(message);
+            }
+            throw new InvalidOperationException("No tool call waits for approval.");
+        }
+        _decided ??= new TaskCompletionSource<ChatMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
+        return _decided.Task.WaitAsync(cancellationToken);
+    }
+
+    /// <summary>Gets a value indicating whether the user decided on calls and nobody has taken the decisions yet.</summary>
+    internal bool HasUndeliveredDecisions => _undelivered is not null;
+
+    /// <summary>The messages of the turn so far that a request continuing it sends after the history.</summary>
+    internal IReadOnlyList<ChatMessage> Messages => _messages;
 
     /// <summary>Ends the turn after the model finished its reply.</summary>
     /// <returns>What the turn produced.</returns>
@@ -124,6 +204,12 @@ public sealed class ChatTurn : INotifyPropertyChanged
     {
         ThrowIfEnded();
         var projector = _conversation.Projector;
+        // IMPORTANT: Calls nobody approved are rejected, so that the history never holds a request without an answer that
+        // a later request could still run.
+        foreach (var entry in _pending.ToList())
+        {
+            DecideCore(entry, approved: false, UndecidedReason, ToolCallStatus.Canceled);
+        }
         if (outcome == TurnOutcome.Stopped && _conversation.Entries.Count > 0
             && _conversation.Entries[^1] is AssistantReplyEntry { IsStreaming: true } reply)
         {
@@ -135,14 +221,13 @@ public sealed class ChatTurn : INotifyPropertyChanged
             call.Status = outcome == TurnOutcome.Failed ? ToolCallStatus.Failed : ToolCallStatus.Canceled;
         }
 
-        var elapsed = _conversation.TimeProvider.GetElapsedTime(_startTimestamp);
+        var elapsed = MeasureElapsed();
         var summary = new TurnSummaryEntry(elapsed, _usage, outcome, _calls);
         projector.AddEntry(summary);
 
-        var response = _updates.ToChatResponse();
-        // The history gets copies, so that the record below does not show up in the response the caller receives.
-        // The combined response reports usage in ChatResponse.Usage; the history keeps the turn's own record instead.
-        var messages = response.Messages.Select(CopyWithoutUsage).ToList();
+        var response = _allUpdates.ToChatResponse();
+        FlushUpdates();
+        var messages = _messages.ToList();
         var last = messages.LastOrDefault(message => message.Role == ChatRole.Assistant);
         if (last is null)
         {
@@ -155,6 +240,77 @@ public sealed class ChatTurn : INotifyPropertyChanged
         _conversation.EndTurn(this, messages);
         return _result;
     }
+
+    internal const string UndecidedReason = "The turn ended before the user approved the call.";
+
+    private void Decide(ToolCallEntry entry, bool approved, string? reason)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+        ThrowIfEnded();
+        if (!_pending.Contains(entry))
+        {
+            throw new ArgumentException("The tool call does not wait for approval in this turn.", nameof(entry));
+        }
+        DecideCore(entry, approved, reason, approved ? ToolCallStatus.Running : ToolCallStatus.Rejected);
+    }
+
+    private void DecideCore(ToolCallEntry entry, bool approved, string? reason, ToolCallStatus status)
+    {
+        _decisions.Add(entry.ApprovalRequest!.CreateResponse(approved, reason));
+        if (!approved)
+        {
+            entry.RejectionReason = reason;
+        }
+        entry.Status = status;
+        _pending.Remove(entry);
+        if (_pending.Count > 0)
+        {
+            return;
+        }
+
+        if (_waitStart is { } waitStart)
+        {
+            _waited += _conversation.TimeProvider.GetElapsedTime(waitStart);
+            _waitStart = null;
+        }
+        // The decisions answer the requests that came before them, so the reply so far goes into the history first.
+        FlushUpdates();
+        var message = new ChatMessage(ChatRole.User, [.. _decisions]);
+        _decisions.Clear();
+        _messages.Add(message);
+        OnPropertyChanged(nameof(IsAwaitingApproval));
+        var decided = _decided;
+        _decided = null;
+        if (decided is null || !decided.TrySetResult(message))
+        {
+            _undelivered = message;
+        }
+    }
+
+    private void FlushUpdates()
+    {
+        if (_updates.Count == 0)
+        {
+            return;
+        }
+        // The history gets copies, so that the record End adds does not show up in the response the caller receives.
+        // The combined response reports usage in ChatResponse.Usage; the history keeps the turn's own record instead.
+        _messages.AddRange(_updates.ToChatResponse().Messages.Select(CopyWithoutUsage));
+        _updates.Clear();
+    }
+
+    private TimeSpan MeasureElapsed()
+    {
+        var waited = _waited;
+        if (_waitStart is { } waitStart)
+        {
+            waited += _conversation.TimeProvider.GetElapsedTime(waitStart);
+        }
+        return _conversation.TimeProvider.GetElapsedTime(_startTimestamp) - waited;
+    }
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private void AddUsage(UsageDetails details)
     {

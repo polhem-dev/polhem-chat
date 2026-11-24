@@ -1,3 +1,5 @@
+using Microsoft.Extensions.AI;
+
 namespace Polhem.Chat;
 
 /// <summary>A tool (function) the model called, with its arguments and, once it arrives, its result.</summary>
@@ -8,6 +10,7 @@ public sealed class ToolCallEntry : ChatEntry
     private ToolCallStatus _status;
     private object? _result;
     private string? _errorMessage;
+    private string? _rejectionReason;
 
     /// <summary>Initializes a new instance of the <see cref="ToolCallEntry"/> class.</summary>
     /// <param name="callId">The identifier that pairs the call with its result.</param>
@@ -64,4 +67,20 @@ public sealed class ToolCallEntry : ChatEntry
         get => _errorMessage;
         set => SetProperty(ref _errorMessage, value);
     }
+
+    /// <summary>
+    /// Gets or sets why the call was not run, when its <see cref="Status"/> is <see cref="ToolCallStatus.Rejected"/> and
+    /// a reason was given.
+    /// </summary>
+    public string? RejectionReason
+    {
+        get => _rejectionReason;
+        set => SetProperty(ref _rejectionReason, value);
+    }
+
+    /// <summary>
+    /// Gets the request for the user's approval this call came with, or <see langword="null"/> when the call did not need
+    /// approval.
+    /// </summary>
+    public ToolApprovalRequestContent? ApprovalRequest { get; internal set; }
 }

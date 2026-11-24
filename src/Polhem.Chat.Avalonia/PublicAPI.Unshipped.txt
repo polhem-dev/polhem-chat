@@ -1,1 +1,15 @@
 #nullable enable
+Polhem.Chat.Avalonia.ChatView.ApproveToolCallCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.RejectToolCallCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatViewStrings.Approve.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Approve.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AwaitingApproval.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AwaitingApproval.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Reject.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Reject.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ScrollForMore.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ScrollForMore.set -> void
