@@ -58,6 +58,21 @@ public sealed class ChatTurn : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Calls)));
     }
 
+    /// <summary>
+    /// Adds an entry of the application's own to the end of the entries while the turn is in progress, for example a card
+    /// that asks the user something. The reply or reasoning before it ends, so text that arrives later starts an entry of
+    /// its own. The entry is shown but not sent to the model, and <see cref="ChatConversation.SaveHistory"/> does not keep
+    /// it.
+    /// </summary>
+    /// <param name="entry">The entry to add.</param>
+    /// <exception cref="InvalidOperationException">The turn has ended.</exception>
+    public void AddEntry(ChatEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+        ThrowIfEnded();
+        _conversation.Projector.AddEntry(entry);
+    }
+
     /// <summary>Adds the contents of a streamed update to the entries.</summary>
     /// <param name="update">The update.</param>
     /// <exception cref="InvalidOperationException">The turn has ended.</exception>

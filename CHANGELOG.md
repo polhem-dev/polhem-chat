@@ -9,6 +9,10 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+Details and migration steps: [docs/en/changelogs/0.2.0.md](docs/en/changelogs/0.2.0.md)
+
+- `ChatTurn.AddEntry` adds an entry of the application's own while a turn is in progress, before the turn's summary.
+
 ## [0.1.2] - 2026-11-25
 
 Details and migration steps: [docs/en/changelogs/0.1.2.md](docs/en/changelogs/0.1.2.md)
