@@ -13,4 +13,9 @@
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.0" />
   </ItemGroup>
 
+  <!-- The tests replace the clock that times each turn. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Polhem.Chat.UnitTests" />
+  </ItemGroup>
+
 </Project>
