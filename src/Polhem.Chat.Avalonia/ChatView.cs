@@ -218,17 +218,13 @@ public partial class ChatView : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        if (_scrollViewer is not null)
-        {
-            _scrollViewer.ScrollChanged -= OnScrollChanged;
-        }
         if (_entries is not null)
         {
             _entries.ItemsSource = null;
             _entries.ContainerPrepared -= OnContainerPrepared;
         }
 
-        _scrollViewer = e.NameScope.Find<ScrollViewer>(ScrollViewerPart);
+        AttachScrollViewer(e.NameScope.Find<ScrollViewer>(ScrollViewerPart));
         _entries = e.NameScope.Find<ItemsControl>(EntriesPart);
         _waitingText = e.NameScope.Find<TextBlock>(WaitingPart);
         if (e.NameScope.Find<Border>(SpinnerPart) is { } spinner)
@@ -237,10 +233,6 @@ public partial class ChatView : TemplatedControl
             spinner.Child = _activityIcon;
         }
         _progressText = e.NameScope.Find<TextBlock>(ProgressPart);
-        if (_scrollViewer is not null)
-        {
-            _scrollViewer.ScrollChanged += OnScrollChanged;
-        }
         if (_entries is not null)
         {
             _entries.ItemTemplate = new ChatEntryTemplate(this);

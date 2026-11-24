@@ -25,12 +25,17 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
 
 ### Changed
 
+- A reply's copy button is a small icon that shows while the pointer is over the reply, instead of a labeled button
+  under every reply.
 - The model's reasoning and its tool calls no longer show as entries: the conversation shows what is written for the
   user, and the activity line tells what the model is doing. The entries stay in the conversation and its history.
   `ChatView.ShowsActivity`, or the › at the end of the activity line, shows them again.
 
 ### Fixed
 
+- `ChatView` no longer stops following the newest entry when a control far up brings itself into view, as when a
+  button of a card that just closed hands its keyboard focus on. Only the user's own scrolling (wheel, scroll bar,
+  keyboard, touch) leaves the end now.
 - `ChatView` no longer stops following the newest entry when entries arrive while it grows taller, such as when a line
   under it goes away at the end of a turn. It took the offset the layout moved for the user scrolling up, and showed
   Jump to latest.

@@ -183,4 +183,18 @@
     </ResourceDictionary>
   </Styles.Resources>
 
+  <!-- The copy button of a reply is an icon that fades in while the pointer is over the reply, or it has the keyboard
+       focus; it keeps its place, so the conversation does not move. -->
+  <Style Selector="Button.polhemChatCopy">
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Opacity" Value="0" />
+  </Style>
+  <Style Selector="StackPanel.polhemChatReply:pointerover Button.polhemChatCopy, Button.polhemChatCopy:focus-visible">
+    <Setter Property="Opacity" Value="0.7" />
+  </Style>
+
 </Styles>

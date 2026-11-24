@@ -42,11 +42,15 @@
                    VerticalAlignment="Center"
                    Opacity="0.7"
                    FontStyle="Italic" />
+        <!-- A small icon that shows while the pointer is over the reply (ChatTheme), so the conversation reads as text. -->
         <Button Classes="polhemChatCopy"
-                Content="{Binding $parent[local:ChatView].Strings.Copy}"
+                ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Copy}"
+                AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Copy}"
                 Command="{Binding $parent[local:ChatView].CopyCommand}"
-                CommandParameter="{Binding}"
-                Padding="8,2">
+                CommandParameter="{Binding}">
+          <PathIcon Width="13"
+                    Height="13"
+                    Data="M8 2h9a2 2 0 0 1 2 2v11h-2V4H8V2zM5 6h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm0 2v12h9V8H5z" />
           <Button.IsVisible>
             <MultiBinding Converter="{x:Static BoolConverters.And}">
               <Binding Path="!IsStreaming" />

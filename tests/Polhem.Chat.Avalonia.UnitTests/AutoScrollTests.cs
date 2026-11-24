@@ -73,7 +73,7 @@ public class AutoScrollTests(HeadlessSession session)
     public Task JumpToLatest_FollowsAgain() => session.RunAsync(() =>
     {
         var (window, view, conversation, scrollViewer) = ShowLongConversation();
-        scrollViewer.Offset = new Vector(0, 0);
+        window.MouseWheel(new Point(250, 100), new Vector(0, 10));
         Settle(window);
         Assert.False(view.FollowsLatest);
 
@@ -146,6 +146,23 @@ public class AutoScrollTests(HeadlessSession session)
         Assert.True(view.FollowsLatest);
         Assert.True(IsAtEnd(Part<ScrollViewer>(view, "PART_ScrollViewer")));
         Assert.False(IsShown(Part<Button>(view, "PART_ScrollToLatest")));
+    });
+
+    [Fact(DisplayName = "A scroll the user did not make, such as a control far up bringing itself into view, is followed back to the end")]
+    public Task Following_ProgrammaticScrollUp_ReturnsToTheEnd() => session.RunAsync(() =>
+    {
+        var (window, view, conversation, scrollViewer) = ShowLongConversation();
+        Assert.True(view.FollowsLatest);
+
+        scrollViewer.Offset = new Vector(0, 40);
+        Settle(window);
+
+        Assert.True(view.FollowsLatest);
+        Assert.True(IsAtEnd(scrollViewer));
+        Assert.False(IsShown(Part<Button>(view, "PART_ScrollToLatest")));
+        conversation.Entries.Add(new UserPromptEntry("Still following"));
+        Settle(window);
+        Assert.True(IsAtEnd(scrollViewer));
     });
 
     private static (Window Window, ChatView View, ChatConversation Conversation, ScrollViewer ScrollViewer) ShowLongConversation()

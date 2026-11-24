@@ -1,4 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace Polhem.Chat.Avalonia;
 
@@ -9,7 +14,67 @@ public partial class ChatView
     // fractional layout offset would make the view stop following a reply it never left.
     private const double EndTolerance = 4;
 
+    // How long after the user's last scroll input a move of the offset still counts as theirs. A wheel or trackpad keeps
+    // sending events while it moves, so this only has to bridge the gap between two of them.
+    private static readonly TimeSpan s_userScrollWindow = TimeSpan.FromMilliseconds(400);
+
     private bool _followsLatest = true;
+    private DateTime _lastUserScroll = DateTime.MinValue;
+
+    private bool IsUserScrolling => DateTime.UtcNow - _lastUserScroll < s_userScrollWindow;
+
+    // Tunnelling, and with handled events too, so the input is seen before the scroll viewer or a scroll bar takes it.
+    private void AttachScrollViewer(ScrollViewer? scrollViewer)
+    {
+        if (_scrollViewer is { } previous)
+        {
+            previous.ScrollChanged -= OnScrollChanged;
+            previous.RemoveHandler(PointerWheelChangedEvent, OnUserScrollInput);
+            previous.RemoveHandler(PointerPressedEvent, OnScrollBarPressed);
+            previous.RemoveHandler(PointerMovedEvent, OnPointerDragged);
+            previous.RemoveHandler(KeyDownEvent, OnScrollKey);
+        }
+        _scrollViewer = scrollViewer;
+        if (scrollViewer is not null)
+        {
+            scrollViewer.ScrollChanged += OnScrollChanged;
+            scrollViewer.AddHandler(PointerWheelChangedEvent, OnUserScrollInput, RoutingStrategies.Tunnel, handledEventsToo: true);
+            scrollViewer.AddHandler(PointerPressedEvent, OnScrollBarPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
+            scrollViewer.AddHandler(PointerMovedEvent, OnPointerDragged, RoutingStrategies.Tunnel, handledEventsToo: true);
+            scrollViewer.AddHandler(KeyDownEvent, OnScrollKey, RoutingStrategies.Tunnel, handledEventsToo: true);
+        }
+    }
+
+    private void OnUserScrollInput(object? sender, RoutedEventArgs e) => _lastUserScroll = DateTime.UtcNow;
+
+    private void OnScrollBarPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (IsInScrollBar(e.Source))
+        {
+            _lastUserScroll = DateTime.UtcNow;
+        }
+    }
+
+    // A scroll bar's thumb being dragged, or a finger panning the content.
+    private void OnPointerDragged(object? sender, PointerEventArgs e)
+    {
+        var properties = e.GetCurrentPoint(null).Properties;
+        if ((properties.IsLeftButtonPressed && IsInScrollBar(e.Source)) || e.Pointer.Type == PointerType.Touch)
+        {
+            _lastUserScroll = DateTime.UtcNow;
+        }
+    }
+
+    private void OnScrollKey(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is Key.Up or Key.PageUp or Key.Home or Key.Down or Key.PageDown or Key.End)
+        {
+            _lastUserScroll = DateTime.UtcNow;
+        }
+    }
+
+    private static bool IsInScrollBar(object? source) =>
+        source is Visual visual && (visual is ScrollBar || visual.FindAncestorOfType<ScrollBar>() is not null);
 
     private void OnScrollChanged(object? sender, ScrollChangedEventArgs e)
     {
@@ -17,11 +82,11 @@ public partial class ChatView
         {
             return;
         }
-        // NOTE: One layout pass can both grow the content and move the offset, so the deltas cannot tell who moved it
-        // from their size alone. The direction can: the view only ever scrolls down, so an offset that went up while the
-        // content did not shrink was the user leaving the end. Unless the viewport grew in that pass: then the layout
-        // moved the offset (a line under the view went away, the window got taller), and the view follows on.
-        if (e.OffsetDelta.Y < 0 && e.ExtentDelta.Y >= 0 && e.ViewportDelta.Y <= 0)
+        // NOTE: The offset also moves without the user: the layout moves it when the view grows taller, and a control
+        // that takes focus brings itself into view, which in a chat is often far above the end (a button of a card that
+        // just closed hands its focus on). So only an offset that went up while the user was scrolling, with the wheel,
+        // a scroll bar, the keyboard or a touch gesture, leaves the end; any other move is followed back to it.
+        if (e.OffsetDelta.Y < 0 && e.ExtentDelta.Y >= 0 && e.ViewportDelta.Y <= 0 && IsUserScrolling)
         {
             SetFollowsLatest(IsAtEnd(scrollViewer));
         }
