@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The gallery shared by the desktop and iOS heads: the chat view on Fluent or Semi, light or dark, in English or
+    Traditional Chinese, used both ways (with a runner, and driven by the host), with an entry type of its own. It
+    answers with a scripted client, so it runs without a key; an OpenAI-compatible endpoint can be plugged in instead.
+    It uses the Avalonia version applications use, newer than the control's minimum.
+  -->
+  <PropertyGroup>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.6" />
+    <PackageReference Include="Semi.Avalonia" Version="12.1.0.1" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="11.0.1" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="11.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polhem.Chat.Avalonia\Polhem.Chat.Avalonia.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -3,6 +3,10 @@
     <Project Path="src/Polhem.Chat/Polhem.Chat.csproj" />
     <Project Path="src/Polhem.Chat.Avalonia/Polhem.Chat.Avalonia.csproj" />
   </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/ChatGallery/ChatGallery.csproj" />
+    <Project Path="samples/ChatGallery.Desktop/ChatGallery.Desktop.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Polhem.Chat.Avalonia.UnitTests/Polhem.Chat.Avalonia.UnitTests.csproj" />
     <Project Path="tests/Polhem.Chat.UnitTests/Polhem.Chat.UnitTests.csproj" />

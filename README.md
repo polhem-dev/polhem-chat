@@ -40,6 +40,29 @@ chatView.Runner = new ChatRunner(chatClient);
 An application that runs its own loop sets `Conversation` instead and handles `PromptSubmitted` and `StopRequested`.
 The [package README](src/Polhem.Chat.Avalonia/README.md) covers templates, texts and colors.
 
+## Gallery
+
+`samples/ChatGallery` shows the view both ways: with a runner, and with a conversation the application drives itself,
+including an entry type of the application's own. Switches on top change the base theme (Fluent or Semi), the variant
+(light or dark) and the language of the view's texts. It answers with scripted replies, so it needs no key: they stream
+reasoning, a tool call and its result, Markdown and the token counts. Ask for an error or a long reply to see those
+cases. Under **Model**, an OpenAI-compatible endpoint can be used instead; the key is typed in, or read from the
+`OPENAI_API_KEY` environment variable, and is never stored.
+
+```bash
+dotnet run --project samples/ChatGallery.Desktop
+```
+
+The iOS head is not in the solution, because it needs the iOS workload. On a Mac, build and start it on a simulator:
+
+```bash
+dotnet build samples/ChatGallery.iOS -c Release -p:RuntimeIdentifier=iossimulator-arm64
+dotnet build samples/ChatGallery.iOS -c Release -t:Run -p:RuntimeIdentifier=iossimulator-arm64 -p:_DeviceName=":v2:udid=<simulator UDID>"
+```
+
+If the build says the iOS workload needs another Xcode version, point `DEVELOPER_DIR` at that version for the build, and
+delete the head's `bin` and `obj` folders before building again.
+
 ## Building
 
 ```bash

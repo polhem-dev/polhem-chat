@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:chat="using:Polhem.Chat.Avalonia"
+             xmlns:local="using:ChatGallery"
+             x:Class="ChatGallery.HostDrivenDemo"
+             x:DataType="local:HostSession">
+
+  <!-- The host runs the turns itself and the view only shows the conversation and reports what the user does. -->
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="12,8,12,0">
+      <Button Name="ReloadButton" Content="Save and reload history" />
+      <Button Name="ClearButton" Content="Clear" />
+    </StackPanel>
+
+    <chat:ChatView Name="Chat" Conversation="{Binding Conversation}" IsGenerating="{Binding IsGenerating}">
+      <chat:ChatView.DataTemplates>
+        <!-- An entry type of the application's own, shown with its own template. The colors are the chat theme's, so
+             the card follows the base theme and the variant like the built-in ones. -->
+        <DataTemplate DataType="local:ChoiceEntry">
+          <Border Classes="polhemChatCard"
+                  Padding="12,8"
+                  CornerRadius="8"
+                  BorderThickness="1"
+                  Background="{DynamicResource PolhemChatCardBackground}"
+                  BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{Binding Question}" FontWeight="SemiBold" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Choices}" IsEnabled="{Binding !IsAnswered}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <Button Content="{Binding}"
+                            Command="{Binding $parent[local:HostDrivenDemo].Session.ChooseCommand}"
+                            CommandParameter="{Binding}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </chat:ChatView.DataTemplates>
+    </chat:ChatView>
+  </DockPanel>
+
+</UserControl>

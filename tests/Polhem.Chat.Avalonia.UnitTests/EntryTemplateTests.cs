@@ -100,6 +100,7 @@ public class EntryTemplateTests(HeadlessSession session)
         Assert.Same(reply, EntryView(view, 1));
         Assert.Equal("Hello", viewer.Markdown);
         Assert.True(IsShown(CopyButton(reply)));
+        Assert.True(CopyButton(reply).IsEffectivelyEnabled);
         Assert.Contains("polhemChatSummary", EntryView(view, 2).Classes);
         Assert.False(view.IsGenerating);
     });
@@ -202,6 +203,27 @@ public class EntryTemplateTests(HeadlessSession session)
 
         Assert.False(view.CopyCommand.CanExecute(new AssistantReplyEntry("partial", isStreaming: true)));
         Assert.False(view.CopyCommand.CanExecute(null));
+    });
+
+    [Fact(DisplayName = "A reply's copy button becomes usable when the reply stops streaming, before the turn ends")]
+    public Task Copy_ReplyThatStopsStreaming_EnablesItsButton() => session.RunAsync(() =>
+    {
+        // The host drives the turn and keeps generating, so nothing but the reply itself tells the button.
+        var conversation = new ChatConversation();
+        var view = new ChatView { Conversation = conversation, IsGenerating = true };
+        var window = Show(view);
+        conversation.AddUserPrompt("Hi");
+        var turn = conversation.BeginTurn();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, "Looking it up."));
+        Settle(window);
+        var button = CopyButton(EntryView(view, 1));
+        Assert.False(button.IsEffectivelyEnabled);
+
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent("call-1", "lookup")]));
+        Settle(window);
+
+        Assert.True(IsShown(button));
+        Assert.True(button.IsEffectivelyEnabled);
     });
 
     [Fact(DisplayName = "Prompts, finished reasoning and plain strings can be copied too")]

@@ -34,7 +34,7 @@ namespace Polhem.Chat.Avalonia;
 [TemplatePart(ScrollViewerPart, typeof(ScrollViewer))]
 [TemplatePart(EntriesPart, typeof(ItemsControl))]
 [PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass)]
-public class ChatView : TemplatedControl
+public partial class ChatView : TemplatedControl
 {
     /// <summary>Defines the <see cref="Runner"/> property.</summary>
     public static readonly StyledProperty<ChatRunner?> RunnerProperty =
@@ -75,10 +75,6 @@ public class ChatView : TemplatedControl
     private const string GeneratingPseudoClass = ":generating";
     private const string ScrolledUpPseudoClass = ":scrolledup";
 
-    // How close to the end, in device-independent pixels, still counts as being at the end. Without some slack a
-    // fractional layout offset would make the view stop following a reply it never left.
-    private const double EndTolerance = 4;
-
     // NOTE: Captured once. Avalonia re-runs coercion whenever the property re-evaluates, and resets the UI thread's
     // culture after dispatcher operations, so creating the default inside the coercion would let the language drift.
     private readonly ChatViewStrings _defaultStrings = ChatViewStrings.ForCulture(CultureInfo.CurrentUICulture);
@@ -90,7 +86,7 @@ public class ChatView : TemplatedControl
     private ItemsControl? _entries;
     private ChatRunner? _activeRunner;
     private ChatConversation? _shown;
-    private bool _followsLatest = true;
+    private readonly List<ChatEntry> _watchedEntries = [];
     private bool _isAttached;
 
     /// <summary>Initializes a new instance of the <see cref="ChatView"/> class.</summary>
@@ -401,6 +397,7 @@ public class ChatView : TemplatedControl
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged += OnEntriesChanged;
+            Watch(_shown.Entries);
         }
     }
 
@@ -414,6 +411,7 @@ public class ChatView : TemplatedControl
         {
             _shown.Entries.CollectionChanged -= OnEntriesChanged;
         }
+        UnwatchAll();
     }
 
     private void OnRunnerPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -429,52 +427,58 @@ public class ChatView : TemplatedControl
         UpdateEmpty();
         if (e.Action == NotifyCollectionChangedAction.Reset)
         {
+            UnwatchAll();
+            Watch(_shown!.Entries);
             ScrollToLatest();
+            return;
+        }
+        if (e.OldItems is not null)
+        {
+            foreach (var entry in e.OldItems.OfType<ChatEntry>())
+            {
+                entry.PropertyChanged -= OnEntryPropertyChanged;
+                _watchedEntries.Remove(entry);
+            }
+        }
+        if (e.NewItems is not null)
+        {
+            Watch(e.NewItems.OfType<ChatEntry>());
+        }
+    }
+
+    // NOTE: Whether an entry can be copied depends on its streaming state, which the entry changes without the view
+    // being told. A button asks a command again only when the command says so, so the view watches the entries and tells
+    // the copy command when one stops streaming; otherwise the copy button of a reply stays disabled after it completes.
+    private void Watch(IEnumerable<ChatEntry> entries)
+    {
+        foreach (var entry in entries)
+        {
+            entry.PropertyChanged += OnEntryPropertyChanged;
+            _watchedEntries.Add(entry);
+        }
+    }
+
+    private void UnwatchAll()
+    {
+        foreach (var entry in _watchedEntries)
+        {
+            entry.PropertyChanged -= OnEntryPropertyChanged;
+        }
+        _watchedEntries.Clear();
+    }
+
+    private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // A streaming reply changes its text with every update; asking every copy button again for each of those would
+        // cost more than it tells, and a reply cannot be copied before it stops streaming anyway.
+        if (e.PropertyName == nameof(AssistantReplyEntry.IsStreaming)
+            || (e.PropertyName == nameof(AssistantReplyEntry.Text) && CopyText(sender) is not null))
+        {
+            _copyCommand.RaiseCanExecuteChanged();
         }
     }
 
     private void UpdateEmpty() => PseudoClasses.Set(EmptyPseudoClass, _shown is null || _shown.Entries.Count == 0);
-
-    private void OnScrollChanged(object? sender, ScrollChangedEventArgs e)
-    {
-        if (_scrollViewer is not { } scrollViewer)
-        {
-            return;
-        }
-        // NOTE: One layout pass can both grow the content and move the offset, so the deltas cannot tell who moved it
-        // from their size alone. The direction can: the view only ever scrolls down, so an offset that went up while the
-        // content did not shrink was the user leaving the end.
-        if (e.OffsetDelta.Y < 0 && e.ExtentDelta.Y >= 0)
-        {
-            SetFollowsLatest(IsAtEnd(scrollViewer));
-        }
-        else if (_followsLatest)
-        {
-            if (!IsAtEnd(scrollViewer))
-            {
-                scrollViewer.ScrollToEnd();
-            }
-        }
-        else if (e.OffsetDelta.Y > 0 && IsAtEnd(scrollViewer))
-        {
-            SetFollowsLatest(true);
-        }
-    }
-
-    private static bool IsAtEnd(ScrollViewer scrollViewer) =>
-        scrollViewer.Offset.Y + scrollViewer.Viewport.Height >= scrollViewer.Extent.Height - EndTolerance;
-
-    private void ScrollToLatest()
-    {
-        SetFollowsLatest(true);
-        _scrollViewer?.ScrollToEnd();
-    }
-
-    private void SetFollowsLatest(bool value)
-    {
-        _followsLatest = value;
-        PseudoClasses.Set(ScrolledUpPseudoClass, !value);
-    }
 
     private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
     {
