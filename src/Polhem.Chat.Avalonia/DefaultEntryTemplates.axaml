@@ -1,0 +1,143 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:chat="using:Polhem.Chat"
+                    xmlns:local="using:Polhem.Chat.Avalonia"
+                    xmlns:md="using:Polhem.Markdown.Avalonia"
+                    x:Class="Polhem.Chat.Avalonia.DefaultEntryTemplates"
+                    x:ClassModifier="internal">
+
+  <!-- The default view of each entry type. ChatEntryTemplate falls back to these when the application registered no
+       template of its own. Colors come from ChatTheme's resources, so an application can change them. -->
+
+  <DataTemplate x:Key="UserPrompt" DataType="chat:UserPromptEntry">
+    <Border Classes="polhemChatPrompt"
+            HorizontalAlignment="Right"
+            MaxWidth="640"
+            Padding="12,8"
+            CornerRadius="12"
+            Background="{DynamicResource PolhemChatPromptBackground}">
+      <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+    </Border>
+  </DataTemplate>
+
+  <DataTemplate x:Key="AssistantReply" DataType="chat:AssistantReplyEntry">
+    <StackPanel Classes="polhemChatReply" Spacing="4">
+      <TextBlock Classes="polhemChatThinking"
+                 Text="{Binding $parent[local:ChatView].Strings.Thinking}"
+                 Opacity="0.7">
+        <TextBlock.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="IsStreaming" />
+            <Binding Path="Text" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+          </MultiBinding>
+        </TextBlock.IsVisible>
+      </TextBlock>
+      <md:MarkdownViewer Markdown="{Binding Text}"
+                         CopyCodeLabel="{Binding $parent[local:ChatView].Strings.CopyCode}"
+                         IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Classes="polhemChatStopped"
+                   Text="{Binding $parent[local:ChatView].Strings.Stopped}"
+                   IsVisible="{Binding IsStopped}"
+                   VerticalAlignment="Center"
+                   Opacity="0.7"
+                   FontStyle="Italic" />
+        <Button Classes="polhemChatCopy"
+                Content="{Binding $parent[local:ChatView].Strings.Copy}"
+                Command="{Binding $parent[local:ChatView].CopyCommand}"
+                CommandParameter="{Binding}"
+                Padding="8,2">
+          <Button.IsVisible>
+            <MultiBinding Converter="{x:Static BoolConverters.And}">
+              <Binding Path="!IsStreaming" />
+              <Binding Path="Text" Converter="{x:Static StringConverters.IsNotNullOrEmpty}" />
+            </MultiBinding>
+          </Button.IsVisible>
+        </Button>
+      </StackPanel>
+    </StackPanel>
+  </DataTemplate>
+
+  <DataTemplate x:Key="Reasoning" DataType="chat:ReasoningEntry">
+    <Border Classes="polhemChatCard polhemChatReasoning"
+            Background="{DynamicResource PolhemChatCardBackground}"
+            BorderBrush="{DynamicResource PolhemChatCardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+      <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+        <Expander.Header>
+          <Panel>
+            <TextBlock Text="{Binding $parent[local:ChatView].Strings.Thinking}" IsVisible="{Binding IsStreaming}" />
+            <TextBlock Text="{Binding $parent[local:ChatView].Strings.Reasoning}" IsVisible="{Binding !IsStreaming}" />
+          </Panel>
+        </Expander.Header>
+        <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" Opacity="0.8" />
+      </Expander>
+    </Border>
+  </DataTemplate>
+
+  <DataTemplate x:Key="ToolCall" DataType="chat:ToolCallEntry">
+    <Border Classes="polhemChatCard polhemChatToolCall"
+            Background="{DynamicResource PolhemChatCardBackground}"
+            BorderBrush="{DynamicResource PolhemChatCardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+      <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+        <Expander.Header>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+            <TextBlock Opacity="0.7">
+              <TextBlock.Text>
+                <MultiBinding Converter="{x:Static local:EntryConverters.ToolStatus}">
+                  <Binding Path="Status" />
+                  <Binding Path="$parent[local:ChatView].Strings" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+          </StackPanel>
+        </Expander.Header>
+        <StackPanel Spacing="4">
+          <TextBlock Text="{Binding $parent[local:ChatView].Strings.ToolArguments}"
+                     FontWeight="SemiBold"
+                     IsVisible="{Binding Arguments, Converter={x:Static local:EntryConverters.HasArguments}}" />
+          <SelectableTextBlock Text="{Binding Arguments, Converter={x:Static local:EntryConverters.ToolArguments}}"
+                               TextWrapping="Wrap"
+                               IsVisible="{Binding Arguments, Converter={x:Static local:EntryConverters.HasArguments}}" />
+          <TextBlock Text="{Binding $parent[local:ChatView].Strings.ToolResult}"
+                     FontWeight="SemiBold"
+                     IsVisible="{Binding Result, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <SelectableTextBlock Text="{Binding Result, Converter={x:Static local:EntryConverters.ToolResult}}"
+                               TextWrapping="Wrap"
+                               IsVisible="{Binding Result, Converter={x:Static ObjectConverters.IsNotNull}}" />
+          <SelectableTextBlock Text="{Binding ErrorMessage}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource PolhemChatErrorForeground}"
+                               IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+      </Expander>
+    </Border>
+  </DataTemplate>
+
+  <DataTemplate x:Key="TurnSummary" DataType="chat:TurnSummaryEntry">
+    <TextBlock Classes="polhemChatSummary" FontSize="12" Opacity="0.6">
+      <TextBlock.Text>
+        <MultiBinding Converter="{x:Static local:EntryConverters.TurnSummary}">
+          <Binding />
+          <Binding Path="$parent[local:ChatView].Strings" />
+        </MultiBinding>
+      </TextBlock.Text>
+    </TextBlock>
+  </DataTemplate>
+
+  <DataTemplate x:Key="Error" DataType="chat:ErrorEntry">
+    <Border Classes="polhemChatError"
+            Padding="12,8"
+            CornerRadius="8"
+            BorderThickness="1"
+            Background="{DynamicResource PolhemChatErrorBackground}"
+            BorderBrush="{DynamicResource PolhemChatErrorBorderBrush}">
+      <SelectableTextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

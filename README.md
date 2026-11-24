@@ -21,6 +21,25 @@ bring the `IChatClient` you already use.
 
 The packages are in development and not yet published; their API is not settled.
 
+## Getting started
+
+Add `ChatTheme` to the application's styles after the base theme (Fluent and Semi are both supported, light and dark),
+put a `ChatView` in a window, and give it a runner for your client:
+
+```xml
+<Application.Styles>
+  <FluentTheme />
+  <chat:ChatTheme />
+</Application.Styles>
+```
+
+```csharp
+chatView.Runner = new ChatRunner(chatClient);
+```
+
+An application that runs its own loop sets `Conversation` instead and handles `PromptSubmitted` and `StopRequested`.
+The [package README](src/Polhem.Chat.Avalonia/README.md) covers templates, texts and colors.
+
 ## Building
 
 ```bash

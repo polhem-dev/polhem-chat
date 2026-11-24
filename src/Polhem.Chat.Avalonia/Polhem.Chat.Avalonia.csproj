@@ -2,12 +2,20 @@
 
   <PropertyGroup>
     <Description>An AI chat control for Avalonia: streamed replies rendered as Markdown, reasoning, tool calls, per-turn usage, stop and copy, on top of any Microsoft.Extensions.AI IChatClient.</Description>
+    <!-- Bindings are resolved when the XAML compiles, not by reflection at run time, so they survive trimming on iOS,
+         Android and WebAssembly. A binding whose path does not exist fails the build. -->
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- The lowest versions the control supports, not the newest: they become the minimum for every consumer. -->
     <PackageReference Include="Avalonia" Version="12.0.0" />
     <PackageReference Include="Polhem.Markdown.Avalonia" Version="0.1.0" />
+  </ItemGroup>
+
+  <!-- The tests reach the view's submit and copy operations, to await them instead of a fire-and-forget command. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Polhem.Chat.Avalonia.UnitTests" />
   </ItemGroup>
 
   <ItemGroup>

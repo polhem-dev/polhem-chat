@@ -14,3 +14,9 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
   `ChatResponseUpdate` 隨到隨轉成這些項目，給自己跑迴圈的應用程式使用。`ChatRunner` 以任何 `IChatClient` 執行對話：
   送出、串流、停止、記錄每輪的時間與 token，並觸發 `MessageSending`（可改寫或取消提問）與 `ResponseReceived`。
   `LoadHistory` 與 `SaveHistory` 還原與保存對話，含每輪的統計。
+- `Polhem.Chat.Avalonia`：`ChatView` 顯示對話並接收提問，可透過 `ChatRunner` 執行，也可給自己跑迴圈的應用程式使用
+  （`PromptSubmitted`、`StopRequested`、`IsGenerating`）。每種項目都有預設樣板，回覆以 Markdown 呈現，應用程式可為
+  新的或內建的項目型別註冊自己的 `DataTemplate`。`ChatPromptBox` 按 Enter 送出、Shift+Enter 換行，輸入法確認組字的
+  Enter 不會送出。Esc 或停止鈕可停止回覆並保留已收到的內容；完成的回覆可複製 Markdown 原文；畫面會跟著新文字捲動，
+  使用者往上捲之後改顯示「回到最新」。`ChatViewStrings` 內建英文與繁體中文，應用程式可替換；`ChatTheme` 在 Fluent 與
+  Semi 的淺色、深色下都能使用。

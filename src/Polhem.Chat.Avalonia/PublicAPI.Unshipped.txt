@@ -1,1 +1,96 @@
 #nullable enable
+Polhem.Chat.Avalonia.ChatPromptBox
+Polhem.Chat.Avalonia.ChatPromptBox.ChatPromptBox() -> void
+Polhem.Chat.Avalonia.ChatPromptBox.IsComposing.get -> bool
+Polhem.Chat.Avalonia.ChatPromptBox.SubmitRequested -> System.EventHandler<Avalonia.Interactivity.RoutedEventArgs!>?
+Polhem.Chat.Avalonia.ChatTheme
+Polhem.Chat.Avalonia.ChatTheme.ChatTheme() -> void
+Polhem.Chat.Avalonia.ChatView
+Polhem.Chat.Avalonia.ChatView.ChatView() -> void
+Polhem.Chat.Avalonia.ChatView.Conversation.get -> Polhem.Chat.ChatConversation?
+Polhem.Chat.Avalonia.ChatView.Conversation.set -> void
+Polhem.Chat.Avalonia.ChatView.CopyCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.EmptyContent.get -> object?
+Polhem.Chat.Avalonia.ChatView.EmptyContent.set -> void
+Polhem.Chat.Avalonia.ChatView.EmptyContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
+Polhem.Chat.Avalonia.ChatView.EmptyContentTemplate.set -> void
+Polhem.Chat.Avalonia.ChatView.FollowsLatest.get -> bool
+Polhem.Chat.Avalonia.ChatView.IsGenerating.get -> bool
+Polhem.Chat.Avalonia.ChatView.IsGenerating.set -> void
+Polhem.Chat.Avalonia.ChatView.Prompt.get -> string?
+Polhem.Chat.Avalonia.ChatView.Prompt.set -> void
+Polhem.Chat.Avalonia.ChatView.PromptSubmitted -> System.EventHandler<Polhem.Chat.Avalonia.PromptSubmittedEventArgs!>?
+Polhem.Chat.Avalonia.ChatView.Runner.get -> Polhem.Chat.ChatRunner?
+Polhem.Chat.Avalonia.ChatView.Runner.set -> void
+Polhem.Chat.Avalonia.ChatView.ScrollToLatestCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.StopCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.StopRequested -> System.EventHandler?
+Polhem.Chat.Avalonia.ChatView.Strings.get -> Polhem.Chat.Avalonia.ChatViewStrings!
+Polhem.Chat.Avalonia.ChatView.Strings.set -> void
+Polhem.Chat.Avalonia.ChatView.SubmitCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.Suggestions.get -> System.Collections.Generic.IEnumerable<string!>?
+Polhem.Chat.Avalonia.ChatView.Suggestions.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings
+Polhem.Chat.Avalonia.ChatViewStrings.ChatViewStrings() -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Copy.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Copy.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.CopyCode.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.CopyCode.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Culture.get -> System.Globalization.CultureInfo!
+Polhem.Chat.Avalonia.ChatViewStrings.Culture.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ElapsedFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ElapsedFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Send.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Send.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Stop.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Stop.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Stopped.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Stopped.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Thinking.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Thinking.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.TokensFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.TokensFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolArguments.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolArguments.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolCanceled.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolCanceled.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolCompleted.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolCompleted.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolFailed.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolFailed.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolResult.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolResult.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolRunning.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolRunning.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.TurnFailed.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.TurnFailed.set -> void
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text) -> void
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs.Text.get -> string!
+override Polhem.Chat.Avalonia.ChatPromptBox.OnApplyTemplate(Avalonia.Controls.Primitives.TemplateAppliedEventArgs! e) -> void
+override Polhem.Chat.Avalonia.ChatPromptBox.OnKeyDown(Avalonia.Input.KeyEventArgs! e) -> void
+override Polhem.Chat.Avalonia.ChatPromptBox.StyleKeyOverride.get -> System.Type!
+override Polhem.Chat.Avalonia.ChatView.OnApplyTemplate(Avalonia.Controls.Primitives.TemplateAppliedEventArgs! e) -> void
+override Polhem.Chat.Avalonia.ChatView.OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs! e) -> void
+override Polhem.Chat.Avalonia.ChatView.OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs! e) -> void
+override Polhem.Chat.Avalonia.ChatView.OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs! change) -> void
+static Polhem.Chat.Avalonia.ChatViewStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.Avalonia.ChatViewStrings!
+static readonly Polhem.Chat.Avalonia.ChatPromptBox.SubmitRequestedEvent -> Avalonia.Interactivity.RoutedEvent<Avalonia.Interactivity.RoutedEventArgs!>!
+static readonly Polhem.Chat.Avalonia.ChatView.ConversationProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatConversation?>!
+static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentProperty -> Avalonia.StyledProperty<object?>!
+static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
+static readonly Polhem.Chat.Avalonia.ChatView.IsGeneratingProperty -> Avalonia.StyledProperty<bool>!
+static readonly Polhem.Chat.Avalonia.ChatView.PromptProperty -> Avalonia.StyledProperty<string?>!
+static readonly Polhem.Chat.Avalonia.ChatView.RunnerProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatRunner?>!
+static readonly Polhem.Chat.Avalonia.ChatView.StringsProperty -> Avalonia.StyledProperty<Polhem.Chat.Avalonia.ChatViewStrings!>!
+static readonly Polhem.Chat.Avalonia.ChatView.SuggestionsProperty -> Avalonia.StyledProperty<System.Collections.Generic.IEnumerable<string!>?>!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatElapsed(System.TimeSpan elapsed) -> string!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatTokens(long inputTokens, long outputTokens) -> string!
