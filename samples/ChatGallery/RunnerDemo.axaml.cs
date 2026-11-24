@@ -30,7 +30,7 @@ public sealed partial class RunnerDemo : UserControl
 
         // The short way: one line gives the view a runner, which sends, streams and stops.
         Chat.Runner = session.Runner;
-        Chat.Suggestions = ["Plan three days in Kyoto", "Give me a long reply", "Show me an error", "規劃京都三日遊"];
+        Chat.Suggestions = ["Plan three days in Kyoto", "Give me a long reply", "Show me an error", "Delete my old notes", "規劃京都三日遊"];
 
         var providerBox = ProviderBox;
         var endpointFields = EndpointFields;
@@ -43,7 +43,7 @@ public sealed partial class RunnerDemo : UserControl
     {
         if (!endpoint)
         {
-            Replace(new DemoChatClient(), options: null, "Scripted replies.");
+            Replace(DemoTools.WithTools(new DemoChatClient()), DemoTools.Options, "Scripted replies.");
             return;
         }
 
@@ -67,7 +67,7 @@ public sealed partial class RunnerDemo : UserControl
             () => DateTimeOffset.Now.ToString("F", CultureInfo.InvariantCulture),
             ToolTitles.CurrentTimeTool,
             "Returns the current local date and time.");
-        Replace(client, new ChatOptions { Tools = [tool] }, model + " at " + uri.Host + ".");
+        Replace(client, new ChatOptions { Tools = [tool, DemoTools.DeleteNotes] }, model + " at " + uri.Host + ".");
     }
 
     private void Replace(IChatClient client, ChatOptions? options, string description)

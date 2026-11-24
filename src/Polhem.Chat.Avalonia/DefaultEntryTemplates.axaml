@@ -148,6 +148,7 @@
                         HorizontalScrollBarVisibility="Disabled">
             <SelectableTextBlock Text="{Binding Arguments, Converter={x:Static local:EntryConverters.ApprovalArguments}}"
                                  TextWrapping="Wrap"
+                                 Margin="0,0,14,0"
                                  FontFamily="Menlo, Consolas, monospace" />
           </ScrollViewer>
         </Border>

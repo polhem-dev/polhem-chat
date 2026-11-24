@@ -15,7 +15,7 @@ namespace ChatGallery;
 /// </summary>
 public sealed class HostSession : INotifyPropertyChanged
 {
-    private readonly DemoChatClient _client = new();
+    private readonly IChatClient _client = DemoTools.WithTools(new DemoChatClient());
     private CancellationTokenSource? _stop;
     private bool _isGenerating;
 
@@ -60,11 +60,27 @@ public sealed class HostSession : INotifyPropertyChanged
         IsGenerating = true;
         try
         {
-            // One request in this demo; an application with its own tool loop calls it before each one.
-            turn.BeginCall();
-            await foreach (var update in _client.GetStreamingResponseAsync(Conversation.SaveHistory(), cancellationToken: stop.Token))
+            // The host keeps the messages of the turn itself, to send them again after the user's approval.
+            var messages = Conversation.SaveHistory().ToList();
+            while (true)
             {
-                turn.Apply(update);
+                // An application with its own tool loop calls BeginCall before each request.
+                turn.BeginCall();
+                var updates = new List<ChatResponseUpdate>();
+                await foreach (var update in _client.GetStreamingResponseAsync(messages, DemoTools.Options, stop.Token))
+                {
+                    updates.Add(update);
+                    turn.Apply(update);
+                }
+                if (!turn.IsAwaitingApproval)
+                {
+                    break;
+                }
+                // The client asked to run a tool that needs approval. The view shows the card; the host waits for the
+                // user's decisions and sends them after the reply so far.
+                var decisions = await turn.WaitForApprovalsAsync(stop.Token);
+                messages.AddRange(updates.ToChatResponse().Messages);
+                messages.Add(decisions);
             }
             // The card belongs to this turn, so it goes in before the turn ends and its summary follows it.
             turn.AddEntry(DemoReplies.Choices(prompt));
