@@ -1,1 +1,2 @@
 #nullable enable
+Polhem.Chat.ChatTurn.AddEntry(Polhem.Chat.ChatEntry! entry) -> void

@@ -10,8 +10,8 @@ namespace ChatGallery;
 
 /// <summary>
 /// A conversation the host drives itself, the way an application with a tool loop of its own uses the view: it adds the
-/// prompt, starts a turn, applies each streamed update, and ends the turn. After each reply it adds a
-/// <see cref="ChoiceEntry"/>, an entry type of its own.
+/// prompt, starts a turn, applies each streamed update, and ends the turn. Before each turn ends it adds a
+/// <see cref="ChoiceEntry"/>, an entry type of its own, with <see cref="ChatTurn.AddEntry"/>.
 /// </summary>
 public sealed class HostSession : INotifyPropertyChanged
 {
@@ -66,8 +66,9 @@ public sealed class HostSession : INotifyPropertyChanged
             {
                 turn.Apply(update);
             }
+            // The card belongs to this turn, so it goes in before the turn ends and its summary follows it.
+            turn.AddEntry(DemoReplies.Choices(prompt));
             turn.Complete();
-            Conversation.Entries.Add(DemoReplies.Choices(prompt));
         }
         catch (OperationCanceledException) when (stop.IsCancellationRequested)
         {
