@@ -33,7 +33,7 @@ namespace Polhem.Chat.Avalonia;
 /// </remarks>
 [TemplatePart(ScrollViewerPart, typeof(ScrollViewer))]
 [TemplatePart(EntriesPart, typeof(ItemsControl))]
-[PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass)]
+[PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass, WaitingPseudoClass)]
 public partial class ChatView : TemplatedControl
 {
     /// <summary>Defines the <see cref="Runner"/> property.</summary>
@@ -276,6 +276,7 @@ public partial class ChatView : TemplatedControl
         else if (change.Property == IsGeneratingProperty)
         {
             PseudoClasses.Set(GeneratingPseudoClass, change.GetNewValue<bool>());
+            UpdateWaiting();
             _submitCommand.RaiseCanExecuteChanged();
             _stopCommand.RaiseCanExecuteChanged();
         }
@@ -446,39 +447,11 @@ public partial class ChatView : TemplatedControl
         }
     }
 
-    // NOTE: Whether an entry can be copied depends on its streaming state, which the entry changes without the view
-    // being told. A button asks a command again only when the command says so, so the view watches the entries and tells
-    // the copy command when one stops streaming; otherwise the copy button of a reply stays disabled after it completes.
-    private void Watch(IEnumerable<ChatEntry> entries)
+    private void UpdateEmpty()
     {
-        foreach (var entry in entries)
-        {
-            entry.PropertyChanged += OnEntryPropertyChanged;
-            _watchedEntries.Add(entry);
-        }
+        PseudoClasses.Set(EmptyPseudoClass, _shown is null || _shown.Entries.Count == 0);
+        UpdateWaiting();
     }
-
-    private void UnwatchAll()
-    {
-        foreach (var entry in _watchedEntries)
-        {
-            entry.PropertyChanged -= OnEntryPropertyChanged;
-        }
-        _watchedEntries.Clear();
-    }
-
-    private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        // A streaming reply changes its text with every update; asking every copy button again for each of those would
-        // cost more than it tells, and a reply cannot be copied before it stops streaming anyway.
-        if (e.PropertyName == nameof(AssistantReplyEntry.IsStreaming)
-            || (e.PropertyName == nameof(AssistantReplyEntry.Text) && CopyText(sender) is not null))
-        {
-            _copyCommand.RaiseCanExecuteChanged();
-        }
-    }
-
-    private void UpdateEmpty() => PseudoClasses.Set(EmptyPseudoClass, _shown is null || _shown.Entries.Count == 0);
 
     private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
     {

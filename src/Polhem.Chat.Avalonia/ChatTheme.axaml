@@ -32,13 +32,22 @@
           <ControlTemplate>
             <Grid RowDefinitions="*,Auto" Background="{TemplateBinding Background}">
               <ScrollViewer Name="PART_ScrollViewer" HorizontalScrollBarVisibility="Disabled">
-                <ItemsControl Name="PART_Entries" Margin="16,12">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <StackPanel Spacing="12" />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <StackPanel Margin="16,12" Spacing="12">
+                  <ItemsControl Name="PART_Entries">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Spacing="12" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+                  <!-- Shown while a reply is in progress and no entry shows progress of its own: before the first
+                       reasoning or text arrives, and between a tool's result and the next response. -->
+                  <TextBlock Name="PART_Waiting"
+                             Classes="polhemChatThinking"
+                             Text="{Binding $parent[local:ChatView].Strings.Thinking}"
+                             Opacity="0.7"
+                             IsVisible="False" />
+                </StackPanel>
               </ScrollViewer>
 
               <StackPanel Name="PART_EmptyState"
@@ -110,6 +119,9 @@
           <Setter Property="IsVisible" Value="True" />
         </Style>
         <Style Selector="^:scrolledup /template/ Button#PART_ScrollToLatest">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:waiting /template/ TextBlock#PART_Waiting">
           <Setter Property="IsVisible" Value="True" />
         </Style>
         <Style Selector="^:generating /template/ Button#PART_SendButton">

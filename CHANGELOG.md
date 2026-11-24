@@ -7,6 +7,13 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
 
 ## [Unreleased]
 
+### Fixed
+
+- `ChatView` now shows that a reply is on its way while no entry does: after a prompt is submitted and before the first
+  reasoning or text arrives, and between a tool's result and the next response. It follows `IsGenerating`, so it works
+  with a `ChatRunner` and for an application that runs its own loop. The theme shows it in `PART_Waiting` under the
+  `:waiting` pseudo-class.
+
 ## [0.1.0] - 2026-11-24
 
 ### Added

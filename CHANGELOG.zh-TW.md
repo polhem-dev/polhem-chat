@@ -7,6 +7,12 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### 修正
+
+- `ChatView` 在沒有任何項目顯示進度時，會顯示回覆正在進行中：送出提示後、第一段推理或文字到達之前，以及工具結果之後、
+  下一次回應到達之前。它跟著 `IsGenerating`，所以 `ChatRunner` 和自己跑迴圈的應用程式都適用。主題在 `:waiting`
+  偽類下以 `PART_Waiting` 顯示。
+
 ## [0.1.0] - 2026-11-24
 
 ### 新增
