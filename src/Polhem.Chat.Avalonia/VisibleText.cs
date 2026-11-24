@@ -95,7 +95,8 @@ internal static class VisibleText
         {
             JsonSerializer.SerializeToElement(value, AIJsonUtilities.DefaultOptions.GetTypeInfo(value.GetType())).WriteTo(writer);
         }
-        catch (NotSupportedException)
+        // A value the contracts know but cannot write, such as one that refers to itself, shows as text too.
+        catch (Exception exception) when (exception is NotSupportedException or JsonException)
         {
             writer.WriteStringValue(Convert.ToString(value, CultureInfo.InvariantCulture));
         }

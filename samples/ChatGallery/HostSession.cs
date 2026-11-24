@@ -72,7 +72,8 @@ public sealed class HostSession : INotifyPropertyChanged
                     updates.Add(update);
                     turn.Apply(update);
                 }
-                if (!turn.IsAwaitingApproval)
+                // The user may decide while the stream is still open, so the host checks for decisions not sent yet too.
+                if (!turn.IsAwaitingApproval && !turn.HasDecisionsToSend)
                 {
                     break;
                 }
@@ -90,7 +91,8 @@ public sealed class HostSession : INotifyPropertyChanged
         {
             turn.Stop();
         }
-        catch (HttpRequestException exception)
+        // FunctionInvokingChatClient throws InvalidOperationException when the history does not match what it expects.
+        catch (Exception exception) when (exception is HttpRequestException or InvalidOperationException)
         {
             turn.Fail(exception);
         }

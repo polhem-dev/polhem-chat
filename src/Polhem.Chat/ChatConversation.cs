@@ -98,7 +98,8 @@ public sealed class ChatConversation : INotifyPropertyChanged
 
     /// <summary>
     /// Replaces the conversation with a saved history. A tool call the history asked approval for and never answered is
-    /// rejected, and the rejection is added to the history.
+    /// rejected, and one that was approved but has no result is closed with a result that says it did not finish, so a
+    /// later request runs neither; both are added to the history.
     /// </summary>
     /// <param name="messages">A history saved with <see cref="SaveHistory"/>, or any list of messages.</param>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
@@ -111,6 +112,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
             AppendMessage(message);
         }
         RejectUnansweredApprovals();
+        foreach (var message in ApprovalRecords.CloseApprovedCalls(_history))
+        {
+            AppendMessage(message);
+        }
     }
 
     /// <summary>

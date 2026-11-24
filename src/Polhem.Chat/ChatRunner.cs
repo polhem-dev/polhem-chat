@@ -159,13 +159,16 @@ public sealed class ChatRunner : INotifyPropertyChanged
                 }
                 turn.Apply(update);
             }
-            if (!turn.IsAwaitingApproval && !turn.HasUndeliveredDecisions)
+            if (!turn.IsAwaitingApproval && !turn.HasDecisionsToSend)
             {
                 break;
             }
             // The client stopped to ask for approval. The turn goes on once the user has decided, which may have
             // happened while the stream was still open, with the decisions sent after the reply so far.
             await turn.WaitForApprovalsAsync(cancellationToken);
+            // WARNING: The client runs the approved calls before it asks the model again. A stop that came with the
+            // decision must end the turn here, or the calls would run after the user asked to stop.
+            cancellationToken.ThrowIfCancellationRequested();
             messages = [.. Conversation.CreateRequestMessages(), .. turn.Messages];
             requests.Continue();
         }

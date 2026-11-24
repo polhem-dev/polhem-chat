@@ -27,8 +27,8 @@ public sealed class ChatTurn : INotifyPropertyChanged
     private int _calls;
     private TimeSpan _waited;
     private long? _waitStart;
+    private readonly List<ChatMessage> _toSend = [];
     private TaskCompletionSource<ChatMessage>? _decided;
-    private ChatMessage? _undelivered;
 
     internal ChatTurn(ChatConversation conversation)
     {
@@ -58,6 +58,13 @@ public sealed class ChatTurn : INotifyPropertyChanged
 
     /// <summary>Gets a value indicating whether any tool call waits for the user's approval.</summary>
     public bool IsAwaitingApproval => _pending.Count > 0;
+
+    /// <summary>
+    /// Gets a value indicating whether the user decided on every waiting call and nobody has taken the decisions with
+    /// <see cref="WaitForApprovalsAsync"/> yet, which happens when the user decides while the stream is still open. An
+    /// application that runs its own loop checks it, with <see cref="IsAwaitingApproval"/>, once a stream has ended.
+    /// </summary>
+    public bool HasDecisionsToSend => _pending.Count == 0 && _toSend.Count > 0;
 
     /// <summary>Gets a value indicating whether the turn has ended.</summary>
     public bool IsEnded => _result is not null;
@@ -155,19 +162,13 @@ public sealed class ChatTurn : INotifyPropertyChanged
         ThrowIfEnded();
         if (_pending.Count == 0)
         {
-            if (_undelivered is { } message)
-            {
-                _undelivered = null;
-                return Task.FromResult(message);
-            }
-            throw new InvalidOperationException("No tool call waits for approval.");
+            return _toSend.Count > 0
+                ? Task.FromResult(TakeDecisions())
+                : throw new InvalidOperationException("No tool call waits for approval.");
         }
         _decided ??= new TaskCompletionSource<ChatMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
         return _decided.Task.WaitAsync(cancellationToken);
     }
-
-    /// <summary>Gets a value indicating whether the user decided on calls and nobody has taken the decisions yet.</summary>
-    internal bool HasUndeliveredDecisions => _undelivered is not null;
 
     /// <summary>The messages of the turn so far that a request continuing it sends after the history.</summary>
     internal IReadOnlyList<ChatMessage> Messages => _messages;
@@ -210,6 +211,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
         {
             DecideCore(entry, approved: false, UndecidedReason, ToolCallStatus.Canceled);
         }
+
         if (outcome == TurnOutcome.Stopped && _conversation.Entries.Count > 0
             && _conversation.Entries[^1] is AssistantReplyEntry { IsStreaming: true } reply)
         {
@@ -228,6 +230,9 @@ public sealed class ChatTurn : INotifyPropertyChanged
         var response = _allUpdates.ToChatResponse();
         FlushUpdates();
         var messages = _messages.ToList();
+        // IMPORTANT: A call the user approved whose result never arrived would run with the next request, which the user
+        // did not ask for. A result that says so closes it.
+        messages.AddRange(ApprovalRecords.CloseApprovedCalls(messages));
         var last = messages.LastOrDefault(message => message.Role == ChatRole.Assistant);
         if (last is null)
         {
@@ -273,18 +278,32 @@ public sealed class ChatTurn : INotifyPropertyChanged
             _waited += _conversation.TimeProvider.GetElapsedTime(waitStart);
             _waitStart = null;
         }
-        // The decisions answer the requests that came before them, so the reply so far goes into the history first.
+        // The decisions go into the history at once, after the reply that asked for them, so that what arrives later
+        // comes after them.
         FlushUpdates();
-        var message = new ChatMessage(ChatRole.User, [.. _decisions]);
+        _toSend.Add(new ChatMessage(ChatRole.User, [.. _decisions]));
+        _messages.Add(_toSend[^1]);
         _decisions.Clear();
-        _messages.Add(message);
         OnPropertyChanged(nameof(IsAwaitingApproval));
-        var decided = _decided;
-        _decided = null;
-        if (decided is null || !decided.TrySetResult(message))
+        if (_decided is { } decided)
         {
-            _undelivered = message;
+            _decided = null;
+            decided.TrySetResult(TakeDecisions());
         }
+    }
+
+    /// <summary>
+    /// Returns the decisions nobody has taken yet as one message. NOTE: Decisions made while the stream was still open
+    /// stay until somebody waits for them, together with those made later, so a loop of the application's own sends
+    /// every one of them.
+    /// </summary>
+    private ChatMessage TakeDecisions()
+    {
+        var message = _toSend.Count == 1
+            ? _toSend[0]
+            : new ChatMessage(ChatRole.User, [.. _toSend.SelectMany(decisions => decisions.Contents)]);
+        _toSend.Clear();
+        return message;
     }
 
     private void FlushUpdates()

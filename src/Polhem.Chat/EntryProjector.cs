@@ -120,25 +120,27 @@ internal sealed class EntryProjector(ChatConversation conversation)
 
     private void AddApprovalRequest(ToolApprovalRequestContent request)
     {
+        // WARNING: Every request gets an entry of its own, with the arguments of the call it asks about. A call id the
+        // conversation saw before may come back with other arguments, and the card must show what the user approves.
         var call = request.ToolCall;
-        if (!_toolCalls.TryGetValue(call.CallId, out var entry))
+        var (name, arguments) = call switch
         {
-            var (name, arguments) = call switch
-            {
-                FunctionCallContent function => (function.Name, function.Arguments),
-                McpServerToolCallContent mcp => (mcp.ServerName + "/" + mcp.Name, mcp.Arguments),
-                _ => (call.GetType().Name, null),
-            };
-            entry = new ToolCallEntry(call.CallId, name) { Arguments = arguments };
-            if (call is FunctionCallContent described && conversation.DescribeToolCall?.Invoke(described) is { } title)
-            {
-                entry.Title = title;
-            }
-            _toolCalls[call.CallId] = entry;
-            AddEntry(entry);
+            FunctionCallContent function => (function.Name, function.Arguments),
+            McpServerToolCallContent mcp => (mcp.ServerName + "/" + mcp.Name, mcp.Arguments),
+            _ => (call.GetType().Name, null),
+        };
+        var entry = new ToolCallEntry(call.CallId, name)
+        {
+            Arguments = arguments,
+            ApprovalRequest = request,
+            Status = ToolCallStatus.AwaitingApproval,
+        };
+        if (call is FunctionCallContent described && conversation.DescribeToolCall?.Invoke(described) is { } title)
+        {
+            entry.Title = title;
         }
-        entry.ApprovalRequest = request;
-        entry.Status = ToolCallStatus.AwaitingApproval;
+        _toolCalls[call.CallId] = entry;
+        AddEntry(entry);
     }
 
     /// <summary>Shows the user's decision on a call that needed approval.</summary>
@@ -170,6 +172,12 @@ internal sealed class EntryProjector(ChatConversation conversation)
         // rejected and carries no exception. The entry already knows it was rejected, and keeps saying so.
         if (entry.Status is ToolCallStatus.Rejected or ToolCallStatus.Canceled)
         {
+            Break();
+            return true;
+        }
+        if (ApprovalRecords.IsNotFinished(result))
+        {
+            entry.Status = ToolCallStatus.Canceled;
             Break();
             return true;
         }

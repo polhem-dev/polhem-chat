@@ -10,3 +10,4 @@ Polhem.Chat.ToolCallEntry.RejectionReason.get -> string?
 Polhem.Chat.ToolCallEntry.RejectionReason.set -> void
 Polhem.Chat.ToolCallStatus.AwaitingApproval = 4 -> Polhem.Chat.ToolCallStatus
 Polhem.Chat.ToolCallStatus.Rejected = 5 -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.ChatTurn.HasDecisionsToSend.get -> bool
