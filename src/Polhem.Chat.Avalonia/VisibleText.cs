@@ -101,17 +101,7 @@ internal static class VisibleText
         }
     }
 
-    private static bool NeedsEscape(string text)
-    {
-        foreach (var rune in text.EnumerateRunes())
-        {
-            if (IsHidden(rune))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+    private static bool NeedsEscape(string text) => text.EnumerateRunes().Any(IsHidden);
 
     private static bool IsHidden(Rune rune) =>
         Rune.GetUnicodeCategory(rune) switch

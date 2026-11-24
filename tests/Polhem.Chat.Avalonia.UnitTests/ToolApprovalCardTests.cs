@@ -91,16 +91,16 @@ public class ToolApprovalCardTests(HeadlessSession session)
     [Fact(DisplayName = "Characters that hide or reorder text show as escapes in the arguments and the title; other scripts show as they are")]
     public Task HiddenCharacters_ShowAsEscapes() => session.RunAsync(() =>
     {
-        var (_, turn, view, _) = Start(new Dictionary<string, object?> { ["path"] = "notes‮txt.exe", ["note"] = "刪除​筆記" });
+        var (_, turn, view, _) = Start(new Dictionary<string, object?> { ["path"] = "notes\u202Etxt.exe", ["note"] = "刪除\u200B筆記" });
         var card = EntryView(view, 1);
 
         var text = Descendants<SelectableTextBlock>(card).Single(block => block.FontFamily.ToString().Contains("Menlo")).Text!;
         Assert.Contains("notes\\u{202E}txt.exe", text);
         Assert.Contains("刪除\\u{200B}筆記", text);
-        Assert.DoesNotContain('‮', text);
+        Assert.DoesNotContain('\u202E', text);
         Assert.Contains("\n", text);
 
-        turn.PendingApprovals[0].Title = "delete⁦_file";
+        turn.PendingApprovals[0].Title = "delete\u2066_file";
         Assert.Contains(Descendants<TextBlock>(card), block => block.Text == "delete\\u{2066}_file");
     });
 

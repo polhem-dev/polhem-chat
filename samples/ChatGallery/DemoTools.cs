@@ -34,7 +34,7 @@ public static class DemoTools
             : $"Note {line} has not been opened for over a year.");
         return new Dictionary<string, object?>
         {
-            ["folder"] = "notes/2024/report‮fdp.exe",
+            ["folder"] = "notes/2024/report\u202Efdp.exe",
             ["reason"] = string.Join("\n", lines),
         };
     }

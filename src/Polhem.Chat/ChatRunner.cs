@@ -117,39 +117,7 @@ public sealed class ChatRunner : INotifyPropertyChanged
         ChatTurnResult result;
         try
         {
-            var messages = Conversation.CreateRequestMessages();
-            // NOTE: A client that runs tools, such as FunctionInvokingChatClient, sends several requests inside one stream.
-            // Each response the model sent has its own ResponseId, so a new one is another request. A client that sets
-            // none counts as one request per stream. The set lives as long as the turn, because a client continuing after
-            // the user's approval may send the updates of an earlier response again.
-            var responses = new HashSet<string>(StringComparer.Ordinal);
-            var continuing = false;
-            turn.BeginCall();
-            while (true)
-            {
-                await foreach (var update in _client.GetStreamingResponseAsync(messages, Options, stop.Token).WithCancellation(stop.Token))
-                {
-                    if ((update.Role is null || update.Role == ChatRole.Assistant) && !RepeatsKnownCalls(update))
-                    {
-                        var isNew = update.ResponseId is { } responseId ? responses.Add(responseId) : continuing;
-                        if (isNew && (continuing || responses.Count > 1))
-                        {
-                            turn.BeginCall();
-                            continuing = false;
-                        }
-                    }
-                    turn.Apply(update);
-                }
-                if (!turn.IsAwaitingApproval && !turn.HasUndeliveredDecisions)
-                {
-                    break;
-                }
-                // The client stopped to ask for approval. The turn goes on once the user has decided, which may have
-                // happened while the stream was still open, with the decisions sent after the reply so far.
-                await turn.WaitForApprovalsAsync(stop.Token);
-                messages = [.. Conversation.CreateRequestMessages(), .. turn.Messages];
-                continuing = true;
-            }
+            await StreamAsync(turn, stop.Token);
             result = turn.Complete();
         }
         catch (OperationCanceledException) when (stop.IsCancellationRequested)
@@ -173,6 +141,36 @@ public sealed class ChatRunner : INotifyPropertyChanged
         return result;
     }
 
+    /// <summary>
+    /// Streams the reply into the turn, and goes on after the user's approval as long as the client asks for it.
+    /// </summary>
+    private async Task StreamAsync(ChatTurn turn, CancellationToken cancellationToken)
+    {
+        var messages = Conversation.CreateRequestMessages();
+        var requests = new RequestCounter();
+        turn.BeginCall();
+        while (true)
+        {
+            await foreach (var update in _client.GetStreamingResponseAsync(messages, Options, cancellationToken).WithCancellation(cancellationToken))
+            {
+                if (!RepeatsKnownCalls(update) && requests.StartsRequest(update))
+                {
+                    turn.BeginCall();
+                }
+                turn.Apply(update);
+            }
+            if (!turn.IsAwaitingApproval && !turn.HasUndeliveredDecisions)
+            {
+                break;
+            }
+            // The client stopped to ask for approval. The turn goes on once the user has decided, which may have
+            // happened while the stream was still open, with the decisions sent after the reply so far.
+            await turn.WaitForApprovalsAsync(cancellationToken);
+            messages = [.. Conversation.CreateRequestMessages(), .. turn.Messages];
+            requests.Continue();
+        }
+    }
+
     // NOTE: After the user approved calls, FunctionInvokingChatClient sends the calls it is about to run again, under a
     // response id of its own. That is not a response of the model, so it does not count as a request.
     private bool RepeatsKnownCalls(ChatResponseUpdate update) =>
@@ -187,4 +185,35 @@ public sealed class ChatRunner : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    /// <summary>Tells which streamed updates start another request to the model within a turn.</summary>
+    /// <remarks>
+    /// NOTE: A client that runs tools, such as FunctionInvokingChatClient, sends several requests inside one stream.
+    /// Each response the model sent has its own ResponseId, so a new one is another request. A client that sets none
+    /// counts as one request per stream. The ids are kept for the whole turn, because a client continuing after the
+    /// user's approval may send the updates of an earlier response again.
+    /// </remarks>
+    private sealed class RequestCounter
+    {
+        private readonly HashSet<string> _responses = new(StringComparer.Ordinal);
+        private bool _continuing;
+
+        /// <summary>Marks that the next stream continues the turn, so its first response is a new request.</summary>
+        public void Continue() => _continuing = true;
+
+        public bool StartsRequest(ChatResponseUpdate update)
+        {
+            if (update.Role is not null && update.Role != ChatRole.Assistant)
+            {
+                return false;
+            }
+            var isNew = update.ResponseId is { } responseId ? _responses.Add(responseId) : _continuing;
+            if (!isNew || (!_continuing && _responses.Count <= 1))
+            {
+                return false;
+            }
+            _continuing = false;
+            return true;
+        }
+    }
 }
