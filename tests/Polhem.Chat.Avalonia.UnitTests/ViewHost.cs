@@ -47,7 +47,7 @@ internal static class ViewHost
     public static Control EntryView(ChatView view, int index)
     {
         var presenter = Part<ItemsControl>(view, "PART_Entries").ContainerFromIndex(index);
-        return Assert.IsAssignableFrom<Control>(Assert.IsAssignableFrom<global::Avalonia.Controls.Presenters.ContentPresenter>(presenter).Child);
+        return Assert.IsType<Control>(Assert.IsType<global::Avalonia.Controls.Presenters.ContentPresenter>(presenter, exactMatch: false).Child, exactMatch: false);
     }
 
     public static IEnumerable<T> Descendants<T>(Visual root) where T : Visual => root.GetVisualDescendants().OfType<T>();

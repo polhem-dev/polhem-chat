@@ -50,7 +50,7 @@ public class ThemeTests(HeadlessSession session)
         // The chat colors follow the variant.
         var prompt = Assert.IsType<Border>(EntryView(view, 0));
         var expected = variant == "Dark" ? Color.Parse("#4D3B82F6") : Color.Parse("#263B82F6");
-        Assert.Equal(expected, Assert.IsAssignableFrom<ISolidColorBrush>(prompt.Background).Color);
+        Assert.Equal(expected, Assert.IsType<ISolidColorBrush>(prompt.Background, exactMatch: false).Color);
 
         Assert.NotNull(window.CaptureRenderedFrame());
     });

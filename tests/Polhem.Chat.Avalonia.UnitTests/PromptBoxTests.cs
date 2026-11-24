@@ -200,6 +200,6 @@ public class PromptBoxTests(HeadlessSession session)
     {
         var request = new TextInputMethodClientRequestedEventArgs { RoutedEvent = InputElement.TextInputMethodClientRequestedEvent };
         box.RaiseEvent(request);
-        return Assert.IsAssignableFrom<TextInputMethodClient>(request.Client);
+        return Assert.IsType<TextInputMethodClient>(request.Client, exactMatch: false);
     }
 }

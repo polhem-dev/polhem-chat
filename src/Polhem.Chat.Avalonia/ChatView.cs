@@ -88,7 +88,7 @@ public class ChatView : TemplatedControl
     private readonly ViewCommand _scrollToLatestCommand;
     private ScrollViewer? _scrollViewer;
     private ItemsControl? _entries;
-    private ChatRunner? _runner;
+    private ChatRunner? _activeRunner;
     private ChatConversation? _shown;
     private bool _followsLatest = true;
     private bool _isAttached;
@@ -250,9 +250,9 @@ public class ChatView : TemplatedControl
         base.OnAttachedToVisualTree(e);
         _isAttached = true;
         Subscribe();
-        if (_runner is not null)
+        if (_activeRunner is not null)
         {
-            SetCurrentValue(IsGeneratingProperty, _runner.IsRunning);
+            SetCurrentValue(IsGeneratingProperty, _activeRunner.IsRunning);
         }
         UpdateEmpty();
     }
@@ -311,7 +311,7 @@ public class ChatView : TemplatedControl
         }
         ScrollToLatest();
 
-        if (_runner is { } runner)
+        if (_activeRunner is { } runner)
         {
             var result = await runner.SendAsync(text);
             // A MessageSending handler of the runner canceled the prompt: give it back to the user instead of losing it.
@@ -346,14 +346,14 @@ public class ChatView : TemplatedControl
 
     private void Stop()
     {
-        _runner?.Stop();
+        _activeRunner?.Stop();
         StopRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private void AttachRunner(ChatRunner? runner)
     {
         Unsubscribe();
-        _runner = runner;
+        _activeRunner = runner;
         _shown = runner?.Conversation ?? Conversation;
         Subscribe();
         Refresh();
@@ -361,7 +361,7 @@ public class ChatView : TemplatedControl
 
     private void ShowConversation()
     {
-        var conversation = _runner?.Conversation ?? Conversation;
+        var conversation = _activeRunner?.Conversation ?? Conversation;
         if (ReferenceEquals(conversation, _shown))
         {
             return;
@@ -374,9 +374,9 @@ public class ChatView : TemplatedControl
 
     private void Refresh()
     {
-        if (_runner is not null)
+        if (_activeRunner is not null)
         {
-            SetCurrentValue(IsGeneratingProperty, _runner.IsRunning);
+            SetCurrentValue(IsGeneratingProperty, _activeRunner.IsRunning);
         }
         if (_entries is not null)
         {
@@ -394,9 +394,9 @@ public class ChatView : TemplatedControl
         {
             return;
         }
-        if (_runner is not null)
+        if (_activeRunner is not null)
         {
-            _runner.PropertyChanged += OnRunnerPropertyChanged;
+            _activeRunner.PropertyChanged += OnRunnerPropertyChanged;
         }
         if (_shown is not null)
         {
@@ -406,9 +406,9 @@ public class ChatView : TemplatedControl
 
     private void Unsubscribe()
     {
-        if (_runner is not null)
+        if (_activeRunner is not null)
         {
-            _runner.PropertyChanged -= OnRunnerPropertyChanged;
+            _activeRunner.PropertyChanged -= OnRunnerPropertyChanged;
         }
         if (_shown is not null)
         {
