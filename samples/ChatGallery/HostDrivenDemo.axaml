@@ -7,15 +7,23 @@
 
   <!-- The host runs the turns itself and the view only shows the conversation and reports what the user does. -->
   <DockPanel>
-    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="12,8,12,0">
-      <Button Name="ReloadButton" Content="Save and reload history" />
-      <Button Name="ClearButton" Content="Clear" />
-    </StackPanel>
-
     <chat:ChatView Name="Chat"
                    CjkFontFamily="PingFang TC, Microsoft JhengHei UI, Noto Sans CJK TC"
                    Conversation="{Binding Conversation}"
                    IsGenerating="{Binding IsGenerating}">
+      <!-- The header stays above the conversation while it scrolls. -->
+      <chat:ChatView.HeaderContent>
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="12,8,12,0">
+          <Button Name="ReloadButton" Content="Save and reload history" />
+          <Button Name="ClearButton" Content="Clear" />
+        </StackPanel>
+      </chat:ChatView.HeaderContent>
+      <chat:ChatView.PromptFooterContent>
+        <TextBlock Text="The host runs these turns itself; the view only shows them."
+                   FontSize="12"
+                   Opacity="0.6"
+                   TextWrapping="Wrap" />
+      </chat:ChatView.PromptFooterContent>
       <chat:ChatView.DataTemplates>
         <!-- An entry type of the application's own, shown with its own template. The colors are the chat theme's, so
              the card follows the base theme and the variant like the built-in ones. -->
