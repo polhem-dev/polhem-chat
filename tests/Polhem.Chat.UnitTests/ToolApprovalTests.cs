@@ -89,7 +89,6 @@ public class ToolApprovalTests
         Assert.Single(turn.PendingApprovals);
         turn.Reject(turn.PendingApprovals[0]);
 
-        Assert.True(waiting.IsCompletedSuccessfully);
         Assert.Equal([true, false], (await waiting).Contents.OfType<ToolApprovalResponseContent>().Select(r => r.Approved));
     }
 

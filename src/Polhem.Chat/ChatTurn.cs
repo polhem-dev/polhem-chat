@@ -28,7 +28,8 @@ public sealed class ChatTurn : INotifyPropertyChanged
     private TimeSpan _waited;
     private long? _waitStart;
     private readonly List<ChatMessage> _toSend = [];
-    private TaskCompletionSource<ChatMessage>? _decided;
+    private readonly HashSet<AIContent> _dropped = new(ReferenceEqualityComparer.Instance);
+    private TaskCompletionSource? _decided;
 
     internal ChatTurn(ChatConversation conversation)
     {
@@ -117,6 +118,12 @@ public sealed class ChatTurn : INotifyPropertyChanged
                 AddUsage(usage.Details);
                 continue;
             }
+            if (content is ToolApprovalRequestContent repeated
+                && _conversation.Projector.FindToolCall(repeated.ToolCall.CallId) is { } seen)
+            {
+                DropRepeatedRequest(repeated, seen);
+                continue;
+            }
             _conversation.Projector.Add(content, streaming: true);
             if (content is ToolApprovalRequestContent request
                 && _conversation.Projector.FindToolCall(request.ToolCall.CallId) is { Status: ToolCallStatus.AwaitingApproval } entry
@@ -166,8 +173,16 @@ public sealed class ChatTurn : INotifyPropertyChanged
                 ? Task.FromResult(TakeDecisions())
                 : throw new InvalidOperationException("No tool call waits for approval.");
         }
-        _decided ??= new TaskCompletionSource<ChatMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
-        return _decided.Task.WaitAsync(cancellationToken);
+        _decided ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        return TakeDecisionsAsync(_decided.Task, cancellationToken);
+    }
+
+    // NOTE: The decisions are taken by the waiter that is still there once they are made. A wait that was canceled
+    // leaves them for the next one, which HasDecisionsToSend announces.
+    private async Task<ChatMessage> TakeDecisionsAsync(Task decided, CancellationToken cancellationToken)
+    {
+        await decided.WaitAsync(cancellationToken).ConfigureAwait(false);
+        return TakeDecisions();
     }
 
     /// <summary>The messages of the turn so far that a request continuing it sends after the history.</summary>
@@ -288,7 +303,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
         if (_decided is { } decided)
         {
             _decided = null;
-            decided.TrySetResult(TakeDecisions());
+            decided.TrySetResult();
         }
     }
 
@@ -314,9 +329,43 @@ public sealed class ChatTurn : INotifyPropertyChanged
         }
         // The history gets copies, so that the record End adds does not show up in the response the caller receives.
         // The combined response reports usage in ChatResponse.Usage; the history keeps the turn's own record instead.
-        _messages.AddRange(_updates.ToChatResponse().Messages.Select(CopyWithoutUsage));
+        // A message that held nothing but a dropped request is left out: a provider rejects an empty message.
+        _messages.AddRange(_updates.ToChatResponse().Messages
+            .Where(message => message.Contents.Count == 0 || message.Contents.Any(content => !_dropped.Contains(content)))
+            .Select(CopyForHistory));
         _updates.Clear();
     }
+
+    internal const string RepeatedCallReason =
+        "The model asked to run a call whose id this conversation used before. It was not run.";
+
+    /// <summary>
+    /// Handles a request for approval of a call id the conversation already has: the same request again is ignored, and
+    /// a new request for an old id is rejected. Neither goes into the history.
+    /// </summary>
+    /// <remarks>
+    /// WARNING: A client that runs tools keys requests by call id, and treats a call that has a result as done. A request
+    /// for an id used before would either be approved without running, or break every later request of the
+    /// conversation, so it is never offered to the user and never sent back.
+    /// </remarks>
+    private void DropRepeatedRequest(ToolApprovalRequestContent request, ToolCallEntry seen)
+    {
+        _dropped.Add(request);
+        if (seen.ApprovalRequest?.RequestId == request.RequestId && _pending.Contains(seen))
+        {
+            return;
+        }
+        _conversation.Projector.AddRejectedRequest(request, RepeatedCallReason);
+    }
+
+    private ChatMessage CopyForHistory(ChatMessage message) =>
+        new(message.Role, message.Contents.Where(content => content is not UsageContent && !_dropped.Contains(content)).ToList())
+        {
+            AuthorName = message.AuthorName,
+            CreatedAt = message.CreatedAt,
+            MessageId = message.MessageId,
+            AdditionalProperties = message.AdditionalProperties,
+        };
 
     private TimeSpan MeasureElapsed()
     {
@@ -336,15 +385,6 @@ public sealed class ChatTurn : INotifyPropertyChanged
         _usage ??= new UsageDetails();
         _usage.Add(details);
     }
-
-    private static ChatMessage CopyWithoutUsage(ChatMessage message) =>
-        new(message.Role, message.Contents.Where(content => content is not UsageContent).ToList())
-        {
-            AuthorName = message.AuthorName,
-            CreatedAt = message.CreatedAt,
-            MessageId = message.MessageId,
-            AdditionalProperties = message.AdditionalProperties,
-        };
 
     private void ThrowIfEnded()
     {

@@ -120,8 +120,28 @@ internal sealed class EntryProjector(ChatConversation conversation)
 
     private void AddApprovalRequest(ToolApprovalRequestContent request)
     {
-        // WARNING: Every request gets an entry of its own, with the arguments of the call it asks about. A call id the
-        // conversation saw before may come back with other arguments, and the card must show what the user approves.
+        var entry = CreateRequestEntry(request);
+        entry.Status = ToolCallStatus.AwaitingApproval;
+        _toolCalls[request.ToolCall.CallId] = entry;
+        AddEntry(entry);
+    }
+
+    /// <summary>
+    /// Shows a request for approval that is rejected as it arrives, without taking the place of the call that first had
+    /// its id.
+    /// </summary>
+    public void AddRejectedRequest(ToolApprovalRequestContent request, string reason)
+    {
+        var entry = CreateRequestEntry(request);
+        entry.RejectionReason = reason;
+        entry.Status = ToolCallStatus.Rejected;
+        AddEntry(entry);
+    }
+
+    // WARNING: Every request gets an entry of its own, with the arguments of the call it asks about, so the card shows
+    // what the user approves.
+    private ToolCallEntry CreateRequestEntry(ToolApprovalRequestContent request)
+    {
         var call = request.ToolCall;
         var (name, arguments) = call switch
         {
@@ -133,14 +153,12 @@ internal sealed class EntryProjector(ChatConversation conversation)
         {
             Arguments = arguments,
             ApprovalRequest = request,
-            Status = ToolCallStatus.AwaitingApproval,
         };
         if (call is FunctionCallContent described && conversation.DescribeToolCall?.Invoke(described) is { } title)
         {
             entry.Title = title;
         }
-        _toolCalls[call.CallId] = entry;
-        AddEntry(entry);
+        return entry;
     }
 
     /// <summary>Shows the user's decision on a call that needed approval.</summary>

@@ -155,8 +155,8 @@ public class ToolApprovalEdgeTests
         Assert.Equal(TurnOutcome.Completed, result!.Summary.Outcome);
     }
 
-    [Fact(DisplayName = "A request whose call id was seen before gets a card of its own, with the arguments it asks about")]
-    public void Request_ReusedCallId_ShowsItsOwnArguments()
+    [Fact(DisplayName = "A request for a call id used before is rejected as it arrives, shows its own arguments and stays out of the history")]
+    public void Request_ReusedCallId_IsRejected()
     {
         var conversation = new ChatConversation();
         var first = conversation.BeginTurn();
@@ -170,9 +170,70 @@ public class ToolApprovalEdgeTests
         var cards = conversation.Entries.OfType<ToolCallEntry>().ToList();
         Assert.Equal(2, cards.Count);
         Assert.Equal("harmless.txt", cards[0].Arguments!["path"]);
-        Assert.Same(cards[1], second.PendingApprovals.Single());
-        Assert.Equal("secrets.txt", cards[1].Arguments!["path"]);
         Assert.Equal(ToolCallStatus.Completed, cards[0].Status);
+        Assert.Equal("secrets.txt", cards[1].Arguments!["path"]);
+        Assert.Equal(ToolCallStatus.Rejected, cards[1].Status);
+        Assert.False(second.IsAwaitingApproval);
+        Assert.False(second.HasDecisionsToSend);
+
+        second.Apply(new ChatResponseUpdate(ChatRole.Assistant, "I cannot do that."));
+        second.Complete();
+        Assert.DoesNotContain(conversation.History.SelectMany(m => m.Contents), c => c is ToolApprovalRequestContent);
+    }
+
+    [Fact(DisplayName = "The same request sent twice in a stream shows one card and is answered once")]
+    public async Task Request_SentTwice_AnsweredOnce()
+    {
+        var conversation = new ChatConversation();
+        var turn = conversation.BeginTurn();
+        var request = new ToolApprovalRequestContent("ficc_c1", Call("c1", "notes.txt"));
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [request]));
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [new ToolApprovalRequestContent("ficc_c1", Call("c1", "notes.txt"))]));
+
+        Assert.Single(conversation.Entries.OfType<ToolCallEntry>());
+        var waiting = turn.WaitForApprovalsAsync();
+        turn.Approve(turn.PendingApprovals.Single());
+        Assert.Single((await waiting).Contents);
+        Assert.Single(conversation.Entries.OfType<ToolCallEntry>());
+    }
+
+    [Fact(DisplayName = "A call stopped while it runs is closed with a result only, so the history holds its call once")]
+    public async Task StopWhileRunning_ClosesWithResultOnly()
+    {
+        var conversation = new ChatConversation();
+        var turn = conversation.BeginTurn();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [new ToolApprovalRequestContent("ficc_c1", Call("c1", "notes.txt"))]));
+        var waiting = turn.WaitForApprovalsAsync();
+        turn.Approve(turn.PendingApprovals[0]);
+        await waiting;
+        // The client sends the approved call again before it runs it; the turn stops while it runs.
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [Call("c1", "notes.txt")]) { ResponseId = "ficc" });
+        turn.Stop();
+
+        var contents = conversation.History.SelectMany(m => m.Contents).ToList();
+        Assert.Single(contents.OfType<FunctionCallContent>());
+        Assert.Single(contents.OfType<FunctionResultContent>());
+        Assert.Equal(ChatRole.Tool, conversation.History[^1].Role);
+        Assert.Contains(conversation.History[^2].Contents, c => c is FunctionCallContent);
+    }
+
+    [Fact(DisplayName = "A wait that was canceled leaves the decisions for the next wait")]
+    public async Task CanceledWait_KeepsTheDecisions()
+    {
+        var conversation = new ChatConversation();
+        var turn = conversation.BeginTurn();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [new ToolApprovalRequestContent("ficc_c1", Call("c1", "notes.txt"))]));
+        using var cancel = new CancellationTokenSource();
+        var first = turn.WaitForApprovalsAsync(cancel.Token);
+        await cancel.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first);
+
+        turn.Approve(turn.PendingApprovals[0]);
+        await Task.Yield();
+
+        Assert.True(turn.HasDecisionsToSend);
+        var message = await turn.WaitForApprovalsAsync();
+        Assert.True(Assert.IsType<ToolApprovalResponseContent>(Assert.Single(message.Contents)).Approved);
     }
 
     /// <summary>A model that answers each request with the updates a function picks from the messages.</summary>
