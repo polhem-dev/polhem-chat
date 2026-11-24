@@ -1,1 +1,103 @@
 #nullable enable
+Polhem.Chat.AssistantReplyEntry
+Polhem.Chat.AssistantReplyEntry.AppendText(string! text) -> void
+Polhem.Chat.AssistantReplyEntry.AssistantReplyEntry(string! text = "", bool isStreaming = false) -> void
+Polhem.Chat.AssistantReplyEntry.IsStopped.get -> bool
+Polhem.Chat.AssistantReplyEntry.IsStopped.set -> void
+Polhem.Chat.AssistantReplyEntry.IsStreaming.get -> bool
+Polhem.Chat.AssistantReplyEntry.IsStreaming.set -> void
+Polhem.Chat.AssistantReplyEntry.Text.get -> string!
+Polhem.Chat.AssistantReplyEntry.Text.set -> void
+Polhem.Chat.ChatConversation
+Polhem.Chat.ChatConversation.AddUserPrompt(string! text) -> Polhem.Chat.UserPromptEntry!
+Polhem.Chat.ChatConversation.AppendMessage(Microsoft.Extensions.AI.ChatMessage! message) -> void
+Polhem.Chat.ChatConversation.BeginTurn() -> Polhem.Chat.ChatTurn!
+Polhem.Chat.ChatConversation.ChatConversation() -> void
+Polhem.Chat.ChatConversation.Clear() -> void
+Polhem.Chat.ChatConversation.CurrentTurn.get -> Polhem.Chat.ChatTurn?
+Polhem.Chat.ChatConversation.DescribeToolCall.get -> System.Func<Microsoft.Extensions.AI.FunctionCallContent!, string?>?
+Polhem.Chat.ChatConversation.DescribeToolCall.set -> void
+Polhem.Chat.ChatConversation.Entries.get -> System.Collections.ObjectModel.ObservableCollection<Polhem.Chat.ChatEntry!>!
+Polhem.Chat.ChatConversation.History.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.ChatMessage!>!
+Polhem.Chat.ChatConversation.LoadHistory(System.Collections.Generic.IEnumerable<Microsoft.Extensions.AI.ChatMessage!>! messages) -> void
+Polhem.Chat.ChatConversation.SaveHistory() -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.ChatMessage!>!
+Polhem.Chat.ChatEntry
+Polhem.Chat.ChatEntry.ChatEntry() -> void
+Polhem.Chat.ChatEntry.OnPropertyChanged(string? propertyName = null) -> void
+Polhem.Chat.ChatEntry.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+Polhem.Chat.ChatEntry.SetProperty<T>(ref T field, T value, string? propertyName = null) -> bool
+Polhem.Chat.ChatRunner
+Polhem.Chat.ChatRunner.ChatRunner(Microsoft.Extensions.AI.IChatClient! client) -> void
+Polhem.Chat.ChatRunner.ChatRunner(Microsoft.Extensions.AI.IChatClient! client, Polhem.Chat.ChatConversation! conversation) -> void
+Polhem.Chat.ChatRunner.Client.get -> Microsoft.Extensions.AI.IChatClient!
+Polhem.Chat.ChatRunner.Client.set -> void
+Polhem.Chat.ChatRunner.Conversation.get -> Polhem.Chat.ChatConversation!
+Polhem.Chat.ChatRunner.IsRunning.get -> bool
+Polhem.Chat.ChatRunner.MessageSending -> System.EventHandler<Polhem.Chat.MessageSendingEventArgs!>?
+Polhem.Chat.ChatRunner.Options.get -> Microsoft.Extensions.AI.ChatOptions?
+Polhem.Chat.ChatRunner.Options.set -> void
+Polhem.Chat.ChatRunner.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+Polhem.Chat.ChatRunner.ResponseReceived -> System.EventHandler<Polhem.Chat.ResponseReceivedEventArgs!>?
+Polhem.Chat.ChatRunner.SendAsync(string! text, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
+Polhem.Chat.ChatRunner.Stop() -> void
+Polhem.Chat.ChatTurn
+Polhem.Chat.ChatTurn.Apply(Microsoft.Extensions.AI.ChatResponseUpdate! update) -> void
+Polhem.Chat.ChatTurn.Complete() -> Polhem.Chat.ChatTurnResult!
+Polhem.Chat.ChatTurn.Fail(System.Exception! exception) -> Polhem.Chat.ChatTurnResult!
+Polhem.Chat.ChatTurn.IsEnded.get -> bool
+Polhem.Chat.ChatTurn.Stop() -> Polhem.Chat.ChatTurnResult!
+Polhem.Chat.ChatTurn.Usage.get -> Microsoft.Extensions.AI.UsageDetails?
+Polhem.Chat.ChatTurnResult
+Polhem.Chat.ChatTurnResult.Exception.get -> System.Exception?
+Polhem.Chat.ChatTurnResult.Response.get -> Microsoft.Extensions.AI.ChatResponse!
+Polhem.Chat.ChatTurnResult.Summary.get -> Polhem.Chat.TurnSummaryEntry!
+Polhem.Chat.ErrorEntry
+Polhem.Chat.ErrorEntry.Details.get -> string?
+Polhem.Chat.ErrorEntry.ErrorCode.get -> string?
+Polhem.Chat.ErrorEntry.ErrorEntry(string! message, string? errorCode = null, string? details = null) -> void
+Polhem.Chat.ErrorEntry.Message.get -> string!
+Polhem.Chat.MessageSendingEventArgs
+Polhem.Chat.MessageSendingEventArgs.MessageSendingEventArgs(string! text) -> void
+Polhem.Chat.MessageSendingEventArgs.Text.get -> string!
+Polhem.Chat.MessageSendingEventArgs.Text.set -> void
+Polhem.Chat.ReasoningEntry
+Polhem.Chat.ReasoningEntry.AppendText(string! text) -> void
+Polhem.Chat.ReasoningEntry.IsStreaming.get -> bool
+Polhem.Chat.ReasoningEntry.IsStreaming.set -> void
+Polhem.Chat.ReasoningEntry.ReasoningEntry(string! text = "", bool isStreaming = false) -> void
+Polhem.Chat.ReasoningEntry.Text.get -> string!
+Polhem.Chat.ReasoningEntry.Text.set -> void
+Polhem.Chat.ResponseReceivedEventArgs
+Polhem.Chat.ResponseReceivedEventArgs.ResponseReceivedEventArgs(Polhem.Chat.ChatTurnResult! result) -> void
+Polhem.Chat.ResponseReceivedEventArgs.Result.get -> Polhem.Chat.ChatTurnResult!
+Polhem.Chat.ToolCallEntry
+Polhem.Chat.ToolCallEntry.Arguments.get -> System.Collections.Generic.IDictionary<string!, object?>?
+Polhem.Chat.ToolCallEntry.Arguments.set -> void
+Polhem.Chat.ToolCallEntry.CallId.get -> string!
+Polhem.Chat.ToolCallEntry.ErrorMessage.get -> string?
+Polhem.Chat.ToolCallEntry.ErrorMessage.set -> void
+Polhem.Chat.ToolCallEntry.Name.get -> string!
+Polhem.Chat.ToolCallEntry.Result.get -> object?
+Polhem.Chat.ToolCallEntry.Result.set -> void
+Polhem.Chat.ToolCallEntry.Status.get -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.ToolCallEntry.Status.set -> void
+Polhem.Chat.ToolCallEntry.Title.get -> string!
+Polhem.Chat.ToolCallEntry.Title.set -> void
+Polhem.Chat.ToolCallEntry.ToolCallEntry(string! callId, string! name) -> void
+Polhem.Chat.ToolCallStatus
+Polhem.Chat.ToolCallStatus.Canceled = 3 -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.ToolCallStatus.Completed = 1 -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.ToolCallStatus.Failed = 2 -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.ToolCallStatus.Running = 0 -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.TurnOutcome
+Polhem.Chat.TurnOutcome.Completed = 0 -> Polhem.Chat.TurnOutcome
+Polhem.Chat.TurnOutcome.Failed = 2 -> Polhem.Chat.TurnOutcome
+Polhem.Chat.TurnOutcome.Stopped = 1 -> Polhem.Chat.TurnOutcome
+Polhem.Chat.TurnSummaryEntry
+Polhem.Chat.TurnSummaryEntry.Elapsed.get -> System.TimeSpan
+Polhem.Chat.TurnSummaryEntry.Outcome.get -> Polhem.Chat.TurnOutcome
+Polhem.Chat.TurnSummaryEntry.TurnSummaryEntry(System.TimeSpan elapsed, Microsoft.Extensions.AI.UsageDetails? usage, Polhem.Chat.TurnOutcome outcome) -> void
+Polhem.Chat.TurnSummaryEntry.Usage.get -> Microsoft.Extensions.AI.UsageDetails?
+Polhem.Chat.UserPromptEntry
+Polhem.Chat.UserPromptEntry.Text.get -> string!
+Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text) -> void
