@@ -1,4 +1,5 @@
-using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
@@ -8,50 +9,80 @@ using static Polhem.Chat.Avalonia.UnitTests.ViewHost;
 
 namespace Polhem.Chat.Avalonia.UnitTests;
 
+/// <summary>
+/// How the default reply template renders a reply. The image tests count the connections a listener on the loopback
+/// address receives, so they see a load however early it starts, without reaching beyond this machine.
+/// </summary>
 [Collection(HeadlessCollection.Name)]
 public class ReplyMarkdownTests(HeadlessSession session)
 {
-    // NOTE: The loader replaces the viewer's own before any option allows an image, so no test reaches the network.
-    private const string Reply = """
-        Look: ![markdown pen](https://example.com/pen.png)
+    // NOTE: Long enough for the viewer's own loader to have connected, which it does at once on a background thread.
+    private static readonly TimeSpan s_quietPeriod = TimeSpan.FromSeconds(1);
 
-        <img src="https://example.com/ink.png" alt="html ink">
-        """;
-
-    [Fact(DisplayName = "By default a reply loads no image, written in Markdown or in HTML, and shows the alternative text")]
-    public Task Images_Default_ShowAlternativeTextOnly() => session.RunAsync(() =>
+    [Fact(DisplayName = "A reply loaded from history loads no image, in Markdown or in HTML, and shows the alternative text")]
+    public Task Images_ReplyFromHistory_MakeNoConnection() => session.RunAsync(async () =>
     {
-        var (_, view, viewer, requested) = ShowReply();
+        using var listener = new ConnectionCounter();
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new AssistantReplyEntry(Reply(listener)));
+        var view = new ChatView { Conversation = conversation };
+        Show(view);
 
-        Assert.Null(view.MarkdownOptions);
-        Assert.Empty(Assert.IsType<MarkdownOptions>(viewer.Options).AllowedImageSchemes);
-        Assert.Empty(requested);
-        var text = ShownText(viewer);
+        await Task.Delay(s_quietPeriod);
+
+        Assert.Equal(0, listener.Count);
+        var text = ShownText(Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0))));
         Assert.Contains("markdown pen", text, StringComparison.Ordinal);
         Assert.Contains("html ink", text, StringComparison.Ordinal);
     });
 
-    [Fact(DisplayName = "Options the application sets load the images they allow, from Markdown and from HTML")]
-    public Task Images_OptionsAllowHttps_LoadImages() => session.RunAsync(async () =>
+    [Fact(DisplayName = "A whole reply added while the view shows loads no image")]
+    public Task Images_ReplyAddedWhileShown_MakeNoConnection() => session.RunAsync(async () =>
     {
-        var (window, view, viewer, requested) = ShowReply();
+        using var listener = new ConnectionCounter();
+        var conversation = new ChatConversation();
+        var window = Show(new ChatView { Conversation = conversation });
 
-        view.MarkdownOptions = new MarkdownOptions();
+        conversation.Entries.Add(new AssistantReplyEntry(Reply(listener)));
         Settle(window);
-        await WaitForAsync(() => requested.Count >= 2);
+        await Task.Delay(s_quietPeriod);
 
-        Assert.Same(view.MarkdownOptions, viewer.Options);
-        Assert.Equal(
-            ["https://example.com/ink.png", "https://example.com/pen.png"],
-            requested.Select(uri => uri.AbsoluteUri).Order(StringComparer.Ordinal));
+        Assert.Equal(0, listener.Count);
     });
 
-    [Fact(DisplayName = "Setting the options back to null stops loading images again")]
-    public Task Images_OptionsCleared_LoadNoImages() => session.RunAsync(() =>
+    [Fact(DisplayName = "A streamed reply loads no image")]
+    public Task Images_StreamedReply_MakeNoConnection() => session.RunAsync(async () =>
     {
-        var (window, view, viewer, _) = ShowReply();
+        using var listener = new ConnectionCounter();
+        var conversation = new ChatConversation();
+        var window = Show(new ChatView { Conversation = conversation });
+        var reply = new AssistantReplyEntry(string.Empty) { IsStreaming = true };
+        conversation.Entries.Add(reply);
+        Settle(window);
+
+        reply.Text = Reply(listener);
+        Settle(window);
+        await Task.Delay(s_quietPeriod);
+
+        Assert.Equal(0, listener.Count);
+    });
+
+    [Fact(DisplayName = "Options the application sets load the images they allow, and setting null stops it again")]
+    public Task Images_OptionsAllowHttps_LoadImages() => session.RunAsync(async () =>
+    {
+        using var listener = new ConnectionCounter();
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new AssistantReplyEntry(Reply(listener)));
+        var view = new ChatView { Conversation = conversation };
+        var window = Show(view);
+        var viewer = Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0)));
+
         view.MarkdownOptions = new MarkdownOptions();
         Settle(window);
+        await listener.WaitForAsync(2);
+
+        Assert.Same(view.MarkdownOptions, viewer.Options);
+        Assert.Equal(2, listener.Count);
 
         view.MarkdownOptions = null;
         Settle(window);
@@ -59,10 +90,29 @@ public class ReplyMarkdownTests(HeadlessSession session)
         Assert.Empty(Assert.IsType<MarkdownOptions>(viewer.Options).AllowedImageSchemes);
     });
 
+    [Fact(DisplayName = "Each reply has its own options that load no images, so changing one opens no other")]
+    public Task Images_DefaultOptions_NotShared() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new AssistantReplyEntry("one"));
+        conversation.Entries.Add(new AssistantReplyEntry("two"));
+        var view = new ChatView { Conversation = conversation };
+        Show(view);
+
+        var first = Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0)));
+        var second = Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 1)));
+
+        Assert.NotSame(first.Options, second.Options);
+    });
+
     [Fact(DisplayName = "The view's CJK font family reaches the reply's viewer")]
     public Task CjkFontFamily_Set_ReachesViewer() => session.RunAsync(() =>
     {
-        var (window, view, viewer, _) = ShowReply();
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new AssistantReplyEntry("這是**京都**"));
+        var view = new ChatView { Conversation = conversation };
+        var window = Show(view);
+        var viewer = Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0)));
         Assert.Null(viewer.CjkFontFamily);
 
         var family = new FontFamily("PingFang TC, Noto Sans CJK TC");
@@ -72,25 +122,12 @@ public class ReplyMarkdownTests(HeadlessSession session)
         Assert.Equal(family, viewer.CjkFontFamily);
     });
 
-    /// <summary>
-    /// Shows a reply whose viewer records the images it is asked to load instead of fetching them.
-    /// </summary>
-    private static (Window Window, ChatView View, MarkdownViewer Viewer, ConcurrentQueue<Uri> Requested) ShowReply()
-    {
-        var conversation = new ChatConversation();
-        conversation.Entries.Add(new AssistantReplyEntry(Reply));
-        var view = new ChatView { Conversation = conversation };
-        var window = Show(view);
-        var viewer = Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0)));
-        var requested = new ConcurrentQueue<Uri>();
-        viewer.ImageLoader = (uri, _) =>
-        {
-            requested.Enqueue(uri);
-            return Task.FromResult<Stream?>(null);
-        };
-        Settle(window);
-        return (window, view, viewer, requested);
-    }
+    /// <summary>A reply with an image in Markdown and one in HTML, both from the listener.</summary>
+    private static string Reply(ConnectionCounter listener) => $"""
+        Look: ![markdown pen](https://127.0.0.1:{listener.Port}/pen.png)
+
+        <img src="https://127.0.0.1:{listener.Port}/ink.png" alt="html ink">
+        """;
 
     /// <summary>The text the viewer shows: that of its text blocks and of their inlines.</summary>
     private static string ShownText(MarkdownViewer viewer) => string.Join(
@@ -99,12 +136,51 @@ public class ReplyMarkdownTests(HeadlessSession session)
             ? string.Concat(inlines.OfType<Run>().Select(run => run.Text))
             : block.Text));
 
-    private static async Task WaitForAsync(Func<bool> condition)
+    /// <summary>Accepts connections on a free loopback port and counts them.</summary>
+    private sealed class ConnectionCounter : IDisposable
     {
-        var deadline = DateTime.UtcNow.AddSeconds(5);
-        while (!condition() && DateTime.UtcNow < deadline)
+        private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
+        private int _count;
+
+        public ConnectionCounter()
         {
-            await Task.Delay(10);
+            _listener.Start();
+            _ = AcceptAsync();
+        }
+
+        public int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
+
+        public int Count => Volatile.Read(ref _count);
+
+        public async Task WaitForAsync(int count)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(5);
+            while (Count < count && DateTime.UtcNow < deadline)
+            {
+                await Task.Delay(10);
+            }
+        }
+
+        public void Dispose() => _listener.Stop();
+
+        private async Task AcceptAsync()
+        {
+            try
+            {
+                while (true)
+                {
+                    using var client = await _listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    Interlocked.Increment(ref _count);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // The listener stopped.
+            }
+            catch (SocketException)
+            {
+                // The listener stopped.
+            }
         }
     }
 }

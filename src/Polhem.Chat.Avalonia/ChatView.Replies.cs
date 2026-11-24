@@ -25,13 +25,19 @@ public partial class ChatView
     /// <para>
     /// A reply comes from the model, so its text is not trusted: a prompt injection can have the model write an image
     /// whose address carries data from the conversation, and loading the image sends that data to the image's server.
-    /// By default a reply's images therefore show their alternative text, whether written in Markdown or as an HTML
-    /// <c>img</c>. Links and the other options keep the defaults of <see cref="Polhem.Markdown.MarkdownOptions"/>.
+    /// By default the reply template therefore shows a reply's images as their alternative text, whether written in
+    /// Markdown or as an HTML <c>img</c>. Links and the other options keep the defaults of
+    /// <see cref="Polhem.Markdown.MarkdownOptions"/>.
     /// </para>
     /// <para>
     /// Assigning an instance hands that choice to the application, and a new
     /// <see cref="Polhem.Markdown.MarkdownOptions"/> loads images over <c>https</c>. Assign a new instance to change the
     /// options; changing the sets of the assigned one does not rebuild the replies already shown.
+    /// </para>
+    /// <para>
+    /// Only the package's own reply template applies this property. A template the application registers for
+    /// <see cref="AssistantReplyEntry"/> shows replies with its own viewer, whose options are the application's to set:
+    /// a <see cref="Polhem.Markdown.Avalonia.MarkdownViewer"/> without options loads images over <c>https</c>.
     /// </para>
     /// </remarks>
     public MarkdownOptions? MarkdownOptions

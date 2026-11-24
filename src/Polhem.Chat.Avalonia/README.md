@@ -47,6 +47,10 @@ A reply is the model's text, so it is not trusted. A prompt injection can have t
 carries data from the conversation, and loading the image would send that data to the image's server. Replies
 therefore show no images: each shows its alternative text, written in Markdown or as an HTML `img`.
 
+This holds for the package's reply template. A template of your own for `AssistantReplyEntry` uses its own
+`MarkdownViewer`, which loads `https` images unless you give it options. Set them as a value, not through a binding to
+the view, because the viewer renders as soon as its text arrives, before such a binding resolves.
+
 To show images, set `MarkdownOptions` to options of your own. A new `MarkdownOptions` allows images over `https`;
 change `AllowedImageSchemes` before assigning it, and assign a new instance to change it later:
 

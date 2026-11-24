@@ -1,16 +1,12 @@
 using System.Globalization;
 using System.Text;
 using Avalonia.Data.Converters;
-using Polhem.Markdown;
 
 namespace Polhem.Chat.Avalonia;
 
 /// <summary>The converters the default entry templates use to turn entry values into text.</summary>
 internal static class EntryConverters
 {
-    // NOTE: Shared by every view. Nothing in the package changes it, and the viewer only reads it.
-    private static readonly MarkdownOptions s_noImages = CreateNoImages();
-
     /// <summary>Converts a <see cref="ToolCallStatus"/> and the view's <see cref="ChatViewStrings"/> to the status word.</summary>
     public static IMultiValueConverter ToolStatus { get; } = new FuncMultiValueConverter<object?, string>(values =>
     {
@@ -27,13 +23,6 @@ internal static class EntryConverters
             _ => strings.ToolCanceled,
         };
     });
-
-    /// <summary>
-    /// Converts <see cref="ChatView.MarkdownOptions"/> to the options a reply's viewer applies: the application's, or
-    /// options that load no images when it set none.
-    /// </summary>
-    public static IValueConverter ReplyOptions { get; } =
-        new FuncValueConverter<MarkdownOptions?, MarkdownOptions>(options => options ?? s_noImages);
 
     /// <summary>Converts the arguments of a tool call to whether there are any.</summary>
     public static IValueConverter HasArguments { get; } =
@@ -96,11 +85,4 @@ internal static class EntryConverters
 
     // A JSON element, which is what most providers return for arguments and results, formats as its JSON text.
     private static string FormatValue(object? value) => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
-
-    private static MarkdownOptions CreateNoImages()
-    {
-        var options = new MarkdownOptions();
-        options.AllowedImageSchemes.Clear();
-        return options;
-    }
 }
