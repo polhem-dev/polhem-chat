@@ -229,6 +229,7 @@ public partial class ChatView : TemplatedControl
 
         _scrollViewer = e.NameScope.Find<ScrollViewer>(ScrollViewerPart);
         _entries = e.NameScope.Find<ItemsControl>(EntriesPart);
+        _progressText = e.NameScope.Find<TextBlock>(ProgressPart);
         if (_scrollViewer is not null)
         {
             _scrollViewer.ScrollChanged += OnScrollChanged;
@@ -238,6 +239,7 @@ public partial class ChatView : TemplatedControl
             _entries.ItemTemplate = new ChatEntryTemplate(this);
             _entries.ItemsSource = _shown?.Entries;
         }
+        UpdateProgress();
     }
 
     /// <inheritdoc/>
@@ -273,10 +275,15 @@ public partial class ChatView : TemplatedControl
         {
             ShowConversation();
         }
+        else if (change.Property == StringsProperty)
+        {
+            UpdateProgress();
+        }
         else if (change.Property == IsGeneratingProperty)
         {
             PseudoClasses.Set(GeneratingPseudoClass, change.GetNewValue<bool>());
             UpdateWaiting();
+            UpdateProgress();
             _submitCommand.RaiseCanExecuteChanged();
             _stopCommand.RaiseCanExecuteChanged();
         }
@@ -398,8 +405,10 @@ public partial class ChatView : TemplatedControl
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged += OnEntriesChanged;
+            _shown.PropertyChanged += OnConversationPropertyChanged;
             Watch(_shown.Entries);
         }
+        WatchTurn(_shown?.CurrentTurn);
     }
 
     private void Unsubscribe()
@@ -411,8 +420,10 @@ public partial class ChatView : TemplatedControl
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged -= OnEntriesChanged;
+            _shown.PropertyChanged -= OnConversationPropertyChanged;
         }
         UnwatchAll();
+        WatchTurn(null);
     }
 
     private void OnRunnerPropertyChanged(object? sender, PropertyChangedEventArgs e)

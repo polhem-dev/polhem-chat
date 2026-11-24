@@ -1,1 +1,8 @@
 #nullable enable
+Polhem.Chat.ChatConversation.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+Polhem.Chat.ChatTurn.BeginCall() -> void
+Polhem.Chat.ChatTurn.Calls.get -> int
+Polhem.Chat.ChatTurn.Elapsed.get -> System.TimeSpan
+Polhem.Chat.ChatTurn.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+Polhem.Chat.TurnSummaryEntry.Calls.get -> int
+Polhem.Chat.TurnSummaryEntry.TurnSummaryEntry(System.TimeSpan elapsed, Microsoft.Extensions.AI.UsageDetails? usage, Polhem.Chat.TurnOutcome outcome, int calls) -> void

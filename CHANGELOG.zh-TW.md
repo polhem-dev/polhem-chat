@@ -9,6 +9,14 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
 
 ## [0.1.1] - 2026-11-24
 
+### 新增
+
+- 每一輪的摘要在發出多次要求時列出要求次數，provider 回報快取時列出輸入 token 中的快取部分
+  （`UsageDetails.CachedInputTokenCount`）。回合進行中，項目下方有一行顯示目前是第幾次要求與經過的秒數。`ChatRunner`
+  自己計算要求次數；自己跑迴圈的應用程式在每次要求前呼叫新的 `ChatTurn.BeginCall`。新增：`ChatTurn.BeginCall`、
+  `ChatTurn.Calls`、`ChatTurn.Elapsed`、`TurnSummaryEntry.Calls`、`ChatConversation.CurrentTurn` 與 `ChatTurn.Calls`
+  的變更通知，以及 `ChatViewStrings` 的 `CallsFormat`、`CachedTokensFormat`、`ProgressFormat` 字串。
+
 ### 修正
 
 - `ChatView` 在沒有任何項目顯示進度時，會顯示回覆正在進行中：送出提示後、第一段推理或文字到達之前，以及工具結果之後、

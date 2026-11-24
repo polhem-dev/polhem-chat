@@ -60,6 +60,8 @@ public sealed class HostSession : INotifyPropertyChanged
         IsGenerating = true;
         try
         {
+            // One request in this demo; an application with its own tool loop calls it before each one.
+            turn.BeginCall();
             await foreach (var update in _client.GetStreamingResponseAsync(Conversation.SaveHistory(), cancellationToken: stop.Token))
             {
                 turn.Apply(update);

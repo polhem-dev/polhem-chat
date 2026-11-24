@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
@@ -18,7 +19,7 @@ namespace Polhem.Chat;
 /// to views.
 /// </para>
 /// </remarks>
-public sealed class ChatConversation
+public sealed class ChatConversation : INotifyPropertyChanged
 {
     private readonly List<ChatMessage> _history = [];
     private readonly EntryProjector _projector;
@@ -29,6 +30,9 @@ public sealed class ChatConversation
     {
         _projector = new EntryProjector(this);
     }
+
+    /// <summary>Occurs when <see cref="CurrentTurn"/> changes.</summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Gets the entries a user interface shows, oldest first. Applications may add entries of their own types; they are
@@ -88,6 +92,7 @@ public sealed class ChatConversation
     {
         ThrowIfTurnInProgress();
         _currentTurn = new ChatTurn(this);
+        OnCurrentTurnChanged();
         return _currentTurn;
     }
 
@@ -159,6 +164,7 @@ public sealed class ChatConversation
         if (ReferenceEquals(_currentTurn, turn))
         {
             _currentTurn = null;
+            OnCurrentTurnChanged();
         }
     }
 
@@ -192,6 +198,9 @@ public sealed class ChatConversation
         }
         _projector.Break();
     }
+
+    private void OnCurrentTurnChanged() =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentTurn)));
 
     private void ThrowIfTurnInProgress()
     {

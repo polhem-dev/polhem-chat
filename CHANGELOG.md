@@ -9,6 +9,15 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
 
 ## [0.1.1] - 2026-11-24
 
+### Added
+
+- Each turn's summary names the requests the turn sent when there were several, and the cached part of the input
+  tokens when the provider reported one (`UsageDetails.CachedInputTokenCount`). While a turn runs, a line under the
+  entries shows the request it is on and its seconds. `ChatRunner` counts the requests itself; an application that
+  runs its own loop calls the new `ChatTurn.BeginCall` before each one. New: `ChatTurn.BeginCall`, `ChatTurn.Calls`,
+  `ChatTurn.Elapsed`, `TurnSummaryEntry.Calls`, change notification of `ChatConversation.CurrentTurn` and
+  `ChatTurn.Calls`, and the `CallsFormat`, `CachedTokensFormat` and `ProgressFormat` texts of `ChatViewStrings`.
+
 ### Fixed
 
 - `ChatView` now shows that a reply is on its way while no entry does: after a prompt is submitted and before the first

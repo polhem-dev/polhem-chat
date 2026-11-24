@@ -31,6 +31,8 @@ Enter sends, Shift+Enter starts a new line, and Esc or the stop button stops the
 
 An application with its own tool loop sets `Conversation` instead of `Runner`, handles `PromptSubmitted` and
 `StopRequested`, and sets `IsGenerating` while it streams into the conversation with `ChatConversation.BeginTurn`.
+Calling `ChatTurn.BeginCall` before each request to the model lets the progress line and the turn summary show how
+many requests the turn took.
 
 ## Templates, texts and colors
 

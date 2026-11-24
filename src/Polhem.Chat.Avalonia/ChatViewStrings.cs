@@ -45,6 +45,9 @@ public class ChatViewStrings
         TurnFailed = Load(nameof(TurnFailed), culture);
         ElapsedFormat = Load(nameof(ElapsedFormat), culture);
         TokensFormat = Load(nameof(TokensFormat), culture);
+        CachedTokensFormat = Load(nameof(CachedTokensFormat), culture);
+        CallsFormat = Load(nameof(CallsFormat), culture);
+        ProgressFormat = Load(nameof(ProgressFormat), culture);
     }
 
     /// <summary>Gets or sets the culture that formats numbers and times, and that the texts were loaded for.</summary>
@@ -114,6 +117,25 @@ public class ChatViewStrings
     public string TokensFormat { get; set; }
 
     /// <summary>
+    /// Gets or sets the composite format of the tokens a turn used when the provider read part of the input from its
+    /// cache. Argument 0 is the input token count, argument 1 the cached part of it and argument 2 the output token
+    /// count, as <see cref="long"/> values.
+    /// </summary>
+    public string CachedTokensFormat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the composite format of the requests a turn sent to the model, shown when there was more than one.
+    /// Argument 0 is the count, as an <see cref="int"/>.
+    /// </summary>
+    public string CallsFormat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the composite format of the line that shows a turn in progress. Argument 0 is the request the turn is
+    /// on, as an <see cref="int"/>, and argument 1 the whole seconds since it began, as a <see cref="double"/>.
+    /// </summary>
+    public string ProgressFormat { get; set; }
+
+    /// <summary>
     /// Returns the texts for a culture: Traditional Chinese for the <c>zh-Hant</c> cultures (<c>zh-TW</c>, <c>zh-HK</c>
     /// and <c>zh-MO</c>), and English otherwise.
     /// </summary>
@@ -142,6 +164,34 @@ public class ChatViewStrings
     /// <returns>The formatted text.</returns>
     public virtual string FormatTokens(long inputTokens, long outputTokens) =>
         string.Format(Culture, TokensFormat, inputTokens, outputTokens);
+
+    /// <summary>Formats the tokens a turn used, part of them cached, with <see cref="CachedTokensFormat"/>.</summary>
+    /// <param name="inputTokens">The input token count, the cached ones included.</param>
+    /// <param name="cachedInputTokens">The part of the input the provider read from its cache.</param>
+    /// <param name="outputTokens">The output token count.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) =>
+        string.Format(Culture, CachedTokensFormat, inputTokens, cachedInputTokens, outputTokens);
+
+    /// <summary>Formats the requests a turn sent with <see cref="CallsFormat"/>.</summary>
+    /// <param name="calls">The count.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string FormatCalls(int calls) => string.Format(Culture, CallsFormat, calls);
+
+    /// <summary>
+    /// Formats a turn in progress with <see cref="ProgressFormat"/>, or with <see cref="ElapsedFormat"/> alone when the
+    /// turn has not counted its requests.
+    /// </summary>
+    /// <param name="calls">The request the turn is on; 0 when it does not count them.</param>
+    /// <param name="elapsed">The time since the turn began.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string FormatProgress(int calls, TimeSpan elapsed)
+    {
+        var seconds = Math.Floor(elapsed.TotalSeconds);
+        return calls > 0
+            ? string.Format(Culture, ProgressFormat, calls, seconds)
+            : string.Format(Culture, ElapsedFormat, seconds);
+    }
 
     private static string Load(string name, CultureInfo culture) =>
         s_resources.GetString(name, culture)

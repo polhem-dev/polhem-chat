@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
@@ -7,14 +8,19 @@ namespace Polhem.Chat;
 /// becomes entries of the conversation as it arrives, and ending the turn adds the reply to the history and a
 /// <see cref="TurnSummaryEntry"/> to the entries.
 /// </summary>
-/// <remarks>Start a turn with <see cref="ChatConversation.BeginTurn"/>.</remarks>
-public sealed class ChatTurn
+/// <remarks>
+/// Start a turn with <see cref="ChatConversation.BeginTurn"/>. An application that runs its own loop calls
+/// <see cref="BeginCall"/> before each request it sends to the model, so the turn can count them; a
+/// <see cref="ChatRunner"/> counts them itself.
+/// </remarks>
+public sealed class ChatTurn : INotifyPropertyChanged
 {
     private readonly ChatConversation _conversation;
     private readonly List<ChatResponseUpdate> _updates = [];
     private readonly long _startTimestamp;
     private UsageDetails? _usage;
     private ChatTurnResult? _result;
+    private int _calls;
 
     internal ChatTurn(ChatConversation conversation)
     {
@@ -23,11 +29,32 @@ public sealed class ChatTurn
         conversation.Projector.Break();
     }
 
+    /// <summary>Occurs when <see cref="Calls"/> changes.</summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>Gets the requests sent to the model in this turn so far, as <see cref="BeginCall"/> counted them.</summary>
+    public int Calls => _calls;
+
+    /// <summary>Gets the time since the turn began, or the time it took once it has ended.</summary>
+    public TimeSpan Elapsed => _result?.Summary.Elapsed ?? _conversation.TimeProvider.GetElapsedTime(_startTimestamp);
+
     /// <summary>Gets a value indicating whether the turn has ended.</summary>
     public bool IsEnded => _result is not null;
 
     /// <summary>Gets the token counts reported so far in this turn, or <see langword="null"/> when there are none.</summary>
     public UsageDetails? Usage => _usage;
+
+    /// <summary>
+    /// Counts a request to the model. Call it before each request the turn sends, the first one included; the turn
+    /// summary shows the count.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The turn has ended.</exception>
+    public void BeginCall()
+    {
+        ThrowIfEnded();
+        _calls++;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Calls)));
+    }
 
     /// <summary>Adds the contents of a streamed update to the entries.</summary>
     /// <param name="update">The update.</param>
@@ -92,7 +119,7 @@ public sealed class ChatTurn
         }
 
         var elapsed = _conversation.TimeProvider.GetElapsedTime(_startTimestamp);
-        var summary = new TurnSummaryEntry(elapsed, _usage, outcome);
+        var summary = new TurnSummaryEntry(elapsed, _usage, outcome, _calls);
         projector.AddEntry(summary);
 
         var response = _updates.ToChatResponse();
