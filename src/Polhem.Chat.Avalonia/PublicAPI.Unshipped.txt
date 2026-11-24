@@ -1,1 +1,7 @@
 #nullable enable
+Polhem.Chat.Avalonia.ChatView.CjkFontFamily.get -> Avalonia.Media.FontFamily?
+Polhem.Chat.Avalonia.ChatView.CjkFontFamily.set -> void
+Polhem.Chat.Avalonia.ChatView.MarkdownOptions.get -> Polhem.Markdown.MarkdownOptions?
+Polhem.Chat.Avalonia.ChatView.MarkdownOptions.set -> void
+static readonly Polhem.Chat.Avalonia.ChatView.CjkFontFamilyProperty -> Avalonia.StyledProperty<Avalonia.Media.FontFamily?>!
+static readonly Polhem.Chat.Avalonia.ChatView.MarkdownOptionsProperty -> Avalonia.StyledProperty<Polhem.Markdown.MarkdownOptions?>!

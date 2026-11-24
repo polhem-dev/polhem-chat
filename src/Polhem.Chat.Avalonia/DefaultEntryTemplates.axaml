@@ -32,7 +32,11 @@
           </MultiBinding>
         </TextBlock.IsVisible>
       </TextBlock>
+      <!-- A reply is the model's text, so its images load only when the application chose options that allow them
+           (ChatView.MarkdownOptions). -->
       <md:MarkdownViewer Markdown="{Binding Text}"
+                         Options="{Binding $parent[local:ChatView].MarkdownOptions, Converter={x:Static local:EntryConverters.ReplyOptions}}"
+                         CjkFontFamily="{Binding $parent[local:ChatView].CjkFontFamily}"
                          CopyCodeLabel="{Binding $parent[local:ChatView].Strings.CopyCode}"
                          IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       <StackPanel Orientation="Horizontal" Spacing="8">
