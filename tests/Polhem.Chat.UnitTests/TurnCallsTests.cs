@@ -29,6 +29,23 @@ public class TurnCallsTests
         Assert.Throws<InvalidOperationException>(turn.BeginCall);
     }
 
+    [Fact(DisplayName = "A new request ends the reply before it, so the next request's text starts an entry of its own")]
+    public void BeginCall_EndsTheOpenReply()
+    {
+        var conversation = new ChatConversation();
+        var turn = conversation.BeginTurn();
+        turn.BeginCall();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, "Reading the form."));
+
+        turn.BeginCall();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, "Done."));
+
+        var replies = conversation.Entries.OfType<AssistantReplyEntry>().ToList();
+        Assert.Equal(["Reading the form.", "Done."], replies.Select(reply => reply.Text));
+        Assert.False(replies[0].IsStreaming);
+        Assert.True(replies[1].IsStreaming);
+    }
+
     [Fact(DisplayName = "A turn whose requests nobody counted has a summary with no calls")]
     public void Complete_NoBeginCall_HasNoCalls()
     {

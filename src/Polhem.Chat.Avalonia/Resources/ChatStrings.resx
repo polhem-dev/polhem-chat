@@ -75,7 +75,16 @@
   <data name="CallsFormat" xml:space="preserve">
     <value>{0} calls</value>
   </data>
-  <data name="ProgressFormat" xml:space="preserve">
-    <value>Call {0} · {1:0} s</value>
+  <data name="OutputTokensFormat" xml:space="preserve">
+    <value>↓ {0:N0} tokens</value>
+  </data>
+  <data name="CallFormat" xml:space="preserve">
+    <value>call {0}</value>
+  </data>
+  <data name="SecondsFormat" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
+  <data name="MinutesFormat" xml:space="preserve">
+    <value>{0}m {1}s</value>
   </data>
 </root>

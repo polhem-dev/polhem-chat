@@ -47,7 +47,10 @@ public class ChatViewStrings
         TokensFormat = Load(nameof(TokensFormat), culture);
         CachedTokensFormat = Load(nameof(CachedTokensFormat), culture);
         CallsFormat = Load(nameof(CallsFormat), culture);
-        ProgressFormat = Load(nameof(ProgressFormat), culture);
+        CallFormat = Load(nameof(CallFormat), culture);
+        SecondsFormat = Load(nameof(SecondsFormat), culture);
+        MinutesFormat = Load(nameof(MinutesFormat), culture);
+        OutputTokensFormat = Load(nameof(OutputTokensFormat), culture);
     }
 
     /// <summary>Gets or sets the culture that formats numbers and times, and that the texts were loaded for.</summary>
@@ -130,10 +133,28 @@ public class ChatViewStrings
     public string CallsFormat { get; set; }
 
     /// <summary>
-    /// Gets or sets the composite format of the line that shows a turn in progress. Argument 0 is the request the turn is
-    /// on, as an <see cref="int"/>, and argument 1 the whole seconds since it began, as a <see cref="double"/>.
+    /// Gets or sets the composite format of the request a turn in progress is on. Argument 0 is the request, as an
+    /// <see cref="int"/>.
     /// </summary>
-    public string ProgressFormat { get; set; }
+    public string CallFormat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the composite format of a running time under a minute. Argument 0 is the whole seconds, as an
+    /// <see cref="int"/>.
+    /// </summary>
+    public string SecondsFormat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the composite format of a running time of a minute or more. Argument 0 is the whole minutes and
+    /// argument 1 the seconds past them, as <see cref="int"/> values.
+    /// </summary>
+    public string MinutesFormat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the composite format of the output tokens a turn in progress has reported so far, added to the
+    /// progress line once there are some. Argument 0 is the count, as a <see cref="long"/>.
+    /// </summary>
+    public string OutputTokensFormat { get; set; }
 
     /// <summary>
     /// Returns the texts for a culture: Traditional Chinese for the <c>zh-Hant</c> cultures (<c>zh-TW</c>, <c>zh-HK</c>
@@ -179,18 +200,32 @@ public class ChatViewStrings
     public virtual string FormatCalls(int calls) => string.Format(Culture, CallsFormat, calls);
 
     /// <summary>
-    /// Formats a turn in progress with <see cref="ProgressFormat"/>, or with <see cref="ElapsedFormat"/> alone when the
-    /// turn has not counted its requests.
+    /// Formats a turn in progress: its running time (<see cref="SecondsFormat"/> or <see cref="MinutesFormat"/>), then
+    /// the request it is on (<see cref="CallFormat"/>) when it counts them, then <see cref="OutputTokensFormat"/> once
+    /// tokens were reported.
     /// </summary>
     /// <param name="calls">The request the turn is on; 0 when it does not count them.</param>
     /// <param name="elapsed">The time since the turn began.</param>
+    /// <param name="outputTokens">The output tokens the turn has reported so far; 0 when none.</param>
     /// <returns>The formatted text.</returns>
-    public virtual string FormatProgress(int calls, TimeSpan elapsed)
+    public virtual string FormatProgress(int calls, TimeSpan elapsed, long outputTokens)
     {
-        var seconds = Math.Floor(elapsed.TotalSeconds);
-        return calls > 0
-            ? string.Format(Culture, ProgressFormat, calls, seconds)
-            : string.Format(Culture, ElapsedFormat, seconds);
+        var seconds = (int)Math.Max(0, Math.Floor(elapsed.TotalSeconds));
+        var parts = new List<string>
+        {
+            seconds < 60
+                ? string.Format(Culture, SecondsFormat, seconds)
+                : string.Format(Culture, MinutesFormat, seconds / 60, seconds % 60),
+        };
+        if (calls > 0)
+        {
+            parts.Add(string.Format(Culture, CallFormat, calls));
+        }
+        if (outputTokens > 0)
+        {
+            parts.Add(string.Format(Culture, OutputTokensFormat, outputTokens));
+        }
+        return string.Join(" · ", parts);
     }
 
     private static string Load(string name, CultureInfo culture) =>

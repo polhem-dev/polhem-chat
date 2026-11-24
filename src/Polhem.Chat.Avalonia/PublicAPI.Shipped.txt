@@ -6,6 +6,8 @@ Polhem.Chat.Avalonia.ChatPromptBox.SubmitRequested -> System.EventHandler<Avalon
 Polhem.Chat.Avalonia.ChatTheme
 Polhem.Chat.Avalonia.ChatTheme.ChatTheme() -> void
 Polhem.Chat.Avalonia.ChatView
+Polhem.Chat.Avalonia.ChatView.ActivityIcon.get -> System.Uri?
+Polhem.Chat.Avalonia.ChatView.ActivityIcon.set -> void
 Polhem.Chat.Avalonia.ChatView.ChatView() -> void
 Polhem.Chat.Avalonia.ChatView.Conversation.get -> Polhem.Chat.ChatConversation?
 Polhem.Chat.Avalonia.ChatView.Conversation.set -> void
@@ -23,6 +25,8 @@ Polhem.Chat.Avalonia.ChatView.PromptSubmitted -> System.EventHandler<Polhem.Chat
 Polhem.Chat.Avalonia.ChatView.Runner.get -> Polhem.Chat.ChatRunner?
 Polhem.Chat.Avalonia.ChatView.Runner.set -> void
 Polhem.Chat.Avalonia.ChatView.ScrollToLatestCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.ShowsActivity.get -> bool
+Polhem.Chat.Avalonia.ChatView.ShowsActivity.set -> void
 Polhem.Chat.Avalonia.ChatView.StopCommand.get -> System.Windows.Input.ICommand!
 Polhem.Chat.Avalonia.ChatView.StopRequested -> System.EventHandler?
 Polhem.Chat.Avalonia.ChatView.Strings.get -> Polhem.Chat.Avalonia.ChatViewStrings!
@@ -33,6 +37,8 @@ Polhem.Chat.Avalonia.ChatView.Suggestions.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings
 Polhem.Chat.Avalonia.ChatViewStrings.CachedTokensFormat.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.CachedTokensFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.CallFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.CallFormat.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.CallsFormat.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.CallsFormat.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.ChatViewStrings() -> void
@@ -48,12 +54,16 @@ Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.set -> void
-Polhem.Chat.Avalonia.ChatViewStrings.ProgressFormat.get -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.ProgressFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.MinutesFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.MinutesFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.OutputTokensFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.OutputTokensFormat.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.SecondsFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.SecondsFormat.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.Send.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.Send.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.Stop.get -> string!
@@ -90,16 +100,18 @@ override Polhem.Chat.Avalonia.ChatView.OnDetachedFromVisualTree(Avalonia.VisualT
 override Polhem.Chat.Avalonia.ChatView.OnPropertyChanged(Avalonia.AvaloniaPropertyChangedEventArgs! change) -> void
 static Polhem.Chat.Avalonia.ChatViewStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.Avalonia.ChatViewStrings!
 static readonly Polhem.Chat.Avalonia.ChatPromptBox.SubmitRequestedEvent -> Avalonia.Interactivity.RoutedEvent<Avalonia.Interactivity.RoutedEventArgs!>!
+static readonly Polhem.Chat.Avalonia.ChatView.ActivityIconProperty -> Avalonia.StyledProperty<System.Uri?>!
 static readonly Polhem.Chat.Avalonia.ChatView.ConversationProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatConversation?>!
 static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentProperty -> Avalonia.StyledProperty<object?>!
 static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
 static readonly Polhem.Chat.Avalonia.ChatView.IsGeneratingProperty -> Avalonia.StyledProperty<bool>!
 static readonly Polhem.Chat.Avalonia.ChatView.PromptProperty -> Avalonia.StyledProperty<string?>!
 static readonly Polhem.Chat.Avalonia.ChatView.RunnerProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatRunner?>!
+static readonly Polhem.Chat.Avalonia.ChatView.ShowsActivityProperty -> Avalonia.StyledProperty<bool>!
 static readonly Polhem.Chat.Avalonia.ChatView.StringsProperty -> Avalonia.StyledProperty<Polhem.Chat.Avalonia.ChatViewStrings!>!
 static readonly Polhem.Chat.Avalonia.ChatView.SuggestionsProperty -> Avalonia.StyledProperty<System.Collections.Generic.IEnumerable<string!>?>!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCalls(int calls) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatElapsed(System.TimeSpan elapsed) -> string!
-virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed) -> string!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed, long outputTokens) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatTokens(long inputTokens, long outputTokens) -> string!

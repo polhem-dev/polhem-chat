@@ -22,7 +22,7 @@ public class EntryTemplateTests(HeadlessSession session)
         conversation.Entries.Add(new AssistantReplyEntry("**Hello**"));
         conversation.Entries.Add(new TurnSummaryEntry(TimeSpan.FromSeconds(1), usage: null, TurnOutcome.Completed));
         conversation.Entries.Add(new ErrorEntry("Boom"));
-        var view = new ChatView { Conversation = conversation };
+        var view = new ChatView { Conversation = conversation, ShowsActivity = true };
         Show(view);
 
         Assert.Contains("polhemChatPrompt", EntryView(view, 0).Classes);
@@ -129,7 +129,7 @@ public class EntryTemplateTests(HeadlessSession session)
         var conversation = new ChatConversation();
         var reasoning = new ReasoningEntry("Hmm", isStreaming: true);
         conversation.Entries.Add(reasoning);
-        var view = new ChatView { Conversation = conversation };
+        var view = new ChatView { Conversation = conversation, ShowsActivity = true };
         var window = Show(view);
 
         string ShownHeader() => Descendants<TextBlock>(EntryView(view, 0)).Single(text => IsShown(text) && text.Text is not "Hmm").Text!;
@@ -150,7 +150,7 @@ public class EntryTemplateTests(HeadlessSession session)
             Arguments = new Dictionary<string, object?> { ["city"] = "Taipei" },
         };
         conversation.Entries.Add(call);
-        var view = new ChatView { Conversation = conversation };
+        var view = new ChatView { Conversation = conversation, ShowsActivity = true };
         var window = Show(view);
         var card = EntryView(view, 0);
         Assert.Single(Descendants<Expander>(card)).IsExpanded = true;

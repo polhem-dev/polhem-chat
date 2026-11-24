@@ -11,7 +11,7 @@
 
 [Avalonia](https://avaloniaui.net/) 的 AI 聊天控制項，可接任何
 [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/microsoft-extensions-ai) 的 `IChatClient`：
-以 Markdown 呈現的串流回覆、推理過程、工具呼叫、每輪用量、停止與複製。它不依賴任何模型供應商，沿用你已經在用的
+以 Markdown 呈現的串流回覆、即時顯示模型正在做什麼的一行（推理、工具呼叫、時間與 token）、每輪用量、停止與複製。它不依賴任何模型供應商，沿用你已經在用的
 `IChatClient` 即可。
 
 | 套件 | 用途 |

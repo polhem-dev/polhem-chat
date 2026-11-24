@@ -33,4 +33,9 @@
     <Compile Include="..\Polhem.Chat.UnitTests\ScriptedChatClient.cs" Link="Shared\ScriptedChatClient.cs" />
   </ItemGroup>
 
+  <!-- A GIF written by the macOS encoder, whose LZW codes grow, unlike the package's own animation. -->
+  <ItemGroup>
+    <None Include="Assets\imageio.gif" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

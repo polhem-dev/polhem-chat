@@ -218,25 +218,25 @@ public partial class ChatView : TemplatedControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        if (_scrollViewer is not null)
-        {
-            _scrollViewer.ScrollChanged -= OnScrollChanged;
-        }
         if (_entries is not null)
         {
             _entries.ItemsSource = null;
+            _entries.ContainerPrepared -= OnContainerPrepared;
         }
 
-        _scrollViewer = e.NameScope.Find<ScrollViewer>(ScrollViewerPart);
+        AttachScrollViewer(e.NameScope.Find<ScrollViewer>(ScrollViewerPart));
         _entries = e.NameScope.Find<ItemsControl>(EntriesPart);
-        _progressText = e.NameScope.Find<TextBlock>(ProgressPart);
-        if (_scrollViewer is not null)
+        _waitingText = e.NameScope.Find<TextBlock>(WaitingPart);
+        if (e.NameScope.Find<Border>(SpinnerPart) is { } spinner)
         {
-            _scrollViewer.ScrollChanged += OnScrollChanged;
+            _activityIcon.Animation ??= LoadActivityIcon(ActivityIcon);
+            spinner.Child = _activityIcon;
         }
+        _progressText = e.NameScope.Find<TextBlock>(ProgressPart);
         if (_entries is not null)
         {
             _entries.ItemTemplate = new ChatEntryTemplate(this);
+            _entries.ContainerPrepared += OnContainerPrepared;
             _entries.ItemsSource = _shown?.Entries;
         }
         UpdateProgress();
@@ -277,7 +277,17 @@ public partial class ChatView : TemplatedControl
         }
         else if (change.Property == StringsProperty)
         {
+            UpdateWaiting();
             UpdateProgress();
+        }
+        else if (change.Property == ActivityIconProperty)
+        {
+            _activityIcon.Animation = LoadActivityIcon(change.GetNewValue<Uri?>());
+        }
+        else if (change.Property == ShowsActivityProperty)
+        {
+            UpdateEntryVisibility();
+            UpdateWaiting();
         }
         else if (change.Property == IsGeneratingProperty)
         {
