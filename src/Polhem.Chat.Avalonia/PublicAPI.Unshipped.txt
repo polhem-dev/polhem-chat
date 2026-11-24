@@ -1,1 +1,19 @@
 #nullable enable
+Polhem.Chat.Avalonia.ChatView.HeaderContent.get -> object?
+Polhem.Chat.Avalonia.ChatView.HeaderContent.set -> void
+Polhem.Chat.Avalonia.ChatView.HeaderContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
+Polhem.Chat.Avalonia.ChatView.HeaderContentTemplate.set -> void
+Polhem.Chat.Avalonia.ChatView.PromptFooterContent.get -> object?
+Polhem.Chat.Avalonia.ChatView.PromptFooterContent.set -> void
+Polhem.Chat.Avalonia.ChatView.PromptFooterContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
+Polhem.Chat.Avalonia.ChatView.PromptFooterContentTemplate.set -> void
+Polhem.Chat.Avalonia.ChatView.PromptHeaderContent.get -> object?
+Polhem.Chat.Avalonia.ChatView.PromptHeaderContent.set -> void
+Polhem.Chat.Avalonia.ChatView.PromptHeaderContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
+Polhem.Chat.Avalonia.ChatView.PromptHeaderContentTemplate.set -> void
+static readonly Polhem.Chat.Avalonia.ChatView.HeaderContentProperty -> Avalonia.StyledProperty<object?>!
+static readonly Polhem.Chat.Avalonia.ChatView.HeaderContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
+static readonly Polhem.Chat.Avalonia.ChatView.PromptFooterContentProperty -> Avalonia.StyledProperty<object?>!
+static readonly Polhem.Chat.Avalonia.ChatView.PromptFooterContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
+static readonly Polhem.Chat.Avalonia.ChatView.PromptHeaderContentProperty -> Avalonia.StyledProperty<object?>!
+static readonly Polhem.Chat.Avalonia.ChatView.PromptHeaderContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!

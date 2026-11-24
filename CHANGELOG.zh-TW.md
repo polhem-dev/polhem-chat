@@ -10,6 +10,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.2.0.md](docs/zh-TW/changelogs/0.2.0.md)
 
+- `ChatView.HeaderContent`、`PromptHeaderContent`、`PromptFooterContent`（各附樣板屬性）在對話上方、輸入框上方與下方顯示應用程式自己的內容。
 - `ChatTurn.AddEntry` 在回合進行中加入應用程式自己的項目，排在該輪摘要之前。
 
 ## [0.1.2] - 2026-11-25
