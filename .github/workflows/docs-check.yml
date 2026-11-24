@@ -1,0 +1,26 @@
+name: Docs Check
+
+# Separate from build-ci.yml so that a change that only touches documents is checked in seconds without .NET.
+# A link breaks when the file it points to is renamed or deleted, and that file is not always .md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Check markdown relative links
+        run: ./check-md-links.sh

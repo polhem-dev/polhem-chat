@@ -1,0 +1,32 @@
+<Project>
+
+  <!--
+    Dependency gate. Each package may take only the external packages that do its job: Microsoft.Extensions.AI.Abstractions
+    for the conversation model, and Avalonia with the Markdown viewer for the control. Every package reference flows to
+    every consumer, so one that is not on the list fails the build. In particular, neither package may depend on the
+    Polhem framework: the packages are for any Avalonia application.
+
+    Only references that flow to consumers count: a package with PrivateAssets="all" (SourceLink, analyzers) does not
+    appear in the nuspec. tests/Polhem.Chat.UnitTests/DependencyGateTests.cs checks the assemblies each package actually
+    references, and that every package under src is listed there.
+  -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Polhem.Chat'">
+    <_PolhemChatAllowedPackage Include="Microsoft.Extensions.AI.Abstractions" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Polhem.Chat.Avalonia'">
+    <_PolhemChatAllowedPackage Include="Avalonia" />
+    <_PolhemChatAllowedPackage Include="Polhem.Markdown.Avalonia" />
+  </ItemGroup>
+
+  <Target Name="PolhemChatDependencyGate" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_PolhemChatConsumerPackage Include="@(PackageReference)" Condition="'%(PackageReference.PrivateAssets)' != 'all'" />
+      <_PolhemChatConsumerPackage Remove="@(_PolhemChatAllowedPackage)" />
+      <_PolhemChatFramework Include="@(FrameworkReference)" Exclude="Microsoft.NETCore.App" />
+    </ItemGroup>
+    <Error Code="CHAT9001"
+           Condition="'@(_PolhemChatConsumerPackage)' != '' or '@(_PolhemChatFramework)' != ''"
+           Text="$(MSBuildProjectName) may depend only on .NET, the other packages of this repository and its own external packages (@(_PolhemChatAllowedPackage, ', ')), because every dependency flows to every consumer. Unexpected reference(s): @(_PolhemChatConsumerPackage, ', ')@(_PolhemChatFramework, ', '). If it is really needed, open an issue first." />
+  </Target>
+
+</Project>

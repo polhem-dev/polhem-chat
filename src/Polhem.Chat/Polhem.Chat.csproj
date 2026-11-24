@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>An observable conversation model for AI chat user interfaces: turns the streamed updates of any Microsoft.Extensions.AI IChatClient into conversation entries (text, reasoning, tool calls, usage, errors), and runs each turn with stop, timing and token counts.</Description>
+    <!-- The control runs on iOS, Android and WebAssembly. The trim and AOT analyzers turn every incompatible call into
+         a build error. -->
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The lowest version the package supports, not the newest: it becomes the minimum for every consumer. 10.4.0 is
+         the first version with a stable ToolApprovalRequestContent, which tool approval builds on. -->
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.4.0" />
+  </ItemGroup>
+
+</Project>

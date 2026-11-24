@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Polhem.Chat/Polhem.Chat.csproj" />
+    <Project Path="src/Polhem.Chat.Avalonia/Polhem.Chat.Avalonia.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Polhem.Chat.UnitTests/Polhem.Chat.UnitTests.csproj" />
+  </Folder>
+</Solution>
