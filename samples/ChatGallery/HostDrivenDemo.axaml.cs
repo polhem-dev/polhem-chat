@@ -20,7 +20,7 @@ public sealed partial class HostDrivenDemo : UserControl
         DataContext = session;
         InitializeComponent();
         var chat = Chat;
-        chat.Suggestions = ["Plan three days in Kyoto", "規劃京都三日遊"];
+        chat.Suggestions = ["Plan three days in Kyoto", "Delete my old notes", "規劃京都三日遊"];
         chat.PromptSubmitted += (_, e) => _ = session.SendAsync(e.Text);
         chat.StopRequested += (_, _) => session.Stop();
         ReloadButton.Click += (_, _) => session.ReloadHistory();

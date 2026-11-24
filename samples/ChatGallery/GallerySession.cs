@@ -15,7 +15,7 @@ public sealed class GallerySession
 {
     public GallerySession()
     {
-        Runner = new ChatRunner(new DemoChatClient());
+        Runner = new ChatRunner(DemoTools.WithTools(new DemoChatClient())) { Options = DemoTools.Options };
         Runner.Conversation.DescribeToolCall = ToolTitles.Describe;
         Culture = ToolTitles.IsTraditionalChinese(CultureInfo.CurrentUICulture) ? ToolTitles.Chinese : ToolTitles.English;
     }

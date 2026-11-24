@@ -87,4 +87,22 @@
   <data name="MinutesFormat" xml:space="preserve">
     <value>{0}m {1}s</value>
   </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="AwaitingApproval" xml:space="preserve">
+    <value>Waiting for your approval</value>
+  </data>
+  <data name="ToolAwaitingApproval" xml:space="preserve">
+    <value>Needs your approval</value>
+  </data>
+  <data name="ToolRejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="ScrollForMore" xml:space="preserve">
+    <value>There is more: scroll to read all of it.</value>
+  </data>
 </root>

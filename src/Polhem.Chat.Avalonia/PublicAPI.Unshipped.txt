@@ -1,4 +1,5 @@
 #nullable enable
+Polhem.Chat.Avalonia.ChatView.ApproveToolCallCommand.get -> System.Windows.Input.ICommand!
 Polhem.Chat.Avalonia.ChatView.HeaderContent.get -> object?
 Polhem.Chat.Avalonia.ChatView.HeaderContent.set -> void
 Polhem.Chat.Avalonia.ChatView.HeaderContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
@@ -11,6 +12,19 @@ Polhem.Chat.Avalonia.ChatView.PromptHeaderContent.get -> object?
 Polhem.Chat.Avalonia.ChatView.PromptHeaderContent.set -> void
 Polhem.Chat.Avalonia.ChatView.PromptHeaderContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
 Polhem.Chat.Avalonia.ChatView.PromptHeaderContentTemplate.set -> void
+Polhem.Chat.Avalonia.ChatView.RejectToolCallCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatViewStrings.Approve.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Approve.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AwaitingApproval.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AwaitingApproval.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Reject.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Reject.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ScrollForMore.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ScrollForMore.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.set -> void
 static readonly Polhem.Chat.Avalonia.ChatView.HeaderContentProperty -> Avalonia.StyledProperty<object?>!
 static readonly Polhem.Chat.Avalonia.ChatView.HeaderContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
 static readonly Polhem.Chat.Avalonia.ChatView.PromptFooterContentProperty -> Avalonia.StyledProperty<object?>!

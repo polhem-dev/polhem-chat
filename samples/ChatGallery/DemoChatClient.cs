@@ -8,7 +8,8 @@ namespace ChatGallery;
 /// An <see cref="IChatClient"/> that plays a scripted reply instead of calling a model, so the gallery shows every kind
 /// of entry without a key: reasoning, a tool call and its result, a Markdown reply streamed in small pieces, and the
 /// token counts. A prompt that mentions an error plays a failing tool and a lost connection; one that asks for a long
-/// reply streams slowly, to try stopping and scrolling. A prompt in Chinese gets a reply in Chinese.
+/// reply streams slowly, to try stopping and scrolling; one that asks to delete something calls
+/// <see cref="DemoTools.DeleteNotesTool"/>, which needs the user's approval. A prompt in Chinese gets a reply in Chinese.
 /// </summary>
 public sealed class DemoChatClient : IChatClient
 {
@@ -26,7 +27,30 @@ public sealed class DemoChatClient : IChatClient
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var prompt = messages.LastOrDefault(message => message.Role == ChatRole.User)?.Text ?? "";
+        var list = messages.ToList();
+        var prompt = list.LastOrDefault(message => message.Role == ChatRole.User && message.Text.Length > 0)?.Text ?? "";
+        var chinese = DemoReplies.IsChinese(prompt);
+
+        // The client that runs tools sends the result of the delete call back: answer it and stop.
+        if (list.LastOrDefault() is { } last && last.Role == ChatRole.Tool
+            && last.Contents.OfType<FunctionResultContent>().FirstOrDefault() is { } deleteResult)
+        {
+            foreach (var chunk in Chunks(DemoTools.After(deleteResult, chinese)))
+            {
+                await Task.Delay(s_chunkDelay, cancellationToken);
+                yield return new ChatResponseUpdate(ChatRole.Assistant, chunk);
+            }
+            yield break;
+        }
+        if (DemoTools.AsksToDelete(prompt))
+        {
+            await Task.Delay(s_chunkDelay * 10, cancellationToken);
+            var deleteId = "call-" + Interlocked.Increment(ref _callCount).ToString(CultureInfo.InvariantCulture);
+            yield return new ChatResponseUpdate(ChatRole.Assistant,
+                [new FunctionCallContent(deleteId, DemoTools.DeleteNotesTool, DemoTools.Arguments(chinese))]);
+            yield break;
+        }
+
         var replies = DemoReplies.For(prompt);
         var callId = "call-" + Interlocked.Increment(ref _callCount).ToString(CultureInfo.InvariantCulture);
         var failing = DemoReplies.AsksForError(prompt);
@@ -40,7 +64,9 @@ public sealed class DemoChatClient : IChatClient
 
         await Task.Delay(delay * 10, cancellationToken);
         var arguments = new Dictionary<string, object?> { ["city"] = replies.City, ["days"] = 3 };
-        yield return new ChatResponseUpdate(ChatRole.Assistant, [new FunctionCallContent(callId, DemoReplies.WeatherTool, arguments)]);
+        // The scripted model plays the weather call and its result itself, so a client that runs tools leaves it alone.
+        yield return new ChatResponseUpdate(ChatRole.Assistant,
+            [new FunctionCallContent(callId, DemoReplies.WeatherTool, arguments) { InformationalOnly = true }]);
 
         // NOTE: The tool "runs" for a moment, so the card shows its running state before the result arrives.
         await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);

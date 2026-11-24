@@ -64,7 +64,14 @@ public partial class ChatView
         }
     }
 
-    private void OnTurnPropertyChanged(object? sender, PropertyChangedEventArgs e) => UpdateProgress();
+    private void OnTurnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        UpdateProgress();
+        if (e.PropertyName == nameof(ChatTurn.IsAwaitingApproval))
+        {
+            UpdateWaiting();
+        }
+    }
 
     private void WatchTurn(ChatTurn? turn)
     {
@@ -78,6 +85,8 @@ public partial class ChatView
             _watchedTurn.PropertyChanged += OnTurnPropertyChanged;
         }
         UpdateProgress();
+        _approveCommand.RaiseCanExecuteChanged();
+        _rejectCommand.RaiseCanExecuteChanged();
     }
 
     // NOTE: The seconds change without the turn saying so, so a timer redraws the line while it shows. It runs only while

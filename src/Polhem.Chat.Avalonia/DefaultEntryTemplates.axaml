@@ -88,10 +88,11 @@
             BorderBrush="{DynamicResource PolhemChatCardBorderBrush}"
             BorderThickness="1"
             CornerRadius="8">
+      <StackPanel>
       <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
         <Expander.Header>
           <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding Title, Converter={x:Static local:EntryConverters.Visible}}" FontWeight="SemiBold" />
             <TextBlock Opacity="0.7">
               <TextBlock.Text>
                 <MultiBinding Converter="{x:Static local:EntryConverters.ToolStatus}">
@@ -119,8 +120,61 @@
                                TextWrapping="Wrap"
                                Foreground="{DynamicResource PolhemChatErrorForeground}"
                                IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <SelectableTextBlock Text="{Binding RejectionReason, Converter={x:Static local:EntryConverters.Visible}}"
+                               TextWrapping="Wrap"
+                               Opacity="0.8"
+                               IsVisible="{Binding RejectionReason, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         </StackPanel>
       </Expander>
+      <!-- WARNING: What the user approves is what the tool receives, so the arguments show in full and never cut short:
+           long ones scroll, with a note that there is more to read, and characters that draw nothing or reorder
+           the text show as escapes. Nothing approves by default; only the button does. -->
+      <StackPanel Classes="polhemChatApproval"
+                  Margin="12,0,12,10"
+                  Spacing="6"
+                  IsVisible="{Binding Status, Converter={x:Static local:EntryConverters.IsAwaitingApproval}}">
+        <TextBlock Text="{Binding $parent[local:ChatView].Strings.ToolArguments}"
+                   FontWeight="SemiBold"
+                   IsVisible="{Binding Arguments, Converter={x:Static local:EntryConverters.HasArguments}}" />
+        <Border Background="{DynamicResource PolhemChatCardBackground}"
+                BorderBrush="{DynamicResource PolhemChatCardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="8,6"
+                IsVisible="{Binding Arguments, Converter={x:Static local:EntryConverters.HasArguments}}">
+          <ScrollViewer Name="ApprovalArguments"
+                        Classes="polhemChatApprovalArguments"
+                        MaxHeight="240"
+                        HorizontalScrollBarVisibility="Disabled">
+            <SelectableTextBlock Text="{Binding Arguments, Converter={x:Static local:EntryConverters.ApprovalArguments}}"
+                                 TextWrapping="Wrap"
+                                 Margin="0,0,14,0"
+                                 FontFamily="Menlo, Consolas, monospace" />
+          </ScrollViewer>
+        </Border>
+        <TextBlock Classes="polhemChatScrollForMore"
+                   FontSize="12"
+                   Opacity="0.7"
+                   Text="{Binding $parent[local:ChatView].Strings.ScrollForMore}">
+          <TextBlock.IsVisible>
+            <MultiBinding Converter="{x:Static local:EntryConverters.IsOverflowing}">
+              <Binding ElementName="ApprovalArguments" Path="Extent" />
+              <Binding ElementName="ApprovalArguments" Path="Viewport" />
+            </MultiBinding>
+          </TextBlock.IsVisible>
+        </TextBlock>
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+          <Button Classes="polhemChatReject"
+                  Content="{Binding $parent[local:ChatView].Strings.Reject}"
+                  Command="{Binding $parent[local:ChatView].RejectToolCallCommand}"
+                  CommandParameter="{Binding}" />
+          <Button Classes="accent polhemChatApprove"
+                  Content="{Binding $parent[local:ChatView].Strings.Approve}"
+                  Command="{Binding $parent[local:ChatView].ApproveToolCallCommand}"
+                  CommandParameter="{Binding}" />
+        </StackPanel>
+      </StackPanel>
+      </StackPanel>
     </Border>
   </DataTemplate>
 

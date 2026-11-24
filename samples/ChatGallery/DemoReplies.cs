@@ -97,7 +97,7 @@ public sealed record DemoReplies(
     /// <summary>Returns the replies in the language of the prompt.</summary>
     public static DemoReplies For(string prompt)
     {
-        var replies = prompt.Any(IsCjk) ? s_chinese : s_english;
+        var replies = IsChinese(prompt) ? s_chinese : s_english;
         return AsksForLongReply(prompt)
             ? replies with { Answer = string.Join("\n\n---\n\n", Enumerable.Repeat(replies.Answer, 4)) }
             : replies;
@@ -113,6 +113,8 @@ public sealed record DemoReplies(
 
     public static bool AsksForLongReply(string prompt) =>
         prompt.Contains("long", StringComparison.OrdinalIgnoreCase) || prompt.Contains("長", StringComparison.Ordinal);
+
+    public static bool IsChinese(string prompt) => prompt.Any(IsCjk);
 
     private static bool IsCjk(char character) => character is >= '\u3400' and <= '\u9FFF';
 }

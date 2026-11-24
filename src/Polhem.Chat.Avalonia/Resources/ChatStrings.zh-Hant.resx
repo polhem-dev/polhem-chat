@@ -87,4 +87,22 @@
   <data name="MinutesFormat" xml:space="preserve">
     <value>{0} 分 {1} 秒</value>
   </data>
+  <data name="Approve" xml:space="preserve">
+    <value>核准</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>拒絕</value>
+  </data>
+  <data name="AwaitingApproval" xml:space="preserve">
+    <value>等待你核准</value>
+  </data>
+  <data name="ToolAwaitingApproval" xml:space="preserve">
+    <value>需要你核准</value>
+  </data>
+  <data name="ToolRejected" xml:space="preserve">
+    <value>已拒絕</value>
+  </data>
+  <data name="ScrollForMore" xml:space="preserve">
+    <value>內容還有，請捲動看完。</value>
+  </data>
 </root>

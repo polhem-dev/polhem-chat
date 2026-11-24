@@ -17,6 +17,7 @@ public static class ToolTitles
     {
         DemoReplies.WeatherTool when call.Arguments?.TryGetValue("city", out var city) == true => "Weather forecast: " + city,
         CurrentTimeTool => "Current time",
+        DemoTools.DeleteNotesTool when call.Arguments?.TryGetValue("folder", out var folder) == true => "Delete the notes in " + folder,
         _ => null,
     };
 

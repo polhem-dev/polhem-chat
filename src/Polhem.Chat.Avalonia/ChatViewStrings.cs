@@ -51,6 +51,12 @@ public class ChatViewStrings
         SecondsFormat = Load(nameof(SecondsFormat), culture);
         MinutesFormat = Load(nameof(MinutesFormat), culture);
         OutputTokensFormat = Load(nameof(OutputTokensFormat), culture);
+        Approve = Load(nameof(Approve), culture);
+        Reject = Load(nameof(Reject), culture);
+        AwaitingApproval = Load(nameof(AwaitingApproval), culture);
+        ToolAwaitingApproval = Load(nameof(ToolAwaitingApproval), culture);
+        ToolRejected = Load(nameof(ToolRejected), culture);
+        ScrollForMore = Load(nameof(ScrollForMore), culture);
     }
 
     /// <summary>Gets or sets the culture that formats numbers and times, and that the texts were loaded for.</summary>
@@ -97,6 +103,27 @@ public class ChatViewStrings
 
     /// <summary>Gets or sets the state of a tool call whose turn was stopped.</summary>
     public string ToolCanceled { get; set; }
+
+    /// <summary>Gets or sets the state of a tool call that waits for the user's approval.</summary>
+    public string ToolAwaitingApproval { get; set; }
+
+    /// <summary>Gets or sets the state of a tool call that was rejected.</summary>
+    public string ToolRejected { get; set; }
+
+    /// <summary>Gets or sets the label of the button that approves a tool call.</summary>
+    public string Approve { get; set; }
+
+    /// <summary>Gets or sets the label of the button that rejects a tool call.</summary>
+    public string Reject { get; set; }
+
+    /// <summary>Gets or sets what the line under the entries says while a tool call waits for the user's approval.</summary>
+    public string AwaitingApproval { get; set; }
+
+    /// <summary>
+    /// Gets or sets the note under the arguments of a tool call that waits for approval when they are longer than their
+    /// area, which tells the user there is more to read before deciding.
+    /// </summary>
+    public string ScrollForMore { get; set; }
 
     /// <summary>Gets or sets the heading of the arguments of a tool call.</summary>
     public string ToolArguments { get; set; }
