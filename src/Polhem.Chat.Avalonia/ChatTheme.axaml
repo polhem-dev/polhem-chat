@@ -30,8 +30,13 @@
       <ControlTheme x:Key="{x:Type local:ChatView}" TargetType="local:ChatView">
         <Setter Property="Template">
           <ControlTemplate>
-            <Grid RowDefinitions="*,Auto" Background="{TemplateBinding Background}">
-              <ScrollViewer Name="PART_ScrollViewer" HorizontalScrollBarVisibility="Disabled">
+            <Grid RowDefinitions="Auto,*,Auto" Background="{TemplateBinding Background}">
+              <!-- The application's own content above the conversation (ChatView.HeaderContent); it does not scroll. -->
+              <ContentPresenter Name="PART_Header"
+                                Content="{TemplateBinding HeaderContent}"
+                                ContentTemplate="{TemplateBinding HeaderContentTemplate}"
+                                IsVisible="{TemplateBinding HeaderContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <ScrollViewer Name="PART_ScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="16,12" Spacing="12">
                   <ItemsControl Name="PART_Entries">
                     <ItemsControl.ItemsPanel>
@@ -89,6 +94,7 @@
               </ScrollViewer>
 
               <StackPanel Name="PART_EmptyState"
+                          Grid.Row="1"
                           HorizontalAlignment="Center"
                           VerticalAlignment="Center"
                           Margin="24"
@@ -121,6 +127,7 @@
               </StackPanel>
 
               <Button Name="PART_ScrollToLatest"
+                      Grid.Row="1"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Bottom"
                       Margin="0,0,0,12"
@@ -128,26 +135,38 @@
                       Content="{Binding $parent[local:ChatView].Strings.JumpToLatest}"
                       Command="{Binding $parent[local:ChatView].ScrollToLatestCommand}" />
 
-              <Border Grid.Row="1"
+              <Border Grid.Row="2"
                       Padding="12"
                       BorderThickness="0,1,0,0"
                       BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
-                <Grid ColumnDefinitions="*,Auto">
-                  <local:ChatPromptBox Name="PART_PromptBox"
-                                       MaxHeight="160"
-                                       VerticalContentAlignment="Center"
-                                       Text="{TemplateBinding Prompt, Mode=TwoWay}"
-                                       PlaceholderText="{Binding $parent[local:ChatView].Strings.PromptPlaceholder}" />
-                  <Panel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Bottom">
-                    <Button Name="PART_SendButton"
-                            Content="{Binding $parent[local:ChatView].Strings.Send}"
-                            Command="{Binding $parent[local:ChatView].SubmitCommand}" />
-                    <Button Name="PART_StopButton"
-                            IsVisible="False"
-                            Content="{Binding $parent[local:ChatView].Strings.Stop}"
-                            Command="{Binding $parent[local:ChatView].StopCommand}" />
-                  </Panel>
-                </Grid>
+                <StackPanel Spacing="8">
+                  <!-- The application's own content above and below the prompt box (ChatView.PromptHeaderContent and
+                       PromptFooterContent). -->
+                  <ContentPresenter Name="PART_PromptHeader"
+                                    Content="{TemplateBinding PromptHeaderContent}"
+                                    ContentTemplate="{TemplateBinding PromptHeaderContentTemplate}"
+                                    IsVisible="{TemplateBinding PromptHeaderContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                  <Grid ColumnDefinitions="*,Auto">
+                    <local:ChatPromptBox Name="PART_PromptBox"
+                                         MaxHeight="160"
+                                         VerticalContentAlignment="Center"
+                                         Text="{TemplateBinding Prompt, Mode=TwoWay}"
+                                         PlaceholderText="{Binding $parent[local:ChatView].Strings.PromptPlaceholder}" />
+                    <Panel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Bottom">
+                      <Button Name="PART_SendButton"
+                              Content="{Binding $parent[local:ChatView].Strings.Send}"
+                              Command="{Binding $parent[local:ChatView].SubmitCommand}" />
+                      <Button Name="PART_StopButton"
+                              IsVisible="False"
+                              Content="{Binding $parent[local:ChatView].Strings.Stop}"
+                              Command="{Binding $parent[local:ChatView].StopCommand}" />
+                    </Panel>
+                  </Grid>
+                  <ContentPresenter Name="PART_PromptFooter"
+                                    Content="{TemplateBinding PromptFooterContent}"
+                                    ContentTemplate="{TemplateBinding PromptFooterContentTemplate}"
+                                    IsVisible="{TemplateBinding PromptFooterContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </StackPanel>
               </Border>
             </Grid>
           </ControlTemplate>
