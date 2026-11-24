@@ -7,6 +7,8 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-24
+
 ### 修正
 
 - `ChatView` 在沒有任何項目顯示進度時，會顯示回覆正在進行中：送出提示後、第一段推理或文字到達之前，以及工具結果之後、
@@ -29,5 +31,6 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
   使用者往上捲之後改顯示「回到最新」。`ChatViewStrings` 內建英文與繁體中文，應用程式可替換；`ChatTheme` 在 Fluent 與
   Semi 的淺色、深色下都能使用。
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0

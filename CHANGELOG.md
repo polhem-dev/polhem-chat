@@ -7,6 +7,8 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-24
+
 ### Fixed
 
 - `ChatView` now shows that a reply is on its way while no entry does: after a prompt is submitted and before the first
@@ -34,5 +36,6 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
   English and Traditional Chinese texts that applications can replace, and `ChatTheme` works on Fluent and Semi, light
   and dark.
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0
