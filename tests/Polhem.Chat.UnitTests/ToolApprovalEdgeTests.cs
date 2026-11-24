@@ -217,6 +217,20 @@ public class ToolApprovalEdgeTests
         Assert.Contains(conversation.History[^2].Contents, c => c is FunctionCallContent);
     }
 
+    [Fact(DisplayName = "Two waiters at once get the same decisions")]
+    public async Task TwoWaiters_GetTheSameDecisions()
+    {
+        var turn = new ChatConversation().BeginTurn();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [new ToolApprovalRequestContent("ficc_c1", Call("c1", "notes.txt"))]));
+        var first = turn.WaitForApprovalsAsync();
+        var second = turn.WaitForApprovalsAsync();
+
+        turn.Approve(turn.PendingApprovals[0]);
+
+        Assert.Same(await first, await second);
+        Assert.Single((await first).Contents);
+    }
+
     [Fact(DisplayName = "A wait that was canceled leaves the decisions for the next wait")]
     public async Task CanceledWait_KeepsTheDecisions()
     {

@@ -30,6 +30,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
     private readonly List<ChatMessage> _toSend = [];
     private readonly List<AIContent> _dropped = [];
     private TaskCompletionSource? _decided;
+    private ChatMessage? _taken;
 
     internal ChatTurn(ChatConversation conversation)
     {
@@ -160,7 +161,8 @@ public sealed class ChatTurn : INotifyPropertyChanged
     /// </summary>
     /// <param name="cancellationToken">Stops waiting. The calls stay undecided until the turn ends, and ending it rejects
     /// them.</param>
-    /// <returns>The message with the decisions.</returns>
+    /// <returns>The message with the decisions. When the turn ended while this waited, it holds what was decided before
+    /// the end; a loop of the application's own checks <see cref="IsEnded"/> before it sends anything.</returns>
     /// <exception cref="InvalidOperationException">The turn has ended, or no call waits for approval and no decision
     /// is left to return.</exception>
     /// <exception cref="OperationCanceledException">The token was canceled.</exception>
@@ -181,8 +183,10 @@ public sealed class ChatTurn : INotifyPropertyChanged
     // leaves them for the next one, which HasDecisionsToSend announces.
     private async Task<ChatMessage> TakeDecisionsAsync(Task decided, CancellationToken cancellationToken)
     {
-        await decided.WaitAsync(cancellationToken).ConfigureAwait(false);
-        return TakeDecisions();
+        // The turn is used from one thread, so the waiter continues on the caller's context.
+        await decided.WaitAsync(cancellationToken);
+        // Two waiters at once get the same decisions.
+        return _toSend.Count > 0 ? TakeDecisions() : _taken!;
     }
 
     /// <summary>The messages of the turn so far that a request continuing it sends after the history.</summary>
@@ -318,6 +322,7 @@ public sealed class ChatTurn : INotifyPropertyChanged
             ? _toSend[0]
             : new ChatMessage(ChatRole.User, [.. _toSend.SelectMany(decisions => decisions.Contents)]);
         _toSend.Clear();
+        _taken = message;
         return message;
     }
 
@@ -329,9 +334,9 @@ public sealed class ChatTurn : INotifyPropertyChanged
         }
         // The history gets copies, so that the record End adds does not show up in the response the caller receives.
         // The combined response reports usage in ChatResponse.Usage; the history keeps the turn's own record instead.
-        // A message that held nothing but a dropped request is left out: a provider rejects an empty message.
+        // A message that held nothing but a dropped request, and usage at most, is left out: a provider rejects an empty message.
         _messages.AddRange(_updates.ToChatResponse().Messages
-            .Where(message => message.Contents.Count == 0 || message.Contents.Any(content => !IsDropped(content)))
+            .Where(message => _dropped.Count == 0 || message.Contents.Any(content => content is not UsageContent && !IsDropped(content)))
             .Select(CopyForHistory));
         _updates.Clear();
     }
