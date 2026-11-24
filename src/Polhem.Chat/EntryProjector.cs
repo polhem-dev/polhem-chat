@@ -8,7 +8,7 @@ namespace Polhem.Chat;
 /// </summary>
 internal sealed class EntryProjector(ChatConversation conversation)
 {
-    private readonly Dictionary<string, ToolCallEntry> _toolCalls = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ToolCallEntry> _toolCalls = [];
     private ChatEntry? _open;
 
     public IEnumerable<ToolCallEntry> ToolCalls => _toolCalls.Values;
