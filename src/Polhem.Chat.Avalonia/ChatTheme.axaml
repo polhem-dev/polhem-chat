@@ -65,13 +65,25 @@
                                   Classes="polhemChatActivityToggle"
                                   VerticalAlignment="Center"
                                   Padding="4,0"
-                                  Background="Transparent"
-                                  BorderThickness="0"
                                   Opacity="0.6"
                                   IsVisible="False"
                                   IsChecked="{Binding $parent[local:ChatView].ShowsActivity, Mode=TwoWay}"
                                   Content="›"
-                                  RenderTransformOrigin="50%,50%" />
+                                  Cursor="Hand"
+                                  RenderTransformOrigin="50%,50%">
+                      <!-- A glyph, not a button: no fill from the base theme when checked or hovered. -->
+                      <ToggleButton.Theme>
+                        <ControlTheme TargetType="ToggleButton">
+                          <Setter Property="Template">
+                            <ControlTemplate>
+                              <ContentPresenter Background="Transparent"
+                                                Padding="{TemplateBinding Padding}"
+                                                Content="{TemplateBinding Content}" />
+                            </ControlTemplate>
+                          </Setter>
+                        </ControlTheme>
+                      </ToggleButton.Theme>
+                    </ToggleButton>
                   </StackPanel>
                 </StackPanel>
               </ScrollViewer>
@@ -153,7 +165,9 @@
         <Style Selector="^:generating /template/ ToggleButton#PART_ActivityToggle">
           <Setter Property="IsVisible" Value="True" />
         </Style>
+        <!-- Open, the toggle stays after the turn, so the details can be closed again. -->
         <Style Selector="^ /template/ ToggleButton#PART_ActivityToggle:checked">
+          <Setter Property="IsVisible" Value="True" />
           <Setter Property="RenderTransform" Value="rotate(90deg)" />
         </Style>
         <Style Selector="^:waiting /template/ TextBlock#PART_Waiting">

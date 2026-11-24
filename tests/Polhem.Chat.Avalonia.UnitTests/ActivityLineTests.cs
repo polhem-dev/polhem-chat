@@ -97,6 +97,18 @@ public class ActivityLineTests(HeadlessSession session)
         Settle(window);
         Assert.False(IsShown(spinner));
         Assert.False(view.ActivityIconPlayer.IsPlaying);
+        // Open, the toggle stays, so the details can be closed again.
+        Assert.True(IsShown(toggle));
+        toggle.IsChecked = false;
+        Settle(window);
+        Assert.False(IsShown(toggle));
+        Assert.False(view.ShowsActivity);
+        // Open, the toggle stays, so the details can be closed again.
+        Assert.True(IsShown(toggle));
+        toggle.IsChecked = false;
+        Settle(window);
+        Assert.False(IsShown(toggle));
+        Assert.False(view.ShowsActivity);
     });
 
     [Fact(DisplayName = "The progress line adds the output tokens the turn has reported so far")]

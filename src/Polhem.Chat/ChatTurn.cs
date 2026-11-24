@@ -46,12 +46,14 @@ public sealed class ChatTurn : INotifyPropertyChanged
 
     /// <summary>
     /// Counts a request to the model. Call it before each request the turn sends, the first one included; the turn
-    /// summary shows the count.
+    /// summary shows the count. The reply or reasoning that arrived before ends, so the next request's text starts an
+    /// entry of its own.
     /// </summary>
     /// <exception cref="InvalidOperationException">The turn has ended.</exception>
     public void BeginCall()
     {
         ThrowIfEnded();
+        _conversation.Projector.Break();
         _calls++;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Calls)));
     }
