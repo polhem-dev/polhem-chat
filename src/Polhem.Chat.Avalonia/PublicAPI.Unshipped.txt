@@ -1,16 +1,1 @@
 #nullable enable
-Polhem.Chat.Avalonia.ChatView.ShowsActivity.get -> bool
-Polhem.Chat.Avalonia.ChatView.ShowsActivity.set -> void
-Polhem.Chat.Avalonia.ChatViewStrings.OutputTokensFormat.get -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.OutputTokensFormat.set -> void
-static readonly Polhem.Chat.Avalonia.ChatView.ShowsActivityProperty -> Avalonia.StyledProperty<bool>!
-virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed, long outputTokens) -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.CallFormat.get -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.CallFormat.set -> void
-Polhem.Chat.Avalonia.ChatViewStrings.MinutesFormat.get -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.MinutesFormat.set -> void
-Polhem.Chat.Avalonia.ChatViewStrings.SecondsFormat.get -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.SecondsFormat.set -> void
-Polhem.Chat.Avalonia.ChatView.ActivityIcon.get -> System.Uri?
-Polhem.Chat.Avalonia.ChatView.ActivityIcon.set -> void
-static readonly Polhem.Chat.Avalonia.ChatView.ActivityIconProperty -> Avalonia.StyledProperty<System.Uri?>!
