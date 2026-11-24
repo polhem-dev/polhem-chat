@@ -11,6 +11,8 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 Details and migration steps: [docs/en/changelogs/0.2.0.md](docs/en/changelogs/0.2.0.md)
 
+- **Security:** A tool wrapped in `ApprovalRequiredAIFunction` runs only after the user approves it on its card, which shows the arguments in full with hidden characters escaped; stopping or ending the turn rejects it.
+- **Changed:** `ToolCallStatus` has two new values, `AwaitingApproval` and `Rejected`.
 - `ChatTurn.AddEntry` adds an entry of the application's own while a turn is in progress, before the turn's summary.
 
 ## [0.1.2] - 2026-11-25
