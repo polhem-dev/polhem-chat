@@ -13,6 +13,11 @@
     <PackageReference Include="Polhem.Markdown.Avalonia" Version="0.1.0" />
   </ItemGroup>
 
+  <!-- The default animation of the activity line (ChatView.ActivityIcon). -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
   <!-- The tests reach the view's submit and copy operations, to await them instead of a fire-and-forget command. -->
   <ItemGroup>
     <InternalsVisibleTo Include="Polhem.Chat.Avalonia.UnitTests" />

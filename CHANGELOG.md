@@ -11,19 +11,23 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
 
 ### Added
 
+- While a turn runs, one line under the conversation shows that the model is at work: an animated icon, what it is
+  doing (*Thinking…*, or the title of the tool it runs), the running time ("2m 32s"), the request it is on and the
+  output tokens reported so far. `ChatView.ActivityIcon` takes another animated GIF; the package decodes GIFs itself,
+  with no further dependency. `ChatViewStrings` has the new `CallFormat`, `SecondsFormat`, `MinutesFormat` and
+  `OutputTokensFormat` texts.
 - Each turn's summary names the requests the turn sent when there were several, and the cached part of the input
-  tokens when the provider reported one (`UsageDetails.CachedInputTokenCount`). While a turn runs, a line under the
-  entries shows the request it is on and its seconds. `ChatRunner` counts the requests itself; an application that
-  runs its own loop calls the new `ChatTurn.BeginCall` before each one. New: `ChatTurn.BeginCall`, `ChatTurn.Calls`,
-  `ChatTurn.Elapsed`, `TurnSummaryEntry.Calls`, change notification of `ChatConversation.CurrentTurn` and
-  `ChatTurn.Calls`, and the `CallsFormat`, `CachedTokensFormat` and `ProgressFormat` texts of `ChatViewStrings`.
+  tokens when the provider reported one (`UsageDetails.CachedInputTokenCount`), with the `CallsFormat` and
+  `CachedTokensFormat` texts.
+- `ChatRunner` counts the requests of a turn itself. An application that runs its own loop calls the new
+  `ChatTurn.BeginCall` before each one. Also new: `ChatTurn.Calls`, `ChatTurn.Elapsed`, `TurnSummaryEntry.Calls`
+  (kept in the saved history), and change notification of `ChatConversation.CurrentTurn` and `ChatTurn.Calls`.
 
-### Fixed
+### Changed
 
-- `ChatView` now shows that a reply is on its way while no entry does: after a prompt is submitted and before the first
-  reasoning or text arrives, and between a tool's result and the next response. It follows `IsGenerating`, so it works
-  with a `ChatRunner` and for an application that runs its own loop. The theme shows it in `PART_Waiting` under the
-  `:waiting` pseudo-class.
+- The model's reasoning and its tool calls no longer show as entries: the conversation shows what is written for the
+  user, and the activity line tells what the model is doing. The entries stay in the conversation and its history.
+  `ChatView.ShowsActivity`, or the › at the end of the activity line, shows them again.
 
 ## [0.1.0] - 2026-11-24
 

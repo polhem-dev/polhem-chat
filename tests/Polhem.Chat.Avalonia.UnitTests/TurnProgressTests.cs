@@ -21,11 +21,11 @@ public class TurnProgressTests(HeadlessSession session)
         var turn = conversation.BeginTurn();
         turn.BeginCall();
         Settle(window);
-        Assert.StartsWith("Call 1 · ", view.ProgressText, StringComparison.Ordinal);
+        Assert.Contains(" · call 1", view.ProgressText, StringComparison.Ordinal);
 
         turn.BeginCall();
         Settle(window);
-        Assert.StartsWith("Call 2 · ", view.ProgressText, StringComparison.Ordinal);
+        Assert.Contains(" · call 2", view.ProgressText, StringComparison.Ordinal);
 
         turn.Complete();
         view.IsGenerating = false;
@@ -44,7 +44,7 @@ public class TurnProgressTests(HeadlessSession session)
         conversation.BeginTurn();
         Settle(window);
 
-        Assert.Equal(view.Strings.FormatProgress(0, TimeSpan.Zero), view.ProgressText);
+        Assert.Equal(view.Strings.FormatProgress(0, TimeSpan.Zero, 0), view.ProgressText);
     });
 
     [Fact(DisplayName = "With a runner, the progress line shows the first request while the reply streams")]
@@ -58,7 +58,7 @@ public class TurnProgressTests(HeadlessSession session)
         var sending = view.SubmitAsync(null);
         await pause.Reached.Task;
         Settle(window);
-        Assert.StartsWith("Call 1 · ", view.ProgressText, StringComparison.Ordinal);
+        Assert.Contains(" · call 1", view.ProgressText, StringComparison.Ordinal);
 
         pause.Release.SetResult();
         await sending;
@@ -88,6 +88,7 @@ public class TurnProgressTests(HeadlessSession session)
 
         Assert.Equal("8 次呼叫", strings.FormatCalls(8));
         Assert.Equal("輸入 1,000（快取 800）· 輸出 20", strings.FormatCachedTokens(1000, 800, 20));
-        Assert.Equal("第 2 次呼叫 · 12 秒", strings.FormatProgress(2, TimeSpan.FromSeconds(12.7)));
+        Assert.Equal("12 秒 · 第 2 次呼叫", strings.FormatProgress(2, TimeSpan.FromSeconds(12.7), 0));
+        Assert.Equal("2 分 32 秒 · 第 6 次呼叫 · ↓ 5,573 tokens", strings.FormatProgress(6, TimeSpan.FromSeconds(152), 5573));
     }
 }

@@ -40,21 +40,38 @@
                       </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                   </ItemsControl>
-                  <!-- While a reply is in progress: Thinking when no entry shows progress of its own (before the first
-                       reasoning or text, and between a tool's result and the next response), then the request the turn is
-                       on and its seconds, which the view keeps current. -->
-                  <StackPanel Orientation="Horizontal" Spacing="8">
+                  <!-- While a reply is in progress: what the model is doing (Thinking, or the running tool's title) when no
+                       entry shows it, then the request the turn is on, its seconds and its output tokens, which the view
+                       keeps current. -->
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <!-- The animated icon (ChatView.ActivityIcon) plays here while a reply is in progress. -->
+                    <Border Name="PART_Spinner"
+                            Width="16"
+                            Height="16"
+                            VerticalAlignment="Center"
+                            IsVisible="False" />
                     <TextBlock Name="PART_Waiting"
                                Classes="polhemChatThinking"
-                               Text="{Binding $parent[local:ChatView].Strings.Thinking}"
-                               Opacity="0.7"
+                               VerticalAlignment="Center"
+                               Opacity="0.75"
                                IsVisible="False" />
                     <TextBlock Name="PART_Progress"
                                Classes="polhemChatProgress"
-                               FontSize="12"
-                               Opacity="0.6"
                                VerticalAlignment="Center"
+                               Opacity="0.6"
                                IsVisible="False" />
+                    <!-- Opens and closes the reasoning and the tool calls, which the conversation leaves out by default. -->
+                    <ToggleButton Name="PART_ActivityToggle"
+                                  Classes="polhemChatActivityToggle"
+                                  VerticalAlignment="Center"
+                                  Padding="4,0"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Opacity="0.6"
+                                  IsVisible="False"
+                                  IsChecked="{Binding $parent[local:ChatView].ShowsActivity, Mode=TwoWay}"
+                                  Content="›"
+                                  RenderTransformOrigin="50%,50%" />
                   </StackPanel>
                 </StackPanel>
               </ScrollViewer>
@@ -129,6 +146,15 @@
         </Style>
         <Style Selector="^:scrolledup /template/ Button#PART_ScrollToLatest">
           <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:generating /template/ Border#PART_Spinner">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^:generating /template/ ToggleButton#PART_ActivityToggle">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^ /template/ ToggleButton#PART_ActivityToggle:checked">
+          <Setter Property="RenderTransform" Value="rotate(90deg)" />
         </Style>
         <Style Selector="^:waiting /template/ TextBlock#PART_Waiting">
           <Setter Property="IsVisible" Value="True" />

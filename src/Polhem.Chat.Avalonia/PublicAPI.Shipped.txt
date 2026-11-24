@@ -48,8 +48,6 @@ Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.set -> void
-Polhem.Chat.Avalonia.ChatViewStrings.ProgressFormat.get -> string!
-Polhem.Chat.Avalonia.ChatViewStrings.ProgressFormat.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.get -> string!
@@ -101,5 +99,4 @@ static readonly Polhem.Chat.Avalonia.ChatView.SuggestionsProperty -> Avalonia.St
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCalls(int calls) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatElapsed(System.TimeSpan elapsed) -> string!
-virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatTokens(long inputTokens, long outputTokens) -> string!

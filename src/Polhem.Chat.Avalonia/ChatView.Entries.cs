@@ -4,13 +4,15 @@ using Avalonia.Controls;
 namespace Polhem.Chat.Avalonia;
 
 /// <summary>
-/// Following the state of the shown entries: whether a reply can be copied yet, and whether the view shows that a reply is
-/// on its way because no entry does (between submitting a prompt and the first reasoning or text, and between a tool's
-/// result and the next response).
+/// Following the state of the shown entries: whether a reply can be copied yet, which entries show, and what the line
+/// under them says the model is doing.
 /// </summary>
 public partial class ChatView
 {
     private const string WaitingPseudoClass = ":waiting";
+    private const string WaitingPart = "PART_Waiting";
+
+    private TextBlock? _waitingText;
 
     // NOTE: Whether an entry can be copied depends on its streaming state, which the entry changes without the view
     // being told. A button asks a command again only when the command says so, so the view watches the entries and tells
@@ -35,7 +37,9 @@ public partial class ChatView
 
     private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(AssistantReplyEntry.IsStreaming) or nameof(ToolCallEntry.Status))
+        // The line follows a running tool's title and a reply's first text as well.
+        if (e.PropertyName is nameof(AssistantReplyEntry.IsStreaming) or nameof(ToolCallEntry.Status) or nameof(ToolCallEntry.Title)
+            || (e.PropertyName == nameof(AssistantReplyEntry.Text) && IsGenerating))
         {
             UpdateWaiting();
         }
@@ -49,16 +53,65 @@ public partial class ChatView
     }
 
     /// <summary>
-    /// Whether the view shows that a reply is on its way: a reply is in progress and the last entry does not show progress
-    /// itself, as a streaming reply or reasoning block and a running tool call do.
+    /// What the line under the entries says the model is doing while a reply is in progress, or <see langword="null"/>
+    /// when an entry already shows it: the title of a running tool, or <see cref="ChatViewStrings.Thinking"/> while the
+    /// model reasons or nothing has arrived yet. A reply that is being written shows itself.
     /// </summary>
-    internal bool IsWaiting => IsGenerating && _shown?.Entries.LastOrDefault() switch
+    internal string? Activity
     {
-        AssistantReplyEntry { IsStreaming: true } => false,
-        ReasoningEntry { IsStreaming: true } => false,
-        ToolCallEntry { Status: ToolCallStatus.Running } => false,
-        _ => true,
-    };
+        get
+        {
+            if (!IsGenerating)
+            {
+                return null;
+            }
+            var last = _shown?.Entries.LastOrDefault();
+            if (ShowsActivity)
+            {
+                // The reasoning and tool call entries show their own progress.
+                return last is AssistantReplyEntry { IsStreaming: true } or ReasoningEntry { IsStreaming: true }
+                    or ToolCallEntry { Status: ToolCallStatus.Running }
+                    ? null
+                    : Strings.Thinking;
+            }
+            return last switch
+            {
+                AssistantReplyEntry { IsStreaming: true, Text.Length: > 0 } => null,
+                ToolCallEntry { Status: ToolCallStatus.Running } call => call.Title + "…",
+                _ => Strings.Thinking,
+            };
+        }
+    }
 
-    private void UpdateWaiting() => PseudoClasses.Set(WaitingPseudoClass, IsWaiting);
+    /// <summary>Gets a value indicating whether the line under the entries says what the model is doing.</summary>
+    internal bool IsWaiting => Activity is not null;
+
+    private void UpdateWaiting()
+    {
+        var activity = Activity;
+        PseudoClasses.Set(WaitingPseudoClass, activity is not null);
+        if (_waitingText is not null)
+        {
+            _waitingText.Text = activity ?? string.Empty;
+        }
+    }
+
+    private static bool IsActivity(object? item) => item is ReasoningEntry or ToolCallEntry;
+
+    // NOTE: Hidden entries stay in the conversation and its history; only their containers are hidden, so they take no
+    // room and no spacing in the list.
+    private void OnContainerPrepared(object? sender, ContainerPreparedEventArgs e) =>
+        e.Container.IsVisible = ShowsActivity || !IsActivity(_entries?.ItemFromContainer(e.Container));
+
+    private void UpdateEntryVisibility()
+    {
+        if (_entries is null)
+        {
+            return;
+        }
+        foreach (var container in _entries.GetRealizedContainers())
+        {
+            container.IsVisible = ShowsActivity || !IsActivity(_entries.ItemFromContainer(container));
+        }
+    }
 }

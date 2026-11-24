@@ -75,7 +75,16 @@
   <data name="CallsFormat" xml:space="preserve">
     <value>{0} 次呼叫</value>
   </data>
-  <data name="ProgressFormat" xml:space="preserve">
-    <value>第 {0} 次呼叫 · {1:0} 秒</value>
+  <data name="OutputTokensFormat" xml:space="preserve">
+    <value>↓ {0:N0} tokens</value>
+  </data>
+  <data name="CallFormat" xml:space="preserve">
+    <value>第 {0} 次呼叫</value>
+  </data>
+  <data name="SecondsFormat" xml:space="preserve">
+    <value>{0} 秒</value>
+  </data>
+  <data name="MinutesFormat" xml:space="preserve">
+    <value>{0} 分 {1} 秒</value>
   </data>
 </root>

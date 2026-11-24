@@ -34,6 +34,13 @@ An application with its own tool loop sets `Conversation` instead of `Runner`, h
 Calling `ChatTurn.BeginCall` before each request to the model lets the progress line and the turn summary show how
 many requests the turn took.
 
+## The activity line
+
+While a reply is in progress, one line under the conversation shows an animated icon, what the model is doing, the
+running time, the request it is on and the output tokens so far. The reasoning and the tool calls do not show as
+entries unless `ShowsActivity` is set, or the user opens them with the › at the end of the line. `ActivityIcon` takes
+an `avares://` URI of another animated GIF.
+
 ## Templates, texts and colors
 
 - Each entry type has a default template. Add a `DataTemplate` to the view's `DataTemplates`, or to any ancestor's, to

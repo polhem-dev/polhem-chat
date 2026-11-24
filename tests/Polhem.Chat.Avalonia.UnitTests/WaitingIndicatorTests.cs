@@ -37,11 +37,11 @@ public class WaitingIndicatorTests(HeadlessSession session)
         Assert.False(IsShown(Waiting(view)));
     });
 
-    [Fact(DisplayName = "Driven by the application, the view shows the wait before reasoning arrives and between a tool's result and the next response")]
+    [Fact(DisplayName = "With the activity entries shown, the view shows the wait before reasoning arrives and between a tool's result and the next response")]
     public Task HostDriven_BetweenEntries_ShowsWaiting() => session.RunAsync(() =>
     {
         var conversation = new ChatConversation();
-        var view = new ChatView { Conversation = conversation };
+        var view = new ChatView { Conversation = conversation, ShowsActivity = true };
         var window = Show(view);
         bool Shown()
         {

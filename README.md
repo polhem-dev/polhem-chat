@@ -11,7 +11,7 @@
 
 An AI chat control for [Avalonia](https://avaloniaui.net/), on top of any
 [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/microsoft-extensions-ai) `IChatClient`: streamed replies
-rendered as Markdown, reasoning, tool calls, per-turn usage, stop and copy. It does not depend on any model provider;
+rendered as Markdown, a live line that shows what the model is doing (reasoning, tool calls, time and tokens), per-turn usage, stop and copy. It does not depend on any model provider;
 bring the `IChatClient` you already use.
 
 | Package | For |

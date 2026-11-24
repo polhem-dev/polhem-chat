@@ -11,17 +11,20 @@ Polhem.Chat 各套件值得注意的變更。格式依循 [Keep a Changelog](htt
 
 ### 新增
 
+- 回合進行中，對話下方有一行顯示模型正在工作：動態圖示、目前在做什麼（「思考中…」或正在執行的工具標題）、經過時間
+  （「2 分 32 秒」）、第幾次要求，以及到目前為止回報的輸出 token。`ChatView.ActivityIcon` 可以換成其他動態 GIF；套件自己
+  解碼 GIF，不多加任何依賴。`ChatViewStrings` 新增 `CallFormat`、`SecondsFormat`、`MinutesFormat`、
+  `OutputTokensFormat` 字串。
 - 每一輪的摘要在發出多次要求時列出要求次數，provider 回報快取時列出輸入 token 中的快取部分
-  （`UsageDetails.CachedInputTokenCount`）。回合進行中，項目下方有一行顯示目前是第幾次要求與經過的秒數。`ChatRunner`
-  自己計算要求次數；自己跑迴圈的應用程式在每次要求前呼叫新的 `ChatTurn.BeginCall`。新增：`ChatTurn.BeginCall`、
-  `ChatTurn.Calls`、`ChatTurn.Elapsed`、`TurnSummaryEntry.Calls`、`ChatConversation.CurrentTurn` 與 `ChatTurn.Calls`
-  的變更通知，以及 `ChatViewStrings` 的 `CallsFormat`、`CachedTokensFormat`、`ProgressFormat` 字串。
+  （`UsageDetails.CachedInputTokenCount`），對應 `CallsFormat`、`CachedTokensFormat` 字串。
+- `ChatRunner` 自己計算每一輪的要求次數；自己跑迴圈的應用程式在每次要求前呼叫新的 `ChatTurn.BeginCall`。另新增
+  `ChatTurn.Calls`、`ChatTurn.Elapsed`、`TurnSummaryEntry.Calls`（保存在歷史中），以及 `ChatConversation.CurrentTurn`
+  與 `ChatTurn.Calls` 的變更通知。
 
-### 修正
+### 變更
 
-- `ChatView` 在沒有任何項目顯示進度時，會顯示回覆正在進行中：送出提示後、第一段推理或文字到達之前，以及工具結果之後、
-  下一次回應到達之前。它跟著 `IsGenerating`，所以 `ChatRunner` 和自己跑迴圈的應用程式都適用。主題在 `:waiting`
-  偽類下以 `PART_Waiting` 顯示。
+- 模型的推理過程與工具呼叫不再以項目顯示：對話只顯示寫給使用者的內容，由進度行說明模型正在做什麼。這些項目仍留在對話與
+  歷史中；設定 `ChatView.ShowsActivity`，或按進度行最後的 ›，可以再顯示它們。
 
 ## [0.1.0] - 2026-11-24
 
