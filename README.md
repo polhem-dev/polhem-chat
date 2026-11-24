@@ -74,6 +74,10 @@ stops the reply. For tool calls, wrap the client with `UseFunctionInvocation()` 
 An application that runs its own loop sets `Conversation` instead and handles `PromptSubmitted` and `StopRequested`.
 The [package README](src/Polhem.Chat.Avalonia/README.md) covers templates, texts and colors.
 
+Replies show no images: a reply is the model's text, and an image address in it could carry data from the conversation
+to the image's server. Set `MarkdownOptions` to allow them. For Chinese or Japanese replies, set `CjkFontFamily` so
+that bold CJK text draws bold.
+
 ## Gallery
 
 `samples/ChatGallery` shows the view both ways: with a runner, and with a conversation the application drives itself,

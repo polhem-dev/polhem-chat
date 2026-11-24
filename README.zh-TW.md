@@ -71,6 +71,9 @@ Chat.Runner = new ChatRunner(client);
 自己跑迴圈的應用程式改設 `Conversation`，並處理 `PromptSubmitted` 與 `StopRequested`。樣板、文字與顏色的自訂方式見
 [套件 README](src/Polhem.Chat.Avalonia/README.md)（英文）。
 
+回覆預設不顯示圖片：回覆是模型寫的內容，其中的圖片網址可能把對話裡的資料帶到圖片的伺服器。要顯示圖片，設定
+`MarkdownOptions`。回覆含中文或日文時，設定 `CjkFontFamily`，粗體的中日文字才會以粗體顯示。
+
 ## 範例程式
 
 `samples/ChatGallery` 示範控件的兩種用法：交給執行器，以及由應用程式自己操作對話，並示範一個應用程式自訂的項目型別。

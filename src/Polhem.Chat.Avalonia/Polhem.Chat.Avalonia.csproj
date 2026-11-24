@@ -10,7 +10,7 @@
   <ItemGroup>
     <!-- The lowest versions the control supports, not the newest: they become the minimum for every consumer. -->
     <PackageReference Include="Avalonia" Version="12.0.0" />
-    <PackageReference Include="Polhem.Markdown.Avalonia" Version="0.1.0" />
+    <PackageReference Include="Polhem.Markdown.Avalonia" Version="0.2.1" />
   </ItemGroup>
 
   <!-- The default animation of the activity line (ChatView.ActivityIcon). -->

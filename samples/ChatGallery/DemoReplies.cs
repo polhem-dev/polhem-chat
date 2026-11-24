@@ -30,6 +30,11 @@ public sealed record DemoReplies(
 
         > Bring a light umbrella for Sunday.
 
+        Budget: $3 \times 12{,}000 = 36{,}000$ yen for the hotel, or per night
+        $$\frac{36{,}000}{3} = 12{,}000$$
+
+        ![Map of the three days](https://example.com/kyoto-map.png)
+
         The same plan as data, if you want to keep it:
 
         ```json
@@ -57,6 +62,11 @@ public sealed record DemoReplies(
         3. **週日**：下雨，改逛博物館，*京都國立博物館*是不錯的選擇。
 
         > 週日記得帶把輕便的傘。
+
+        **住宿預算**：$3 \times 12{,}000 = 36{,}000$ 日圓，每晚
+        $$\frac{36{,}000}{3} = 12{,}000$$
+
+        ![三日行程地圖](https://example.com/kyoto-map.png)
 
         同一份行程的資料格式，方便保存：
 

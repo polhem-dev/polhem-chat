@@ -12,7 +12,10 @@
       <Button Name="ClearButton" Content="Clear" />
     </StackPanel>
 
-    <chat:ChatView Name="Chat" Conversation="{Binding Conversation}" IsGenerating="{Binding IsGenerating}">
+    <chat:ChatView Name="Chat"
+                   CjkFontFamily="PingFang TC, Microsoft JhengHei UI, Noto Sans CJK TC"
+                   Conversation="{Binding Conversation}"
+                   IsGenerating="{Binding IsGenerating}">
       <chat:ChatView.DataTemplates>
         <!-- An entry type of the application's own, shown with its own template. The colors are the chat theme's, so
              the card follows the base theme and the variant like the built-in ones. -->

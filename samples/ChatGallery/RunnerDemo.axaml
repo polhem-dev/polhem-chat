@@ -23,7 +23,7 @@
       </StackPanel>
     </Expander>
 
-    <chat:ChatView Name="Chat" />
+    <chat:ChatView Name="Chat" CjkFontFamily="PingFang TC, Microsoft JhengHei UI, Noto Sans CJK TC" />
   </DockPanel>
 
 </UserControl>
