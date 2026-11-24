@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ChatGallery.GalleryView">
+
+  <DockPanel>
+    <!-- The look of the whole gallery: base theme, light or dark, and the language of the view's own texts. -->
+    <WrapPanel DockPanel.Dock="Top" Margin="12,8" ItemSpacing="16" LineSpacing="8">
+      <ComboBox Name="ThemeBox" SelectedIndex="0" VerticalAlignment="Center" MinWidth="110">
+        <ComboBoxItem Content="Fluent" />
+        <ComboBoxItem Content="Semi" />
+      </ComboBox>
+      <ToggleSwitch Name="DarkSwitch" OnContent="Dark" OffContent="Light" VerticalAlignment="Center" />
+      <ComboBox Name="LanguageBox" VerticalAlignment="Center" MinWidth="110">
+        <ComboBoxItem Content="English" />
+        <ComboBoxItem Content="繁體中文" />
+      </ComboBox>
+    </WrapPanel>
+
+    <TabControl Name="Demos">
+      <TabItem Name="RunnerTab" Header="Runner" />
+      <TabItem Name="HostTab" Header="Host-driven" />
+    </TabControl>
+  </DockPanel>
+
+</UserControl>

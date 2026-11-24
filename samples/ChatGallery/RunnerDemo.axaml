@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:chat="using:Polhem.Chat.Avalonia"
+             x:Class="ChatGallery.RunnerDemo">
+
+  <!-- The short way: the view gets a runner, and sends, streams and stops through it. -->
+  <DockPanel>
+    <Expander DockPanel.Dock="Top" Header="Model" Margin="12,8,12,0" HorizontalAlignment="Stretch">
+      <StackPanel Spacing="8">
+        <ComboBox Name="ProviderBox" SelectedIndex="0" HorizontalAlignment="Stretch">
+          <ComboBoxItem Content="Scripted replies (no key needed)" />
+          <ComboBoxItem Content="OpenAI-compatible endpoint" />
+        </ComboBox>
+        <StackPanel Name="EndpointFields" Spacing="8" IsVisible="False">
+          <TextBox Name="EndpointBox" PlaceholderText="Endpoint" Text="https://api.openai.com/v1" />
+          <TextBox Name="ModelBox" PlaceholderText="Model" Text="gpt-4o-mini" />
+          <TextBox Name="KeyBox" PlaceholderText="API key (empty: the OPENAI_API_KEY environment variable)" PasswordChar="•" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <Button Name="UseButton" Content="Use this model" />
+          <TextBlock Name="ModelStatus" VerticalAlignment="Center" Opacity="0.7" TextWrapping="Wrap" />
+        </StackPanel>
+      </StackPanel>
+    </Expander>
+
+    <chat:ChatView Name="Chat" />
+  </DockPanel>
+
+</UserControl>

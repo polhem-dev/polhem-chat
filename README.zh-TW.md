@@ -40,6 +40,27 @@ chatView.Runner = new ChatRunner(chatClient);
 自己跑迴圈的應用程式改設 `Conversation`，並處理 `PromptSubmitted` 與 `StopRequested`。樣板、文字與顏色的自訂方式見
 [套件 README](src/Polhem.Chat.Avalonia/README.md)（英文）。
 
+## 範例程式
+
+`samples/ChatGallery` 示範控件的兩種用法：交給執行器，以及由應用程式自己操作對話，並示範一個應用程式自訂的項目型別。
+上方的切換可改變基礎主題（Fluent 或 Semi）、淺色或深色，以及控件文字的語言。它用腳本化的回覆回答，不需要金鑰：
+串流顯示推理、工具呼叫與結果、Markdown 和 token 數。要求「錯誤」或「長一點的回覆」可看到這兩種情況。
+在 **Model** 底下可以改接 OpenAI 相容的端點；金鑰由使用者輸入，或讀取環境變數 `OPENAI_API_KEY`，不會儲存。
+
+```bash
+dotnet run --project samples/ChatGallery.Desktop
+```
+
+iOS head 需要 iOS workload，所以不在方案裡。在 Mac 上建置並在模擬器啟動：
+
+```bash
+dotnet build samples/ChatGallery.iOS -c Release -p:RuntimeIdentifier=iossimulator-arm64
+dotnet build samples/ChatGallery.iOS -c Release -t:Run -p:RuntimeIdentifier=iossimulator-arm64 -p:_DeviceName=":v2:udid=<模擬器 UDID>"
+```
+
+如果建置訊息說 iOS workload 需要另一版 Xcode，建置時把 `DEVELOPER_DIR` 指向那一版，並先刪除該 head 的 `bin` 與 `obj`
+資料夾再重新建置。
+
 ## 建置
 
 ```bash
