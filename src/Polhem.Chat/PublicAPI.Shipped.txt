@@ -20,6 +20,7 @@ Polhem.Chat.ChatConversation.DescribeToolCall.set -> void
 Polhem.Chat.ChatConversation.Entries.get -> System.Collections.ObjectModel.ObservableCollection<Polhem.Chat.ChatEntry!>!
 Polhem.Chat.ChatConversation.History.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.ChatMessage!>!
 Polhem.Chat.ChatConversation.LoadHistory(System.Collections.Generic.IEnumerable<Microsoft.Extensions.AI.ChatMessage!>! messages) -> void
+Polhem.Chat.ChatConversation.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 Polhem.Chat.ChatConversation.SaveHistory() -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.ChatMessage!>!
 Polhem.Chat.ChatEntry
 Polhem.Chat.ChatEntry.ChatEntry() -> void
@@ -42,9 +43,13 @@ Polhem.Chat.ChatRunner.SendAsync(string! text, System.Threading.CancellationToke
 Polhem.Chat.ChatRunner.Stop() -> void
 Polhem.Chat.ChatTurn
 Polhem.Chat.ChatTurn.Apply(Microsoft.Extensions.AI.ChatResponseUpdate! update) -> void
+Polhem.Chat.ChatTurn.BeginCall() -> void
+Polhem.Chat.ChatTurn.Calls.get -> int
 Polhem.Chat.ChatTurn.Complete() -> Polhem.Chat.ChatTurnResult!
+Polhem.Chat.ChatTurn.Elapsed.get -> System.TimeSpan
 Polhem.Chat.ChatTurn.Fail(System.Exception! exception) -> Polhem.Chat.ChatTurnResult!
 Polhem.Chat.ChatTurn.IsEnded.get -> bool
+Polhem.Chat.ChatTurn.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 Polhem.Chat.ChatTurn.Stop() -> Polhem.Chat.ChatTurnResult!
 Polhem.Chat.ChatTurn.Usage.get -> Microsoft.Extensions.AI.UsageDetails?
 Polhem.Chat.ChatTurnResult
@@ -94,9 +99,11 @@ Polhem.Chat.TurnOutcome.Completed = 0 -> Polhem.Chat.TurnOutcome
 Polhem.Chat.TurnOutcome.Failed = 2 -> Polhem.Chat.TurnOutcome
 Polhem.Chat.TurnOutcome.Stopped = 1 -> Polhem.Chat.TurnOutcome
 Polhem.Chat.TurnSummaryEntry
+Polhem.Chat.TurnSummaryEntry.Calls.get -> int
 Polhem.Chat.TurnSummaryEntry.Elapsed.get -> System.TimeSpan
 Polhem.Chat.TurnSummaryEntry.Outcome.get -> Polhem.Chat.TurnOutcome
 Polhem.Chat.TurnSummaryEntry.TurnSummaryEntry(System.TimeSpan elapsed, Microsoft.Extensions.AI.UsageDetails? usage, Polhem.Chat.TurnOutcome outcome) -> void
+Polhem.Chat.TurnSummaryEntry.TurnSummaryEntry(System.TimeSpan elapsed, Microsoft.Extensions.AI.UsageDetails? usage, Polhem.Chat.TurnOutcome outcome, int calls) -> void
 Polhem.Chat.TurnSummaryEntry.Usage.get -> Microsoft.Extensions.AI.UsageDetails?
 Polhem.Chat.UserPromptEntry
 Polhem.Chat.UserPromptEntry.Text.get -> string!
