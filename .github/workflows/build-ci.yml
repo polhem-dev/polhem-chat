@@ -1,0 +1,44 @@
+name: Build CI
+
+# No trigger carries `paths` or `paths-ignore`: `build` is a required check, and a required check that never starts
+# leaves a pull request (or a merge group) waiting forever. A documentation-only pull request is recognized inside the
+# job instead, by .github/scripts/detect-docs-only.sh, which ends the job successfully without building.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # A hung test or restore ends the run instead of holding the runner for the default six hours.
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 2
+
+      - name: Detect documentation-only pull request
+        id: changes
+        run: bash .github/scripts/detect-docs-only.sh
+
+      - name: Setup .NET
+        if: steps.changes.outputs.build == 'true'
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7  # v5.2.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        if: steps.changes.outputs.build == 'true'
+        run: dotnet build Polhem.Chat.slnx --configuration Release
+
+      - name: Test
+        if: steps.changes.outputs.build == 'true'
+        run: dotnet test Polhem.Chat.slnx --configuration Release --no-build

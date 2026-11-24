@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>An AI chat control for Avalonia: streamed replies rendered as Markdown, reasoning, tool calls, per-turn usage, stop and copy, on top of any Microsoft.Extensions.AI IChatClient.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The lowest versions the control supports, not the newest: they become the minimum for every consumer. -->
+    <PackageReference Include="Avalonia" Version="12.0.0" />
+    <PackageReference Include="Polhem.Markdown.Avalonia" Version="0.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Polhem.Chat\Polhem.Chat.csproj" />
+  </ItemGroup>
+
+</Project>
