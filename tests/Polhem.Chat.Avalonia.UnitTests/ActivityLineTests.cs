@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Microsoft.Extensions.AI;
 using static Polhem.Chat.Avalonia.UnitTests.ViewHost;
 
@@ -90,7 +92,7 @@ public class ActivityLineTests(HeadlessSession session)
         Assert.Equal(1, view.ActivityIconPlayer.CurrentFrame);
         var toggle = Part<global::Avalonia.Controls.Primitives.ToggleButton>(view, "PART_ActivityToggle");
         Assert.True(IsShown(toggle));
-        toggle.IsChecked = true;
+        Click(window, toggle);
         Assert.True(view.ShowsActivity);
 
         view.IsGenerating = false;
@@ -99,14 +101,7 @@ public class ActivityLineTests(HeadlessSession session)
         Assert.False(view.ActivityIconPlayer.IsPlaying);
         // Open, the toggle stays, so the details can be closed again.
         Assert.True(IsShown(toggle));
-        toggle.IsChecked = false;
-        Settle(window);
-        Assert.False(IsShown(toggle));
-        Assert.False(view.ShowsActivity);
-        // Open, the toggle stays, so the details can be closed again.
-        Assert.True(IsShown(toggle));
-        toggle.IsChecked = false;
-        Settle(window);
+        Click(window, toggle);
         Assert.False(IsShown(toggle));
         Assert.False(view.ShowsActivity);
     });
@@ -127,4 +122,12 @@ public class ActivityLineTests(HeadlessSession session)
 
         Assert.Equal("0s · call 1 · ↓ 1,234 tokens", view.ProgressText);
     });
+
+    private static void Click(global::Avalonia.Controls.TopLevel window, Control control)
+    {
+        var center = control.TranslatePoint(new global::Avalonia.Point(control.Bounds.Width / 2, control.Bounds.Height / 2), window)!.Value;
+        window.MouseDown(center, global::Avalonia.Input.MouseButton.Left);
+        window.MouseUp(center, global::Avalonia.Input.MouseButton.Left);
+        Settle(window);
+    }
 }

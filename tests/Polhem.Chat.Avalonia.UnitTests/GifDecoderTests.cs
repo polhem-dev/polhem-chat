@@ -7,7 +7,7 @@ public class GifDecoderTests(HeadlessSession session)
 {
     private static int Alpha(GifFrame frame, int width, int x, int y) => frame.Pixels[(y * width + x) * 4 + 3];
 
-    [Fact(DisplayName = "The package's activity icon decodes into frames that differ, each with its duration and a transparent background")]
+    [Fact(DisplayName = "The package's spinner decodes into frames that differ, each with its duration and a transparent background")]
     public Task Decode_PackageIcon_HasAnimatedFrames() => session.RunAsync(() =>
     {
         using var stream = AssetLoader.Open(new Uri("avares://Polhem.Chat.Avalonia/Assets/activity.gif"));
@@ -16,12 +16,14 @@ public class GifDecoderTests(HeadlessSession session)
 
         var animation = GifDecoder.Decode(memory.ToArray());
 
-        Assert.Equal(32, animation.Width);
-        Assert.Equal(32, animation.Height);
+        Assert.Equal(64, animation.Width);
+        Assert.Equal(64, animation.Height);
         Assert.Equal(12, animation.Frames.Count);
-        Assert.All(animation.Frames, frame => Assert.Equal(TimeSpan.FromMilliseconds(80), frame.Duration));
-        Assert.Equal(0, Alpha(animation.Frames[0], 32, 31, 0));
-        Assert.Equal(255, Alpha(animation.Frames[0], 32, 6, 6));
+        Assert.All(animation.Frames, frame => Assert.Equal(TimeSpan.FromMilliseconds(70), frame.Duration));
+        // A ring of dots led by the one at the top in the first frame; the corners and the middle stay empty.
+        Assert.Equal(0, Alpha(animation.Frames[0], 64, 0, 0));
+        Assert.Equal(0, Alpha(animation.Frames[0], 64, 32, 32));
+        Assert.Equal(255, Alpha(animation.Frames[0], 64, 32, 10));
         Assert.NotEqual(animation.Frames[0].Pixels, animation.Frames[6].Pixels);
     });
 
