@@ -1,6 +1,7 @@
 #nullable enable
 Polhem.Chat.ChatTurn.AddEntry(Polhem.Chat.ChatEntry! entry) -> void
 Polhem.Chat.ChatTurn.Approve(Polhem.Chat.ToolCallEntry! entry) -> void
+Polhem.Chat.ChatTurn.HasDecisionsToSend.get -> bool
 Polhem.Chat.ChatTurn.IsAwaitingApproval.get -> bool
 Polhem.Chat.ChatTurn.PendingApprovals.get -> System.Collections.Generic.IReadOnlyList<Polhem.Chat.ToolCallEntry!>!
 Polhem.Chat.ChatTurn.Reject(Polhem.Chat.ToolCallEntry! entry, string? reason = null) -> void
@@ -8,6 +9,7 @@ Polhem.Chat.ChatTurn.WaitForApprovalsAsync(System.Threading.CancellationToken ca
 Polhem.Chat.ToolCallEntry.ApprovalRequest.get -> Microsoft.Extensions.AI.ToolApprovalRequestContent?
 Polhem.Chat.ToolCallEntry.RejectionReason.get -> string?
 Polhem.Chat.ToolCallEntry.RejectionReason.set -> void
+Polhem.Chat.ToolCallEntry.TryGetArgument<T>(string! name, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! typeInfo, out T value) -> bool
+Polhem.Chat.ToolCallEntry.TryGetResult<T>(System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! typeInfo, out T value) -> bool
 Polhem.Chat.ToolCallStatus.AwaitingApproval = 4 -> Polhem.Chat.ToolCallStatus
 Polhem.Chat.ToolCallStatus.Rejected = 5 -> Polhem.Chat.ToolCallStatus
-Polhem.Chat.ChatTurn.HasDecisionsToSend.get -> bool

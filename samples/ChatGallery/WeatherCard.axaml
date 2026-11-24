@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:chat="using:Polhem.Chat"
+             xmlns:local="using:ChatGallery"
+             x:Class="ChatGallery.WeatherCard"
+             x:DataType="chat:ToolCallEntry">
+
+  <!-- The card the gallery draws for every call of the weather tool, in place of the default tool call card
+       (ToolCallTemplate, registered on the application in GalleryApp). -->
+  <Border Classes="polhemChatCard"
+          Padding="12,10"
+          CornerRadius="8"
+          BorderThickness="1"
+          Background="{DynamicResource PolhemChatCardBackground}"
+          BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
+    <StackPanel Spacing="4">
+      <TextBlock FontWeight="SemiBold">
+        <TextBlock.Text>
+          <MultiBinding Converter="{x:Static local:WeatherCard.Title}">
+            <Binding />
+            <Binding Path="Arguments" />
+          </MultiBinding>
+        </TextBlock.Text>
+      </TextBlock>
+      <TextBlock Text="Checking the forecast…"
+                 Opacity="0.7"
+                 IsVisible="{Binding Result, Converter={x:Static ObjectConverters.IsNull}}" />
+      <TextBlock TextWrapping="Wrap">
+        <TextBlock.Text>
+          <MultiBinding Converter="{x:Static local:WeatherCard.Forecast}">
+            <Binding />
+            <Binding Path="Result" />
+          </MultiBinding>
+        </TextBlock.Text>
+      </TextBlock>
+    </StackPanel>
+  </Border>
+</UserControl>
