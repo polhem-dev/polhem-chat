@@ -18,6 +18,10 @@ namespace Polhem.Chat.Avalonia;
 /// reply loaded from history makes no connection.
 /// </para>
 /// <para>
+/// Out of the visual tree, as when the view is on a hidden tab, the viewer loads no images either, whatever the view
+/// it left allowed. It follows the view again once it is back.
+/// </para>
+/// <para>
 /// Each viewer holds its own options that load no images, so code that reaches one through
 /// <see cref="MarkdownViewer.Options"/> cannot open images for every view.
 /// </para>
@@ -53,6 +57,10 @@ internal sealed class ReplyMarkdownViewer : MarkdownViewer
             _view.PropertyChanged -= OnViewPropertyChanged;
             _view = null;
         }
+
+        // IMPORTANT: The text keeps arriving while the reply is out of the tree, and the viewer renders it there. Without
+        // a view to follow, the viewer must not keep options that allow images.
+        Options = _noImages;
         base.OnDetachedFromVisualTree(e);
     }
 

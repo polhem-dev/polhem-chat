@@ -90,6 +90,25 @@ public class ReplyMarkdownTests(HeadlessSession session)
         Assert.Empty(Assert.IsType<MarkdownOptions>(viewer.Options).AllowedImageSchemes);
     });
 
+    [Fact(DisplayName = "A reply that keeps streaming while the view is out of the window loads no image")]
+    public Task Images_ViewDetached_MakeNoConnection() => session.RunAsync(async () =>
+    {
+        using var listener = new ConnectionCounter();
+        var conversation = new ChatConversation();
+        var reply = new AssistantReplyEntry("hello") { IsStreaming = true };
+        conversation.Entries.Add(reply);
+        var view = new ChatView { Conversation = conversation, MarkdownOptions = new MarkdownOptions() };
+        var window = Show(view);
+        window.Content = null;
+        Settle(window);
+
+        view.MarkdownOptions = null;
+        reply.Text = Reply(listener);
+        await Task.Delay(s_quietPeriod);
+
+        Assert.Equal(0, listener.Count);
+    });
+
     [Fact(DisplayName = "Each reply has its own options that load no images, so changing one opens no other")]
     public Task Images_DefaultOptions_NotShared() => session.RunAsync(() =>
     {
