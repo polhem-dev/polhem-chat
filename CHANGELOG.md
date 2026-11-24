@@ -15,6 +15,9 @@ Notable changes to the Polhem.Chat packages. The format follows [Keep a Changelo
   reasoning or text arrives, and between a tool's result and the next response. It follows `IsGenerating`, so it works
   with a `ChatRunner` and for an application that runs its own loop. The theme shows it in `PART_Waiting` under the
   `:waiting` pseudo-class.
+- `ChatView` no longer stops following the newest entry when entries arrive while it grows taller, such as when a line
+  under it goes away at the end of a turn. It took the offset the layout moved for the user scrolling up, and showed
+  Jump to latest.
 
 ## [0.1.0] - 2026-11-24
 

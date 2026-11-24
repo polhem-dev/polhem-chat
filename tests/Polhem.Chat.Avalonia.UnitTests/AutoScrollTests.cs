@@ -119,6 +119,35 @@ public class AutoScrollTests(HeadlessSession session)
         Assert.True(IsAtEnd(scrollViewer));
     });
 
+    [Fact(DisplayName = "Entries that arrive while the view grows taller, as when a line under it goes away, keep it following")]
+    public Task Following_EntriesWhileViewGrows_KeepsFollowing() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        for (var index = 0; index < 30; index++)
+        {
+            conversation.Entries.Add(new UserPromptEntry($"Prompt {index}"));
+        }
+        var view = new ChatView { Conversation = conversation };
+        var line = new TextBlock { Text = "Call 2 · 12 s", Height = 40 };
+        var panel = new DockPanel();
+        DockPanel.SetDock(line, Dock.Bottom);
+        panel.Children.Add(line);
+        panel.Children.Add(view);
+        var window = new Window { Width = 500, Height = 400, Content = panel };
+        window.Show();
+        Settle(window);
+        Assert.True(view.FollowsLatest);
+
+        conversation.Entries.Add(new TurnSummaryEntry(TimeSpan.FromSeconds(1), usage: null, TurnOutcome.Completed));
+        conversation.Entries.Add(new ErrorEntry("A note after the turn"));
+        line.IsVisible = false;
+        Settle(window);
+
+        Assert.True(view.FollowsLatest);
+        Assert.True(IsAtEnd(Part<ScrollViewer>(view, "PART_ScrollViewer")));
+        Assert.False(IsShown(Part<Button>(view, "PART_ScrollToLatest")));
+    });
+
     private static (Window Window, ChatView View, ChatConversation Conversation, ScrollViewer ScrollViewer) ShowLongConversation()
     {
         var conversation = new ChatConversation();
