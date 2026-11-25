@@ -1,8 +1,11 @@
 using System.Buffers.Binary;
 
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
-/// <summary>Reads the size of a PNG, GIF, JPEG or WebP picture from its first bytes, without decoding it.</summary>
+/// <summary>
+/// Reads the size of a PNG, GIF, JPEG or WebP picture from its header, without decoding it. For a GIF, the size covers
+/// every frame as well as the logical screen.
+/// </summary>
 internal static class ImageHeader
 {
     /// <summary>Returns the width and height of the picture, or <see langword="null"/> when they cannot be read.</summary>
@@ -12,9 +15,9 @@ internal static class ImageHeader
         {
             return Positive(BinaryPrimitives.ReadInt32BigEndian(data[16..]), BinaryPrimitives.ReadInt32BigEndian(data[20..]));
         }
-        if (data.Length >= 10 && (data.StartsWith("GIF87a"u8) || data.StartsWith("GIF89a"u8)))
+        if (data.Length >= 13 && (data.StartsWith("GIF87a"u8) || data.StartsWith("GIF89a"u8)))
         {
-            return Positive(BinaryPrimitives.ReadUInt16LittleEndian(data[6..]), BinaryPrimitives.ReadUInt16LittleEndian(data[8..]));
+            return ReadGif(data);
         }
         if (data.Length >= 4 && data[0] == 0xFF && data[1] == 0xD8)
         {
@@ -29,6 +32,59 @@ internal static class ImageHeader
 
     private static (int, int)? Positive(long width, long height) =>
         width is > 0 and <= int.MaxValue && height is > 0 and <= int.MaxValue ? ((int)width, (int)height) : null;
+
+    // WARNING: A frame may reach past the logical screen the header declares, and browsers enlarge the picture to fit the
+    // first frame: a GIF of a few dozen bytes that declares 64 x 64 and a 20000 x 20000 frame decodes to over a gigabyte.
+    // So every frame descriptor counts, not only the screen.
+    private static (int, int)? ReadGif(ReadOnlySpan<byte> data)
+    {
+        long width = BinaryPrimitives.ReadUInt16LittleEndian(data[6..]);
+        long height = BinaryPrimitives.ReadUInt16LittleEndian(data[8..]);
+        var position = 13 + ColorTableSize(data[10]);
+        while (position < data.Length)
+        {
+            var block = data[position];
+            if (block == 0x2C && position + 10 <= data.Length)
+            {
+                var frame = data[(position + 1)..];
+                width = Math.Max(width, BinaryPrimitives.ReadUInt16LittleEndian(frame) + (long)BinaryPrimitives.ReadUInt16LittleEndian(frame[4..]));
+                height = Math.Max(height, BinaryPrimitives.ReadUInt16LittleEndian(frame[2..]) + (long)BinaryPrimitives.ReadUInt16LittleEndian(frame[6..]));
+                // The descriptor, its color table and the code size byte come before the frame's data.
+                position += 10 + ColorTableSize(data[position + 9]) + 1;
+            }
+            else if (block == 0x21)
+            {
+                // An extension: its introducer and label, then its data.
+                position += 2;
+            }
+            else
+            {
+                // The trailer, a cut descriptor, or a block that is not GIF: nothing after it is drawn.
+                break;
+            }
+            if (!SkipSubBlocks(data, ref position))
+            {
+                break;
+            }
+        }
+        return Positive(width, height);
+    }
+
+    private static int ColorTableSize(byte packed) => (packed & 0x80) != 0 ? 3 << ((packed & 0x07) + 1) : 0;
+
+    private static bool SkipSubBlocks(ReadOnlySpan<byte> data, ref int position)
+    {
+        while (position < data.Length)
+        {
+            var size = data[position];
+            position += 1 + size;
+            if (size == 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private static (int, int)? ReadJpeg(ReadOnlySpan<byte> data)
     {

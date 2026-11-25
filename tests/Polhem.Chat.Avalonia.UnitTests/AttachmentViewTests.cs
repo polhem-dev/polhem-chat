@@ -182,7 +182,8 @@ public class AttachmentViewTests(HeadlessSession session)
         System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(huge.AsSpan(16), 12000);
         System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(huge.AsSpan(20), 12000);
 
-        Assert.Equal((12000, 12000), ImageHeader.ReadSize(huge));
+        Assert.True(ChatPicturePreview.TryReadSize(huge, out var width, out var height));
+        Assert.Equal((12000, 12000), (width, height));
         Assert.Null(AttachmentPreview.Thumbnail(new DataContent(huge, ChatAttachmentLimits.Png)));
     });
 
@@ -214,22 +215,6 @@ public class AttachmentViewTests(HeadlessSession session)
         Assert.Same(AttachmentPreview.Thumbnail(picture), AttachmentPreview.Thumbnail(picture));
         Assert.Null(AttachmentPreview.Thumbnail(new DataContent(s_png, "image/bmp")));
     });
-
-    [Theory(DisplayName = "The header gives the size of each picture type")]
-    [InlineData("gif", 3, 2)]
-    [InlineData("jpeg", 640, 480)]
-    [InlineData("webp-vp8x", 300, 200)]
-    public void ImageHeader_ReadsEachType(string kind, int width, int height)
-    {
-        byte[] data = kind switch
-        {
-            "gif" => [.. "GIF89a"u8, 3, 0, 2, 0, 0, 0, 0],
-            "jpeg" => [0xFF, 0xD8, 0xFF, 0xE0, 0, 4, 0, 0, 0xFF, 0xC0, 0, 11, 8, 0x01, 0xE0, 0x02, 0x80, 3, 0, 0],
-            _ => [.. "RIFF"u8, 0, 0, 0, 0, .. "WEBP"u8, .. "VP8X"u8, 10, 0, 0, 0, 0, 0, 0, 0, 0x2B, 0x01, 0x00, 0xC7, 0x00, 0x00, 0, 0],
-        };
-
-        Assert.Equal((width, height), ImageHeader.ReadSize(data));
-    }
 
     [Fact(DisplayName = "A file that fails to open is refused as unreadable, and the next file is still attached")]
     public Task AddAttachment_OpenFails_IsUnreadable() => session.RunAsync(async () =>

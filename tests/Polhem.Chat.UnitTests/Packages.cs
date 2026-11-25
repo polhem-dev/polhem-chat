@@ -11,7 +11,7 @@ internal static class Packages
     {
         ["Polhem.Chat"] = ["Microsoft.Extensions.AI.Abstractions"],
         ["Polhem.Chat.Avalonia"] = ["Polhem.Chat", "Microsoft.Extensions.AI.Abstractions", "Avalonia", "Polhem.Markdown"],
-        ["Polhem.Chat.Blazor"] = ["Polhem.Chat", "Microsoft.Extensions.AI.Abstractions", "Microsoft.AspNetCore.Components", "Polhem.Markdown"],
+        ["Polhem.Chat.Blazor"] = ["Polhem.Chat", "Microsoft.Extensions.AI.Abstractions", "Microsoft.AspNetCore.Components", "Microsoft.JSInterop", "Polhem.Markdown"],
     };
 
     public static TheoryData<string> Names => [.. AllowedReferences.Keys];

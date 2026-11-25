@@ -1,0 +1,65 @@
+// The browser side of Polhem.Chat.Blazor's ChatView.
+
+const watched = new WeakMap();
+
+// Copies text to the clipboard. The browser allows it only in a secure context (HTTPS or localhost) and may refuse it;
+// the view then has nothing else to do, so a refusal is reported as false rather than as an error.
+export async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// Marks each approval card whose arguments are taller than their box with data-overflowing, which shows the note that
+// there is more to read. What the user approves is what the tool receives, so they must know when part of it is hidden.
+export function watchOverflow(root) {
+    if (watched.has(root)) {
+        return;
+    }
+    const update = () => {
+        for (const box of root.querySelectorAll('.pch-approval-args')) {
+            const card = box.parentElement;
+            if (box.scrollHeight > box.clientHeight + 1) {
+                card.dataset.overflowing = '';
+            } else {
+                delete card.dataset.overflowing;
+            }
+        }
+    };
+    const resize = new ResizeObserver(update);
+    const observed = new Set();
+    // Only the boxes come and go; a streaming reply changes text, which the observer is not asked about. A box that
+    // appears is observed, and the resize observer then reports it at once.
+    const track = () => {
+        for (const box of observed) {
+            if (!box.isConnected) {
+                resize.unobserve(box);
+                observed.delete(box);
+            }
+        }
+        for (const box of root.querySelectorAll('.pch-approval-args')) {
+            if (!observed.has(box)) {
+                resize.observe(box);
+                observed.add(box);
+            }
+        }
+    };
+    const mutation = new MutationObserver(track);
+    mutation.observe(root, { childList: true, subtree: true });
+    resize.observe(root);
+    watched.set(root, { resize, mutation });
+    track();
+    update();
+}
+
+export function unwatch(root) {
+    const observers = watched.get(root);
+    if (observers) {
+        observers.resize.disconnect();
+        observers.mutation.disconnect();
+        watched.delete(root);
+    }
+}

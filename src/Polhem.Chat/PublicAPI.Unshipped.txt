@@ -46,6 +46,7 @@ Polhem.Chat.ChatComposer.StopRequested -> System.EventHandler?
 Polhem.Chat.ChatComposer.Strings.get -> Polhem.Chat.ChatStrings!
 Polhem.Chat.ChatComposer.Strings.set -> void
 Polhem.Chat.ChatComposer.SubmitAsync(string? text = null) -> System.Threading.Tasks.Task!
+Polhem.Chat.ChatPicturePreview
 Polhem.Chat.ChatStrings
 Polhem.Chat.ChatStrings.Approve.get -> string!
 Polhem.Chat.ChatStrings.Approve.set -> void
@@ -148,6 +149,11 @@ Polhem.Chat.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text) -> v
 Polhem.Chat.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
 Polhem.Chat.PromptSubmittedEventArgs.Text.get -> string!
 Polhem.Chat.VisibleText
+const Polhem.Chat.ChatPicturePreview.MaxAspectRatio = 20 -> int
+const Polhem.Chat.ChatPicturePreview.MaxFileSize = 5242880 -> int
+const Polhem.Chat.ChatPicturePreview.MaxPixels = 16777216 -> long
+static Polhem.Chat.ChatPicturePreview.CanPreview(Microsoft.Extensions.AI.DataContent! attachment) -> bool
+static Polhem.Chat.ChatPicturePreview.TryReadSize(System.ReadOnlySpan<byte> data, out int width, out int height) -> bool
 static Polhem.Chat.ChatStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.ChatStrings!
 static Polhem.Chat.VisibleText.Escape(string? text) -> string!
 static Polhem.Chat.VisibleText.FormatArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
