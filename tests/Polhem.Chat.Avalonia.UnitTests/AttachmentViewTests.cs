@@ -76,7 +76,7 @@ public class AttachmentViewTests(HeadlessSession session)
         Assert.Equal("hugegnp.exe", rejected.FileName);
         var error = Part<TextBlock>(view, "PART_AttachmentError");
         Assert.True(IsShown(error));
-        Assert.Equal("huge\\u{202E}gnp.exe is larger than 10.0 MB.", error.Text);
+        Assert.Equal("huge\\u{202E}gnp.exe is larger than 5.0 MB.", error.Text);
 
         Assert.Null(await view.AddAttachmentAsync("photo.png", null, Open(s_png)));
         Settle(window);
