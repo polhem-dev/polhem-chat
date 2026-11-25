@@ -13,9 +13,28 @@
     --pch-accent: #3b82f6;
     --pch-accent-text: #ffffff;
     --pch-code-font: ui-monospace, Menlo, Consolas, monospace;
+    --pch-jump-background: color-mix(in srgb, Canvas 94%, transparent);
+    --pch-jump-dot: #d97757;
+    position: relative;
+    height: 100%;
     display: flex;
     flex-direction: column;
     min-height: 0;
+}
+
+/* The view fills its container's height and scrolls inside it, so the container needs a height of its own. */
+.pch-scroller {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.pch-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--pch-gap);
+    padding: 12px 16px;
 }
 
 .pch-entries {
@@ -246,4 +265,114 @@
     border-color: var(--pch-accent);
     background: var(--pch-accent);
     color: var(--pch-accent-text);
+}
+
+.pch-activity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 24px;
+}
+
+.pch-waiting {
+    color: var(--pch-muted);
+}
+
+.pch-progress {
+    color: var(--pch-muted);
+    font-size: 13px;
+}
+
+.pch-spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--pch-card-border);
+    border-top-color: var(--pch-jump-dot);
+    animation: pch-spin 0.9s linear infinite;
+}
+
+.pch-activity-toggle {
+    padding: 0 4px;
+    border: none;
+    background: transparent;
+    color: var(--pch-muted);
+    font: inherit;
+    cursor: pointer;
+    transition: transform 120ms;
+}
+
+.pch-activity-toggle[aria-pressed="true"] {
+    transform: rotate(90deg);
+}
+
+.pch-jump {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--pch-card-border);
+    background: var(--pch-jump-background);
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+}
+
+.pch-jump svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.pch-jump-dots {
+    display: inline-flex;
+    gap: 3px;
+}
+
+.pch-jump-dots span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--pch-jump-dot);
+    opacity: 0.35;
+    animation: pch-pulse 1.2s infinite;
+}
+
+.pch-jump-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.pch-jump-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes pch-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* The dots pulse one after the other, like the Avalonia view's. */
+@keyframes pch-pulse {
+    0%, 60%, 100% {
+        opacity: 0.35;
+    }
+
+    30% {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pch-spinner,
+    .pch-jump-dots span {
+        animation: none;
+    }
 }

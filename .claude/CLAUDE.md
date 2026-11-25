@@ -48,6 +48,7 @@ Rules that hold across the repository:
 ```bash
 dotnet build Polhem.Chat.slnx --configuration Release
 dotnet test Polhem.Chat.slnx --configuration Release --no-build
+node --test tests/Polhem.Chat.Blazor.ScriptTests/polhem-chat.test.mjs
 ./check-md-links.sh
 ```
 

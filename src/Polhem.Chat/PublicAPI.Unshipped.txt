@@ -115,6 +115,8 @@ Polhem.Chat.ChatStrings.SecondsFormat.get -> string!
 Polhem.Chat.ChatStrings.SecondsFormat.set -> void
 Polhem.Chat.ChatStrings.Send.get -> string!
 Polhem.Chat.ChatStrings.Send.set -> void
+Polhem.Chat.ChatStrings.ShowActivity.get -> string!
+Polhem.Chat.ChatStrings.ShowActivity.set -> void
 Polhem.Chat.ChatStrings.Stop.get -> string!
 Polhem.Chat.ChatStrings.Stop.set -> void
 Polhem.Chat.ChatStrings.Stopped.get -> string!

@@ -102,6 +102,9 @@
   <data name="ToolRejected" xml:space="preserve">
     <value>Rejected</value>
   </data>
+  <data name="ShowActivity" xml:space="preserve">
+    <value>Show reasoning and tool calls</value>
+  </data>
   <data name="ScrollForMore" xml:space="preserve">
     <value>There is more: scroll to read all of it.</value>
   </data>

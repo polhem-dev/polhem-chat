@@ -70,6 +70,7 @@ public class ChatStrings
         ToolAwaitingApproval = Load(nameof(ToolAwaitingApproval), culture);
         ToolRejected = Load(nameof(ToolRejected), culture);
         ScrollForMore = Load(nameof(ScrollForMore), culture);
+        ShowActivity = Load(nameof(ShowActivity), culture);
     }
 
     /// <summary>Gets or sets the culture that formats numbers and times, and that the texts were loaded for.</summary>
@@ -131,6 +132,11 @@ public class ChatStrings
 
     /// <summary>Gets or sets what the line under the entries says while a tool call waits for the user's approval.</summary>
     public string AwaitingApproval { get; set; }
+
+    /// <summary>
+    /// Gets or sets the accessible name and tooltip of the toggle that shows or hides the model's reasoning and tool calls.
+    /// </summary>
+    public string ShowActivity { get; set; }
 
     /// <summary>
     /// Gets or sets the note under the arguments of a tool call that waits for approval when they are longer than their
