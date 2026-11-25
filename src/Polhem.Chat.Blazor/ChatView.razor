@@ -19,7 +19,7 @@
         _ => static _ => { },
     };
 
-    private RenderFragment RenderPrompt(UserPromptEntry prompt) =>
+    private static RenderFragment RenderPrompt(UserPromptEntry prompt) =>
         @<div class="pch-prompt">
             @if (prompt.Attachments.Count > 0)
             {

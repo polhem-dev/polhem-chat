@@ -23,9 +23,9 @@ export function watchOverflow(root) {
         for (const box of root.querySelectorAll('.pch-approval-args')) {
             const card = box.parentElement;
             if (box.scrollHeight > box.clientHeight + 1) {
-                card.setAttribute('data-overflowing', '');
+                card.dataset.overflowing = '';
             } else {
-                card.removeAttribute('data-overflowing');
+                delete card.dataset.overflowing;
             }
         }
     };

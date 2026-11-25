@@ -95,13 +95,13 @@ public class ChatViewTests : BunitContext
         var conversation = new ChatConversation();
         conversation.AddUserPrompt("Clean up");
         var turn = conversation.BeginTurn();
-        var call = new FunctionCallContent("c1", "delete", new Dictionary<string, object?> { ["path"] = "notes‮txt.exe" });
+        var call = new FunctionCallContent("c1", "delete", new Dictionary<string, object?> { ["path"] = "notes\u202Etxt.exe" });
         turn.Apply(Update(new ToolApprovalRequestContent("r1", call)));
         var view = HostDriven(conversation);
 
         var arguments = view.Find(".pch-approval-args").TextContent;
         Assert.Contains("\\u{202E}", arguments, StringComparison.Ordinal);
-        Assert.DoesNotContain("‮", arguments, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202E", arguments, StringComparison.Ordinal);
 
         view.Find(".pch-approve").Click();
 
@@ -191,6 +191,86 @@ public class ChatViewTests : BunitContext
         first.AddUserPrompt("Ignored");
         Assert.Single(view.FindAll(".pch-prompt"));
     }
+
+    [Fact(DisplayName = "An error and the turn's failure show, and an entry type of the application's own shows nothing")]
+    public void Error_AndOwnEntryType()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var turn = conversation.BeginTurn();
+        turn.Fail(new InvalidOperationException("The model is down."));
+        conversation.Entries.Add(new NoteEntry());
+
+        var view = HostDriven(conversation);
+
+        Assert.Contains("The model is down.", view.Find(".pch-error").TextContent, StringComparison.Ordinal);
+        Assert.Equal(new ChatStrings().TurnFailed, view.Find(".pch-summary").TextContent.Split(" · ")[^1]);
+        Assert.Equal(conversation.Entries.Count - 1, view.FindAll(".pch-entries > *").Count);
+    }
+
+    [Fact(DisplayName = "A reply waiting for its first text says the model is thinking, and a stopped one says it was stopped")]
+    public void Reply_ThinkingAndStopped()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        conversation.Entries.Add(new AssistantReplyEntry(isStreaming: true));
+        var view = HostDriven(conversation);
+        Assert.Equal("Thinking…", view.Find(".pch-thinking").TextContent);
+
+        var stopped = new ChatConversation();
+        stopped.AddUserPrompt("Hi");
+        var turn = stopped.BeginTurn();
+        turn.Apply(Update(new TextContent("Partial")));
+        turn.Stop();
+        var stoppedView = HostDriven(stopped);
+        Assert.Equal(new ChatStrings().Stopped, stoppedView.Find(".pch-stopped").TextContent);
+    }
+
+    [Fact(DisplayName = "A failed call shows its error, and a rejected one the reason, with hidden characters escaped")]
+    public void ToolCall_FailedAndRejected()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Go");
+        var turn = conversation.BeginTurn();
+        turn.Apply(Update(new FunctionCallContent("c1", "fetch")));
+        turn.Apply(new ChatResponseUpdate(ChatRole.Tool, [new FunctionResultContent("c1", null) { Exception = new IOException("Timed out.") }]));
+        turn.Apply(Update(new ToolApprovalRequestContent("r2", new FunctionCallContent("c2", "delete"))));
+        turn.Reject(conversation.Entries.OfType<ToolCallEntry>().Last(), "Not \u202E now");
+
+        var view = HostDriven(conversation, showsActivity: true);
+
+        Assert.Contains("Timed out.", view.Find(".pch-error-text").TextContent, StringComparison.Ordinal);
+        Assert.Equal("Not \\u{202E} now", view.Find(".pch-muted").TextContent);
+    }
+
+    [Fact(DisplayName = "Entries leave the view when the last prompt is rewound or the conversation is cleared")]
+    public void Entries_RewoundAndCleared()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("First");
+        conversation.AddUserPrompt("Second");
+        var view = HostDriven(conversation);
+        Assert.Equal(2, view.FindAll(".pch-prompt").Count);
+
+        conversation.RewindLastPrompt();
+        view.WaitForAssertion(() => Assert.Equal("First", Assert.Single(view.FindAll(".pch-prompt-text")).TextContent));
+
+        conversation.Clear();
+        view.WaitForAssertion(() => Assert.Empty(view.FindAll(".pch-prompt")));
+        conversation.AddUserPrompt("Again");
+        view.WaitForAssertion(() => Assert.Equal("Again", view.Find(".pch-prompt-text").TextContent));
+    }
+
+    [Fact(DisplayName = "A view disposed after its circuit went away does not fail")]
+    public async Task Dispose_AfterDisconnect()
+    {
+        _module.SetupVoid("unwatch", _ => true).SetException(new Microsoft.JSInterop.JSDisconnectedException("The circuit is gone."));
+        HostDriven(new ChatConversation());
+
+        await DisposeComponentsAsync();
+    }
+
+    private sealed class NoteEntry : ChatEntry;
 
     [Fact(DisplayName = "A disposed view leaves no handler on the conversation or its entries")]
     public async Task Dispose_RemovesHandlers()
