@@ -14,6 +14,10 @@
 以 Markdown 呈現的串流回覆、即時顯示模型正在做什麼的一行（推理、工具呼叫、時間與 token）、每輪用量、停止與複製。它不依賴任何模型供應商，沿用你已經在用的
 `IChatClient` 即可。
 
+![ChatGallery 範例中的一輪對話：模型思考、呼叫天氣工具、串流出 Markdown 回覆，並顯示花費的時間與 token](docs/images/chat-demo.gif)
+
+*[ChatGallery](samples/ChatGallery) 範例中的一輪對話；範例的回覆是預先寫好的，不需金鑰就能執行。*
+
 | 套件 | 用途 |
 |------|------|
 | `Polhem.Chat` | 對話模型：把串流更新轉成對話項目，並負責執行每一輪。不含 UI |
