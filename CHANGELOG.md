@@ -11,7 +11,7 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.3.0.md)
 
-- `ChatComposer` in `Polhem.Chat` holds what the user does with a chat view apart from drawing it (the prompt box, files, submitting, stopping, regenerating, editing, approving), for views on any UI framework; `ChatView` uses it and behaves as before.
+- `ChatComposer` in `Polhem.Chat` holds what the user does with a chat view apart from drawing it (the prompt box, files, submitting, stopping, regenerating, editing, approving), for views on any UI framework; `ChatView` uses it, and its tests pass unchanged.
 - **Changed:** `PromptSubmittedEventArgs` and `ChatAttachmentRejectedEventArgs` moved to `Polhem.Chat`.
 - **Changed:** `ChatViewStrings` is now `ChatStrings` in `Polhem.Chat`, shared by the views of every UI framework, with `DescribeTurn` and `DescribeToolStatus`; `VisibleText` is public there.
 

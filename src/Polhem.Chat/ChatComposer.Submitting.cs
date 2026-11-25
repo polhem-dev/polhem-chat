@@ -13,7 +13,10 @@ public sealed partial class ChatComposer
     /// The prompt, which goes without the files waiting in the box; or <see langword="null"/> for the text in the prompt
     /// box, which takes them along.
     /// </param>
-    /// <returns>A task that completes once the prompt is sent and its turn has ended.</returns>
+    /// <returns>
+    /// A task that completes once the turn has ended when there is a <see cref="Runner"/>, and once
+    /// <see cref="PromptSubmitted"/> has been raised otherwise.
+    /// </returns>
     /// <remarks>
     /// When the runner's sending handler cancels a prompt from the box, the prompt goes back into the box, unless the
     /// user has typed something new meanwhile.

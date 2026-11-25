@@ -75,10 +75,15 @@ public sealed partial class ChatComposer
 
     /// <summary>
     /// Sends the last prompt again in place of its turn, through the <see cref="Runner"/>; without one, raises
-    /// <see cref="RegenerateRequested"/>. An edit in progress is canceled first.
+    /// <see cref="RegenerateRequested"/>. An edit in progress is canceled first. Nothing happens when
+    /// <see cref="CanRegenerate"/> is <see langword="false"/>.
     /// </summary>
     public void Regenerate()
     {
+        if (!CanRegenerate())
+        {
+            return;
+        }
         CancelEdit();
         if (_runner is { } runner)
         {

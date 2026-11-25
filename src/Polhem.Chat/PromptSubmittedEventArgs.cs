@@ -3,7 +3,9 @@ using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
 
-/// <summary>Provides data for the <see cref="ChatComposer.PromptSubmitted"/> event.</summary>
+/// <summary>
+/// Provides data for the <see cref="ChatComposer.PromptSubmitted"/> event, which a view raises again as its own.
+/// </summary>
 public sealed class PromptSubmittedEventArgs : CancelEventArgs
 {
     /// <summary>Initializes a new instance of the <see cref="PromptSubmittedEventArgs"/> class.</summary>
@@ -25,8 +27,8 @@ public sealed class PromptSubmittedEventArgs : CancelEventArgs
     }
 
     /// <summary>
-    /// Gets a value indicating whether the prompt replaces the last one, which the user changed with
-    /// <see cref="ChatComposer.EditLastPrompt"/>. Without a <see cref="ChatComposer.Runner"/>, the application calls
+    /// Gets a value indicating whether the prompt replaces the last one, which the user took into the box to change
+    /// (<see cref="ChatComposer.EditLastPrompt"/>, or a view's edit button). Without a <see cref="ChatComposer.Runner"/>, the application calls
     /// <see cref="ChatConversation.RewindLastPrompt"/> before it sends the prompt.
     /// </summary>
     public bool IsEdit { get; init; }

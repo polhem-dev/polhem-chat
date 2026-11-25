@@ -160,7 +160,9 @@ public sealed partial class ChatComposer
 
     private ChatAttachmentProblem Reject(string fileName, ChatAttachmentProblem problem)
     {
-        AttachmentError = Strings.FormatAttachmentProblem(fileName, problem, AttachmentLimits);
+        // NOTE: Notified even when the message is the same as the last one, so a view that hid it shows it again.
+        _attachmentError = Strings.FormatAttachmentProblem(fileName, problem, AttachmentLimits);
+        OnPropertyChanged(nameof(AttachmentError));
         AttachmentRejected?.Invoke(this, new ChatAttachmentRejectedEventArgs(ChatAttachmentLimits.FileNameOf(fileName), problem));
         return problem;
     }

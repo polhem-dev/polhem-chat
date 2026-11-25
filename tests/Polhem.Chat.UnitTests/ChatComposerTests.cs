@@ -138,6 +138,9 @@ public class ChatComposerTests
         hostDriven.RegenerateRequested += (_, _) => requested++;
         Assert.False(hostDriven.CanRegenerate());
 
+        hostDriven.Regenerate();
+        Assert.Equal(0, requested);
+
         hostDriven.AllowsRewind = true;
         Assert.True(hostDriven.CanRegenerate());
         hostDriven.Regenerate();
@@ -159,6 +162,19 @@ public class ChatComposerTests
 
         Assert.Null(await composer.AddAttachmentAsync("photo.png", AttachmentTests.Png.Length, Open(AttachmentTests.Png)));
         Assert.Null(composer.AttachmentError);
+    }
+
+    [Fact(DisplayName = "The same refusal twice in a row says so again, so a view that hid the message shows it")]
+    public async Task Attach_SameRefusalTwice_NotifiesTwice()
+    {
+        var composer = new ChatComposer();
+        var notified = 0;
+        composer.PropertyChanged += (_, e) => notified += e.PropertyName == nameof(ChatComposer.AttachmentError) ? 1 : 0;
+
+        await composer.AddAttachmentAsync("huge.png", 50L * 1024 * 1024, Open(AttachmentTests.Png));
+        await composer.AddAttachmentAsync("huge.png", 50L * 1024 * 1024, Open(AttachmentTests.Png));
+
+        Assert.Equal(2, notified);
     }
 
     [Fact(DisplayName = "A file whose size cannot be read is refused as unreadable without being opened")]

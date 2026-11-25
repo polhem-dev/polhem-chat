@@ -154,6 +154,6 @@ public partial class ChatView
     private void TakeAttachmentError(INameScope scope)
     {
         _attachmentError = scope.Find<TextBlock>(AttachmentErrorPart);
-        ShowAttachmentError(_composer.AttachmentError);
+        ShowAttachmentError(null);
     }
 }

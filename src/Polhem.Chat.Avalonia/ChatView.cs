@@ -370,7 +370,10 @@ public partial class ChatView : TemplatedControl
 
     private void Refresh()
     {
-        SetCurrentValue(IsGeneratingProperty, _composer.IsGenerating);
+        if (_composer.Runner is not null)
+        {
+            SetCurrentValue(IsGeneratingProperty, _composer.IsGenerating);
+        }
         if (_entries is not null)
         {
             _entries.ItemsSource = _shown?.Entries;

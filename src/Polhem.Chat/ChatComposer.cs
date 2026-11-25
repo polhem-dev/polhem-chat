@@ -19,8 +19,8 @@ namespace Polhem.Chat;
 /// </para>
 /// <para>
 /// The composer follows the runner and the conversation only between <see cref="Connect"/> and
-/// <see cref="Disconnect"/>. A view connects it while it is shown, so that a runner which outlives the view does not keep
-/// the view alive through the composer.
+/// <see cref="Disconnect"/>, which removes its handlers from them. A view connects it while it is shown and disconnects it
+/// when it closes, so that a runner which outlives the view holds no handler that leads back to the view.
 /// </para>
 /// </remarks>
 public sealed partial class ChatComposer : INotifyPropertyChanged
