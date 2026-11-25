@@ -80,6 +80,11 @@ public sealed class ChatConversation : INotifyPropertyChanged
     {
         ArgumentNullException.ThrowIfNull(text);
         ArgumentNullException.ThrowIfNull(attachments);
+        // A provider may reject a text block of nothing but white space, and the files say all there is to say.
+        if (attachments.Count > 0 && string.IsNullOrWhiteSpace(text))
+        {
+            text = string.Empty;
+        }
         if (text.Length == 0 && attachments.Count == 0)
         {
             throw new ArgumentException("A prompt needs text or attachments.", nameof(text));

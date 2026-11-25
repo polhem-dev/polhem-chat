@@ -63,7 +63,7 @@ public class AttachmentViewTests(HeadlessSession session)
         ChatAttachmentRejectedEventArgs? rejected = null;
         view.AttachmentRejected += (_, e) => rejected = e;
 
-        var problem = await view.AddAttachmentAsync("huge‮gnp.exe", 50L * 1024 * 1024, () =>
+        var problem = await view.AddAttachmentAsync("huge\u202Egnp.exe", 50L * 1024 * 1024, () =>
         {
             opened = true;
             return Task.FromResult<Stream>(new MemoryStream(s_png));
@@ -171,6 +171,65 @@ public class AttachmentViewTests(HeadlessSession session)
         var entry = EntryView(view, 0);
         Assert.Contains(Descendants<Image>(entry), image => image.Source is not null && IsShown(image));
         Assert.Contains(Descendants<SelectableTextBlock>(entry), block => block.Text == "What is this?");
+    });
+
+    [Fact(DisplayName = "A picture that declares more pixels than the limit gets no preview and is never decoded")]
+    public Task Thumbnail_HugePicture_IsNotDecoded() => session.RunAsync(() =>
+    {
+        // A valid PNG whose header says 12000 × 12000: decoding it would take over half a gigabyte.
+        var huge = (byte[])s_png.Clone();
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(huge.AsSpan(16), 12000);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(huge.AsSpan(20), 12000);
+
+        Assert.Equal((12000, 12000), ImageHeader.ReadSize(huge));
+        Assert.Null(AttachmentPreview.Thumbnail(new DataContent(huge, ChatAttachmentLimits.Png)));
+    });
+
+    [Fact(DisplayName = "The same attachment is decoded once, and a type the package does not check gets no preview")]
+    public Task Thumbnail_IsCached() => session.RunAsync(() =>
+    {
+        var picture = new DataContent(s_png, ChatAttachmentLimits.Png);
+
+        Assert.Same(AttachmentPreview.Thumbnail(picture), AttachmentPreview.Thumbnail(picture));
+        Assert.Null(AttachmentPreview.Thumbnail(new DataContent(s_png, "image/bmp")));
+    });
+
+    [Theory(DisplayName = "The header gives the size of each picture type")]
+    [InlineData("gif", 3, 2)]
+    [InlineData("jpeg", 640, 480)]
+    [InlineData("webp-vp8x", 300, 200)]
+    public void ImageHeader_ReadsEachType(string kind, int width, int height)
+    {
+        byte[] data = kind switch
+        {
+            "gif" => [.. "GIF89a"u8, 3, 0, 2, 0, 0, 0, 0],
+            "jpeg" => [0xFF, 0xD8, 0xFF, 0xE0, 0, 4, 0, 0, 0xFF, 0xC0, 0, 11, 8, 0x01, 0xE0, 0x02, 0x80, 3, 0, 0],
+            _ => [.. "RIFF"u8, 0, 0, 0, 0, .. "WEBP"u8, .. "VP8X"u8, 10, 0, 0, 0, 0, 0, 0, 0, 0x2B, 0x01, 0x00, 0xC7, 0x00, 0x00, 0, 0],
+        };
+
+        Assert.Equal((width, height), ImageHeader.ReadSize(data));
+    }
+
+    [Fact(DisplayName = "A file that fails to open is refused as unreadable, and the next file is still attached")]
+    public Task AddAttachment_OpenFails_IsUnreadable() => session.RunAsync(async () =>
+    {
+        var view = new ChatView { Conversation = new ChatConversation(), AllowsAttachments = true };
+        Show(view);
+
+        var problem = await view.AddAttachmentAsync("gone.png", 100, () => throw new InvalidOperationException("The file went away."));
+
+        Assert.Equal(ChatAttachmentProblem.Unreadable, problem);
+        Assert.Null(await view.AddAttachmentAsync("photo.png", null, Open(s_png)));
+    });
+
+    [Fact(DisplayName = "A limit as large as a long holds still reads files")]
+    public Task AddAttachment_HugeLimit_Reads() => session.RunAsync(async () =>
+    {
+        var view = new ChatView { Conversation = new ChatConversation(), AllowsAttachments = true };
+        view.AttachmentLimits = new ChatAttachmentLimits { MaxFileSize = long.MaxValue, MaxTotalSize = long.MaxValue };
+        Show(view);
+
+        Assert.Null(await view.AddAttachmentAsync("photo.png", null, Open(s_png)));
     });
 
     [Fact(DisplayName = "A picture whose body is broken shows no preview, without throwing")]

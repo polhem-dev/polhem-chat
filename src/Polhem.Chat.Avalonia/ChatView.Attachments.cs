@@ -81,8 +81,16 @@ public partial class ChatView
     public async Task<ChatAttachmentProblem?> AddAttachmentAsync(IStorageFile file)
     {
         ArgumentNullException.ThrowIfNull(file);
-        var properties = await file.GetBasicPropertiesAsync();
-        return await AddAttachmentAsync(file.Name, (long?)properties.Size, file.OpenReadAsync);
+        long? size;
+        try
+        {
+            size = (long?)(await file.GetBasicPropertiesAsync()).Size;
+        }
+        catch (Exception exception) when (IsReadFailure(exception))
+        {
+            return Reject(NameOnly(file.Name), ChatAttachmentProblem.Unreadable);
+        }
+        return await AddAttachmentAsync(file.Name, size, file.OpenReadAsync);
     }
 
     /// <summary>
@@ -121,7 +129,7 @@ public partial class ChatView
             await using var stream = await open();
             content = await ReadUpToAsync(stream, limits.MaxFileSize);
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (IsReadFailure(exception))
         {
             content = null;
         }
@@ -150,10 +158,17 @@ public partial class ChatView
     private static ChatAttachmentLimits CoerceLimits(AvaloniaObject owner, ChatAttachmentLimits? value) =>
         value ?? ((ChatView)owner)._defaultLimits;
 
+    // NOTE: A file can go away, or a platform's storage refuse it, between the moment the user picks or drops it and the
+    // moment it is read; each storage provider reports that its own way. The file is then refused as unreadable instead
+    // of ending the drop or the picking of the files after it.
+    private static bool IsReadFailure(Exception exception) =>
+        exception is IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException or ArgumentException;
+
     private static async Task<byte[]> ReadUpToAsync(Stream stream, long limit)
     {
-        // One byte past the limit is enough to know the file is too large.
-        var cap = (int)Math.Min(limit + 1, int.MaxValue);
+        // One byte past the limit is enough to know the file is too large. The limit may be anything up to
+        // long.MaxValue, and an array cannot be larger than Array.MaxLength.
+        var cap = (int)Math.Min(Math.Max(limit, 0), Array.MaxLength - 1) + 1;
         using var buffer = new MemoryStream();
         var chunk = new byte[81920];
         int read;

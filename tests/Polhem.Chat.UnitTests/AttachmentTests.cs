@@ -77,6 +77,34 @@ public class AttachmentTests
         Assert.Equal(problem, check.Problem);
     }
 
+    [Theory(DisplayName = "A name with an extension the package does not know is rejected, whatever the content")]
+    [InlineData("photo.png.exe")]
+    [InlineData("photo.heic")]
+    public void Check_UnknownExtension_IsRejected(string fileName) =>
+        Assert.Equal(ChatAttachmentProblem.TypeNotAllowed, new ChatAttachmentLimits().Check(fileName, Png, []).Problem);
+
+    [Fact(DisplayName = "Characters that draw nothing are left out of the name the model reads, and a name of nothing is rejected")]
+    public void Check_Name_IsCleaned()
+    {
+        var limits = new ChatAttachmentLimits();
+
+        Assert.Equal("invoicegnp.png", limits.Check("invoice\u202Egnp.png", Png, []).Attachment!.Name);
+        Assert.Equal("a.png", limits.Check("a\u0000.png", Png, []).Attachment!.Name);
+        Assert.Equal(ChatAttachmentProblem.Unreadable, limits.Check("folder/", Png, []).Problem);
+        Assert.Equal(ChatAttachmentProblem.Unreadable, limits.Check("\u200B", Png, []).Problem);
+    }
+
+    [Fact(DisplayName = "Limits as large as a long holds do not overflow")]
+    public void Check_HugeLimits()
+    {
+        var limits = new ChatAttachmentLimits { MaxFileSize = long.MaxValue, MaxTotalSize = long.MaxValue };
+        var first = limits.Check("a.png", Png, []).Attachment!;
+
+        Assert.Null(limits.CheckSize(long.MaxValue - 1000, [first]));
+        Assert.Equal(ChatAttachmentProblem.TotalTooLarge, limits.CheckSize(long.MaxValue, [first]));
+        Assert.True(limits.Check("b.png", Png, [first]).IsAllowed);
+    }
+
     [Fact(DisplayName = "Text types are known but allowed only when added, and must be UTF-8 without NUL")]
     public void Check_TextTypes()
     {
@@ -136,6 +164,11 @@ public class AttachmentTests
         Assert.Equal("", entry.Text);
         Assert.Single(conversation.History[0].Contents);
         Assert.Throws<ArgumentException>(() => conversation.AddUserPrompt("", []));
+
+        // White space alone is no text: a provider may reject a text block of it.
+        var spaced = conversation.AddUserPrompt("   ", [picture]);
+        Assert.Equal("", spaced.Text);
+        Assert.IsType<DataContent>(Assert.Single(conversation.History[^1].Contents));
     }
 
     [Fact(DisplayName = "Attachments come back from a saved history, with their names and types")]

@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using System.Text.Unicode;
 using Microsoft.Extensions.AI;
 
@@ -64,9 +66,11 @@ public class ChatAttachmentLimits
 
     private static readonly HashSet<string> s_textTypes = new(StringComparer.Ordinal) { PlainText, Markdown, Csv, Json };
 
-    /// <summary>
-    /// Gets or sets the largest file, in bytes. The default is 10 MB.
-    /// </summary>
+    /// <summary>Gets or sets the largest file, in bytes. The default is 10 MB.</summary>
+    /// <remarks>
+    /// Providers have limits of their own, often lower for pictures than for documents (Anthropic, for example, takes
+    /// pictures up to 5 MB). A larger file passes here and fails the turn there, so set the limit of the provider in use.
+    /// </remarks>
     public long MaxFileSize { get; set; } = 10L * 1024 * 1024;
 
     /// <summary>Gets or sets how many files one prompt may carry. The default is 5.</summary>
@@ -100,9 +104,9 @@ public class ChatAttachmentLimits
         {
             return ChatAttachmentProblem.TooLarge;
         }
-        return pending.Sum(attachment => (long)attachment.Data.Length) + size > MaxTotalSize
-            ? ChatAttachmentProblem.TotalTooLarge
-            : null;
+        // Compared by subtraction, so a limit near long.MaxValue cannot overflow the sum.
+        var total = pending.Sum(attachment => (long)attachment.Data.Length);
+        return size > MaxTotalSize - total ? ChatAttachmentProblem.TotalTooLarge : null;
     }
 
     /// <summary>
@@ -117,6 +121,10 @@ public class ChatAttachmentLimits
     {
         ArgumentNullException.ThrowIfNull(fileName);
         var name = NameOnly(fileName);
+        if (name.Length == 0)
+        {
+            return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.Unreadable);
+        }
         if (CheckSize(content.Length, pending) is { } problem)
         {
             return ChatAttachmentCheck.Rejected(name, problem);
@@ -126,7 +134,13 @@ public class ChatAttachmentLimits
             return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.Unreadable);
         }
 
-        var named = s_extensions.GetValueOrDefault(Path.GetExtension(name));
+        var extension = Path.GetExtension(name);
+        var named = s_extensions.GetValueOrDefault(extension);
+        // A name with an extension this package does not know says a type it cannot check, such as photo.png.exe.
+        if (named is null && extension.Length > 0)
+        {
+            return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.TypeNotAllowed);
+        }
         var mediaType = Sniff(content);
         if (mediaType is not null)
         {
@@ -157,11 +171,15 @@ public class ChatAttachmentLimits
     }
 
     // NOTE: Both separators, whatever the platform: a name from another system, or one written to look like a path,
-    // must not carry its folders to the model.
+    // must not carry its folders to the model. Characters that draw nothing or reorder the text, which a name could use
+    // to pass for another, are left out of the name the model reads.
     private static string NameOnly(string fileName)
     {
-        var start = fileName.LastIndexOfAny(['/', '\\']) + 1;
-        return fileName[start..];
+        var name = fileName[(fileName.LastIndexOfAny(['/', '\\']) + 1)..];
+        return string.Concat(name.EnumerateRunes()
+            .Where(rune => Rune.GetUnicodeCategory(rune) is not (UnicodeCategory.Control or UnicodeCategory.Format
+                or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator))
+            .Select(rune => rune.ToString())).Trim();
     }
 
     private static string? Sniff(ReadOnlySpan<byte> content)
