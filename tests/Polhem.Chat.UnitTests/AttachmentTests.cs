@@ -90,6 +90,10 @@ public class AttachmentTests
     [InlineData("photo.png.\u0661")]
     [InlineData("photo.exe.\u3000.")]
     [InlineData("photo.heic")]
+    [InlineData("invoice\u2024exe")]
+    [InlineData("invoice\uFF0Eexe")]
+    [InlineData("setup\u3002exe")]
+    [InlineData("invoice\u2024exe.1")]
     public void Check_UnknownExtension_IsRejected(string fileName) =>
         Assert.Equal(ChatAttachmentProblem.TypeNotAllowed, new ChatAttachmentLimits().Check(fileName, Png, []).Problem);
 
@@ -120,6 +124,16 @@ public class AttachmentTests
     [Fact(DisplayName = "A picture whose name ends in white space before a dot is still a picture")]
     public void Check_TrailingSpaceBeforeDot_IsAllowed() =>
         Assert.Equal("photo.png", new ChatAttachmentLimits().Check("photo.png\u2003.", Png, []).Attachment!.Name);
+
+    [Fact(DisplayName = "A very long name of dots and digits is checked quickly")]
+    public void Check_LongName_IsQuick()
+    {
+        var name = string.Concat(Enumerable.Repeat("1.", 400_000)) + "png";
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+
+        Assert.True(new ChatAttachmentLimits().Check(name, Png, []).IsAllowed);
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), watch.Elapsed.ToString());
+    }
 
     [Fact(DisplayName = "Limits as large as a long holds do not overflow")]
     public void Check_HugeLimits()

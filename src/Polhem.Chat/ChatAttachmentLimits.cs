@@ -186,6 +186,9 @@ public class ChatAttachmentLimits
     {
         ArgumentNullException.ThrowIfNull(path);
         var name = path[(path.LastIndexOfAny(['/', '\\']) + 1)..];
+        // NOTE: Compatibility forms become their plain letters, and the characters that look like a dot become one, so
+        // that "invoice\u2024exe" or a name in mathematical letters says what it reads as.
+        name = name.Normalize(NormalizationForm.FormKC).Replace('\u3002', '.').Replace('\uFF61', '.');
         name = string.Concat(name.EnumerateRunes()
             .Where(rune => Rune.GetUnicodeCategory(rune) is not (UnicodeCategory.Control or UnicodeCategory.Format
                 or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator))
@@ -207,15 +210,20 @@ public class ChatAttachmentLimits
     /// </summary>
     private static string TypeExtension(string name)
     {
-        var rest = name;
+        var end = name.Length;
         while (true)
         {
-            var extension = Path.GetExtension(rest);
-            if (extension.Length <= 1 || extension.AsSpan(1).ContainsAnyExcept("0123456789"))
+            var dot = name.LastIndexOf('.', end - 1, end);
+            if (dot < 0 || dot == end - 1)
             {
-                return extension;
+                return string.Empty;
             }
-            rest = rest[..^extension.Length];
+            var extension = name.AsSpan(dot, end - dot);
+            if (extension[1..].ContainsAnyExcept("0123456789") || dot == 0)
+            {
+                return extension.ToString();
+            }
+            end = dot;
         }
     }
 
