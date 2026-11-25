@@ -8,6 +8,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-25
+
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.2.0.md](docs/zh-TW/changelogs/0.2.0.md)
 
 - **安全性：** 以 `ApprovalRequiredAIFunction` 包裝的工具，要使用者在卡片上核准後才會執行；卡片顯示完整參數，隱藏字元一律跳脫顯示。停止或結束該輪則視為拒絕。
@@ -49,7 +51,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - 輸入框按 Enter 送出，輸入法確認組字的 Enter 不會送出。
 - 內建英文與繁體中文字串，主題支援 Fluent 與 Semi 的淺色、深色。
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0
