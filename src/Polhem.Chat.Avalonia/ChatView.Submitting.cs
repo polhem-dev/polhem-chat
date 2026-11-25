@@ -40,22 +40,18 @@ public partial class ChatView
         }
         ScrollToLatest();
 
+        if (editing)
+        {
+            EndEdit();
+        }
         if (_activeRunner is not { } runner)
         {
-            if (editing)
-            {
-                EndEdit();
-            }
             return;
         }
 
         var result = editing
             ? await runner.EditLastPromptAsync(text, attachments, CancellationToken.None)
             : await runner.SendAsync(text, attachments, CancellationToken.None);
-        if (editing && result is not null)
-        {
-            EndEdit();
-        }
         // A MessageSending handler of the runner canceled the prompt: give it back to the user instead of losing it.
         if (result is null && fromBox && string.IsNullOrEmpty(Prompt) && _pendingAttachments.Count == 0)
         {
@@ -63,6 +59,10 @@ public partial class ChatView
             foreach (var attachment in attachments)
             {
                 _pendingAttachments.Add(attachment);
+            }
+            if (editing)
+            {
+                ResumeEdit();
             }
         }
     }

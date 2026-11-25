@@ -86,6 +86,52 @@ public class RewindViewTests(HeadlessSession session)
         Assert.Equal(["First", "Second, changed"], runner.Conversation.Entries.OfType<UserPromptEntry>().Select(p => p.Text));
     });
 
+    [Fact(DisplayName = "Sending a suggestion while editing ends the edit, and a later submit sends a new prompt")]
+    public Task Edit_Suggestion_EndsTheEdit() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        view.Prompt = "draft";
+        view.EditLastPromptCommand.Execute(runner.Conversation.Entries.OfType<UserPromptEntry>().Last());
+
+        await view.SubmitAsync("Third");
+        Settle(window);
+
+        Assert.False(view.IsEditingPrompt);
+        Assert.Equal("draft", view.Prompt);
+        await view.SubmitAsync(null);
+        Assert.Equal(["First", "Second", "Third", "draft"], runner.Conversation.Entries.OfType<UserPromptEntry>().Select(p => p.Text));
+    });
+
+    [Fact(DisplayName = "Showing another conversation ends the edit")]
+    public Task Edit_OtherConversation_EndsTheEdit() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        view.EditLastPromptCommand.Execute(runner.Conversation.Entries.OfType<UserPromptEntry>().Last());
+
+        var other = new ChatRunner(new ScriptedChatClient(Text("Other")));
+        await other.SendAsync("Elsewhere");
+        view.Runner = other;
+        Settle(window);
+
+        Assert.False(view.IsEditingPrompt);
+    });
+
+    [Fact(DisplayName = "An edit the runner's sending handler cancels goes back in the box, still editing")]
+    public Task Edit_Canceled_StaysEditing() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        runner.MessageSending += (_, e) => e.Cancel = e.ReplacesLastPrompt;
+        view.EditLastPromptCommand.Execute(runner.Conversation.Entries.OfType<UserPromptEntry>().Last());
+        view.Prompt = "Second, changed";
+
+        await view.SubmitAsync(null);
+        Settle(window);
+
+        Assert.True(view.IsEditingPrompt);
+        Assert.Equal("Second, changed", view.Prompt);
+        Assert.Equal(["First", "Second"], runner.Conversation.Entries.OfType<UserPromptEntry>().Select(p => p.Text));
+    });
+
     [Fact(DisplayName = "Without a runner nothing is offered until the application allows it, and then the view asks the application")]
     public Task HostDriven_AsksTheApplication() => session.RunAsync(() =>
     {

@@ -187,7 +187,7 @@ public sealed class ChatRunner : INotifyPropertyChanged
     private async Task<ChatTurnResult?> SendCoreAsync(
         string text, IReadOnlyList<DataContent> attachments, bool replacesLastPrompt, CancellationToken cancellationToken)
     {
-        var sending = new MessageSendingEventArgs(text);
+        var sending = new MessageSendingEventArgs(text) { ReplacesLastPrompt = replacesLastPrompt };
         foreach (var attachment in attachments)
         {
             sending.Attachments.Add(attachment);

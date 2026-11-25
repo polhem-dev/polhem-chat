@@ -22,6 +22,7 @@ public partial class ChatView
     private ViewCommand? _editLastPromptCommand;
     private ViewCommand? _cancelEditCommand;
     private (string? Prompt, DataContent[] Attachments)? _beforeEdit;
+    private UserPromptEntry? _editing;
 
     /// <summary>
     /// Occurs when the user asks to send the last prompt again, without a <see cref="Runner"/>. The application calls
@@ -97,6 +98,7 @@ public partial class ChatView
     private void BeginEdit(UserPromptEntry entry)
     {
         _beforeEdit ??= (Prompt, [.. _pendingAttachments]);
+        _editing = entry;
         SetCurrentValue(PromptProperty, entry.Text);
         _pendingAttachments.Clear();
         foreach (var attachment in entry.Attachments)
@@ -114,6 +116,7 @@ public partial class ChatView
             return;
         }
         _beforeEdit = null;
+        _editing = null;
         SetCurrentValue(PromptProperty, before.Prompt);
         _pendingAttachments.Clear();
         foreach (var attachment in before.Attachments)
@@ -123,11 +126,26 @@ public partial class ChatView
         UpdateEditing();
     }
 
-    /// <summary>Ends editing once the changed prompt was sent; the box was emptied by the submission.</summary>
+    /// <summary>Ends editing as the changed prompt is sent; the box was emptied by the submission.</summary>
     private void EndEdit()
     {
         _beforeEdit = null;
+        _editing = null;
         UpdateEditing();
+    }
+
+    /// <summary>
+    /// Edits the last prompt again after the runner's sending handler canceled the changed one, which went back into the
+    /// box; the box held nothing else before.
+    /// </summary>
+    private void ResumeEdit()
+    {
+        if (LastOf<UserPromptEntry>() is { } last)
+        {
+            _beforeEdit = (string.Empty, []);
+            _editing = last;
+            UpdateEditing();
+        }
     }
 
     private void UpdateEditing()
@@ -138,8 +156,9 @@ public partial class ChatView
 
     private void UpdateRewind()
     {
-        // A prompt that is no longer the last one, or a turn that started, ends the editing.
-        if (IsEditingPrompt && !CanRewind && !IsGenerating)
+        // The edit belongs to the prompt it took: once that is no longer the last prompt of the conversation shown (a
+        // suggestion was sent, the conversation was replaced or cleared), it ends.
+        if (IsEditingPrompt && !IsGenerating && (!CanRewind || !ReferenceEquals(_editing, LastOf<UserPromptEntry>())))
         {
             CancelEdit();
         }

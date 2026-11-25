@@ -82,6 +82,53 @@ public class RewindTests
         Assert.Single(next.PendingApprovals);
     }
 
+    [Fact(DisplayName = "A prompt entry the application added itself is not the prompt rewound, and the two lists stay in step")]
+    public async Task Rewind_ApplicationPromptEntry_IsNotAPrompt()
+    {
+        var (runner, _) = await TwoTurns();
+        var conversation = runner.Conversation;
+        conversation.Entries.Add(new UserPromptEntry("added by the application"));
+
+        var removed = conversation.RewindLastPrompt();
+
+        Assert.Equal("Second", removed!.Text);
+        Assert.Equal(["First"], conversation.Entries.OfType<UserPromptEntry>().Select(p => p.Text));
+        Assert.Equal("Answer", conversation.History[^1].Text);
+    }
+
+    [Fact(DisplayName = "An empty prompt added with AddUserPrompt is still the prompt rewound")]
+    public void Rewind_EmptyPrompt()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("A");
+        conversation.BeginTurn().Complete();
+        conversation.AddUserPrompt("");
+
+        Assert.Equal("", conversation.RewindLastPrompt()!.Text);
+        Assert.Equal(["A"], conversation.Entries.OfType<UserPromptEntry>().Select(p => p.Text));
+        Assert.Equal(2, conversation.History.Count);
+    }
+
+    [Fact(DisplayName = "A sending handler can tell a prompt that replaces the last one, and does not add to its text twice")]
+    public async Task Regenerate_MarksTheSending()
+    {
+        var client = new ScriptedChatClient(Text("Answer"));
+        var runner = new ChatRunner(client);
+        runner.MessageSending += (_, e) =>
+        {
+            if (!e.ReplacesLastPrompt)
+            {
+                e.Text = "[ctx] " + e.Text;
+            }
+        };
+        await runner.SendAsync("Q");
+
+        await runner.RegenerateAsync(CancellationToken.None);
+
+        Assert.Equal("[ctx] Q", runner.Conversation.Entries.OfType<UserPromptEntry>().Single().Text);
+        Assert.Equal("[ctx] Q", client.Requests[^1][^1].Text);
+    }
+
     [Fact(DisplayName = "Regenerating sends the last prompt again, with its attachments, in place of its turn")]
     public async Task Regenerate_SendsTheSamePrompt()
     {
