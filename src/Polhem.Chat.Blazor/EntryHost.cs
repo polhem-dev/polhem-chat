@@ -18,6 +18,7 @@ internal sealed class EntryHost : IComponent, IDisposable
     private ChatEntry? _watched;
     private RenderFragment<ChatEntry>? _template;
     private int _revision = -1;
+    private bool _canRewind;
     private bool _disposed;
 
     /// <summary>Gets or sets the entry to show.</summary>
@@ -32,6 +33,13 @@ internal sealed class EntryHost : IComponent, IDisposable
     [Parameter]
     public int Revision { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the entry shows the button that sends its prompt again or changes it, which
+    /// the template reads from the view.
+    /// </summary>
+    [Parameter]
+    public bool CanRewind { get; set; }
+
     public void Attach(RenderHandle renderHandle)
     {
         _handle = renderHandle;
@@ -41,7 +49,8 @@ internal sealed class EntryHost : IComponent, IDisposable
     public Task SetParametersAsync(ParameterView parameters)
     {
         parameters.SetParameterProperties(this);
-        var changed = !ReferenceEquals(Entry, _watched) || !ReferenceEquals(Template, _template) || Revision != _revision;
+        var changed = !ReferenceEquals(Entry, _watched) || !ReferenceEquals(Template, _template) || Revision != _revision
+            || CanRewind != _canRewind;
         if (!ReferenceEquals(Entry, _watched))
         {
             if (_watched is not null)
@@ -53,6 +62,7 @@ internal sealed class EntryHost : IComponent, IDisposable
         }
         _template = Template;
         _revision = Revision;
+        _canRewind = CanRewind;
         if (changed)
         {
             Render();

@@ -1,53 +1,135 @@
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 @using Polhem.Markdown.Blazor
 
-<div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes">
-    @* Focusable, so the keyboard scrolls the conversation (WCAG 2.1.1). *@
-    <div class="pch-scroller" tabindex="0" @ref="_scroller">
-        <div class="pch-content">
-            <div class="pch-entries">
-                @_entries
-            </div>
-            @if (_composer.IsGenerating || _showsActivity)
-            {
-                var activity = DescribeActivity();
-                var progress = Progress;
-                @* While a reply is in progress: what the model is doing when no entry shows it, then the request the turn is
-                   on, its seconds and its output tokens, kept current once a second. *@
-                <div class="pch-activity">
-                    @if (_composer.IsGenerating)
-                    {
-                        <span class="pch-spinner" aria-hidden="true"></span>
-                    }
-                    @if (activity is not null)
-                    {
-                        <span class="pch-waiting">@activity</span>
-                    }
-                    @if (progress is not null)
-                    {
-                        <span class="pch-progress">@progress</span>
-                    }
-                    <button type="button" class="pch-activity-toggle" title="@S.ShowActivity" aria-label="@S.ShowActivity"
-                            aria-pressed="@(_showsActivity ? "true" : "false")" @onclick="ToggleActivityAsync">›</button>
+@* The script handles Esc only while there is something for it to stop or end, and leaves it to the page otherwise. *@
+<div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes" data-generating="@(_composer.IsGenerating ? "" : null)"
+     data-editing="@(_composer.IsEditingPrompt ? "" : null)">
+    <div class="pch-main">
+        @* Focusable, so the keyboard scrolls the conversation (WCAG 2.1.1). *@
+        <div class="pch-scroller" tabindex="0" @ref="_scroller">
+            <div class="pch-content">
+                @if (_shown is null || _shown.Entries.Count == 0)
+                {
+                    @* While the conversation is empty: a title, and prompts that send themselves when clicked. *@
+                    <div class="pch-empty">
+                        <div class="pch-empty-title">@S.EmptyTitle</div>
+                        @if (Suggestions is not null)
+                        {
+                            <div class="pch-suggestions">
+                                @foreach (var suggestion in Suggestions)
+                                {
+                                    <button type="button" class="pch-button pch-suggestion" disabled="@_composer.IsGenerating"
+                                            @onclick="() => SubmitSuggestionAsync(suggestion)">@suggestion</button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                <div class="pch-entries">
+                    @_entries
                 </div>
-            }
+                @if (_composer.IsGenerating || _showsActivity)
+                {
+                    var activity = DescribeActivity();
+                    var progress = Progress;
+                    @* While a reply is in progress: what the model is doing when no entry shows it, then the request the
+                       turn is on, its seconds and its output tokens, kept current once a second. *@
+                    <div class="pch-activity">
+                        @if (_composer.IsGenerating)
+                        {
+                            <span class="pch-spinner" aria-hidden="true"></span>
+                        }
+                        @if (activity is not null)
+                        {
+                            <span class="pch-waiting">@activity</span>
+                        }
+                        @if (progress is not null)
+                        {
+                            <span class="pch-progress">@progress</span>
+                        }
+                        <button type="button" class="pch-activity-toggle" title="@S.ShowActivity" aria-label="@S.ShowActivity"
+                                aria-pressed="@(_showsActivity ? "true" : "false")" @onclick="ToggleActivityAsync">›</button>
+                    </div>
+                }
+            </div>
         </div>
+        @if (!_followsLatest)
+        {
+            @* A round button with an arrow down, or three pulsing dots while a reply is in progress, so it shows that new
+               text is arriving below. The text is the tooltip and the accessible name. *@
+            <button type="button" class="pch-jump" title="@S.JumpToLatest" aria-label="@S.JumpToLatest" @onclick="JumpToLatestAsync">
+                @if (_composer.IsGenerating)
+                {
+                    <span class="pch-jump-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                }
+                else
+                {
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v12.17l5.59-5.58L20 12l-8 8-8-8 1.41-1.41L11 16.17V4z" /></svg>
+                }
+            </button>
+        }
     </div>
-    @if (!_followsLatest)
-    {
-        @* A round button with an arrow down, or three pulsing dots while a reply is in progress, so it shows that new text
-           is arriving below. The text is the tooltip and the accessible name. *@
-        <button type="button" class="pch-jump" title="@S.JumpToLatest" aria-label="@S.JumpToLatest" @onclick="JumpToLatestAsync">
-            @if (_composer.IsGenerating)
+    <div class="pch-composer">
+        @if (_composer.IsEditingPrompt)
+        {
+            @* While the box holds the last prompt to change: sending replaces it and everything after it. *@
+            <div class="pch-edit-banner">
+                <span>@S.EditingPrompt</span>
+                <button type="button" class="pch-button pch-cancel-edit" @onclick="_composer.CancelEdit">@S.CancelEdit</button>
+            </div>
+        }
+        @if (_composer.PendingAttachments.Count > 0)
+        {
+            <div class="pch-pending">
+                @foreach (var attachment in _composer.PendingAttachments)
+                {
+                    <span class="pch-pending-file" @key="attachment">
+                        @if (ChatPicturePreview.CanPreview(attachment))
+                        {
+                            <img class="pch-pending-thumbnail" src="@attachment.Uri" alt="" />
+                        }
+                        else
+                        {
+                            <svg class="pch-pending-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5z" /></svg>
+                        }
+                        <span class="pch-pending-text">
+                            <span class="pch-file-name">@VisibleText.Escape(attachment.Name)</span>
+                            <span class="pch-pending-size">@S.FormatFileSize(attachment.Data.Length)</span>
+                        </span>
+                        <button type="button" class="pch-icon-button pch-remove-attachment" title="@S.RemoveAttachment"
+                                aria-label="@($"{S.RemoveAttachment}: {VisibleText.Escape(attachment.Name)}")"
+                                @onclick="() => _composer.RemoveAttachment(attachment)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.4 4 4 5.4 10.6 12 4 18.6 5.4 20l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L20 5.4 18.6 4 12 10.6z" /></svg>
+                        </button>
+                    </span>
+                }
+            </div>
+        }
+        <div class="pch-input-row">
+            @if (AllowsAttachments)
             {
-                <span class="pch-jump-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                @* The file input itself sits in the button, visually hidden but focusable, so the browser opens its picker
+                   from the user's own click or key; a picker opened from the server would lose the user's activation.
+                   Dropped files and pasted pictures reach the same input (polhem-chat.js). *@
+                <label class="pch-icon-button pch-attach" title="@S.Attach">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z" /></svg>
+                    <InputFile class="pch-file-input" multiple accept="@AcceptedTypes" aria-label="@S.Attach" OnChange="OnFilesPickedAsync" />
+                </label>
             }
-            else
-            {
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v12.17l5.59-5.58L20 12l-8 8-8-8 1.41-1.41L11 16.17V4z" /></svg>
-            }
-        </button>
-    }
+            @* Enter sends, Shift+Enter starts a new line, and an Enter that confirms an input method's composition does
+               neither (polhem-chat.js). *@
+            <textarea @ref="_promptBox" class="pch-prompt-box" rows="1" placeholder="@S.PromptPlaceholder"
+                      aria-label="@S.PromptPlaceholder" @bind:get="_composer.Prompt" @bind:set="SetPrompt"
+                      @bind:event="oninput"></textarea>
+            <button type="button" class="@(_composer.IsGenerating ? "pch-button pch-stop" : "pch-button pch-send")"
+                    @onclick="SendOrStopAsync">@(_composer.IsGenerating ? S.Stop : S.Send)</button>
+        </div>
+        @if (_composer.AttachmentError is { } attachmentError)
+        {
+            <div class="pch-attachment-error" role="alert">@attachmentError</div>
+        }
+    </div>
 </div>
 
 @code {
@@ -62,7 +144,7 @@
         _ => static _ => { },
     };
 
-    private static RenderFragment RenderPrompt(UserPromptEntry prompt) =>
+    private RenderFragment RenderPrompt(UserPromptEntry prompt) =>
         @<div class="pch-prompt">
             @if (prompt.Attachments.Count > 0)
             {
@@ -89,6 +171,14 @@
             {
                 <div class="pch-prompt-text">@prompt.Text</div>
             }
+            @* On the last prompt only, while the user may change it. *@
+            @if (_composer.CanEditLastPrompt(prompt))
+            {
+                <button type="button" class="pch-icon-button pch-edit" title="@S.EditPrompt" aria-label="@S.EditPrompt"
+                        @onclick="() => EditLastPromptAsync(prompt)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></svg>
+                </button>
+            }
         </div>;
 
     private RenderFragment RenderReply(AssistantReplyEntry reply) =>
@@ -111,6 +201,14 @@
                     <button type="button" class="pch-icon-button pch-copy" title="@S.Copy" aria-label="@S.Copy"
                             @onclick="() => CopyAsync(reply.Text)">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2h9a2 2 0 0 1 2 2v11h-2V4H8V2zM5 6h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm0 2v12h9V8H5z" /></svg>
+                    </button>
+                }
+                @* On the last reply only, while the user may send its prompt again. *@
+                @if (_composer.CanRegenerate(reply))
+                {
+                    <button type="button" class="pch-icon-button pch-regenerate" title="@S.Regenerate" aria-label="@S.Regenerate"
+                            @onclick="_composer.Regenerate">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" /></svg>
                     </button>
                 }
             </div>
