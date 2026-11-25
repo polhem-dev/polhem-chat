@@ -34,25 +34,38 @@ public partial class ChatView
         }
         if (fromBox)
         {
-            SetCurrentValue(PromptProperty, string.Empty);
-            _pendingAttachments.Clear();
-            ShowAttachmentError(null);
+            EmptyBox();
         }
         ScrollToLatest();
 
         var ended = editing ? EndEdit() : default;
-        if (_activeRunner is not { } runner)
+        if (_activeRunner is { } runner)
         {
-            return;
+            await SendThroughAsync(runner, text, attachments, fromBox, editing ? ended : null);
         }
+    }
 
-        var result = editing
+    private async Task SendThroughAsync(
+        ChatRunner runner,
+        string text,
+        IReadOnlyList<DataContent> attachments,
+        bool fromBox,
+        (UserPromptEntry? Entry, (string? Prompt, DataContent[] Attachments)? Before)? edit)
+    {
+        var result = edit is not null
             ? await runner.EditLastPromptAsync(text, attachments, CancellationToken.None)
             : await runner.SendAsync(text, attachments, CancellationToken.None);
         if (result is null && fromBox)
         {
-            GiveBack(text, attachments, editing ? ended : null);
+            GiveBack(text, attachments, edit);
         }
+    }
+
+    private void EmptyBox()
+    {
+        SetCurrentValue(PromptProperty, string.Empty);
+        _pendingAttachments.Clear();
+        ShowAttachmentError(null);
     }
 
     /// <summary>
