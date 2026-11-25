@@ -56,3 +56,4 @@ const Polhem.Chat.ChatAttachmentLimits.WebP = "image/webp" -> string!
 static Polhem.Chat.ChatAttachmentLimits.FileNameOf(string! path) -> string!
 Polhem.Chat.MessageSendingEventArgs.ReplacesLastPrompt.get -> bool
 Polhem.Chat.MessageSendingEventArgs.ReplacesLastPrompt.init -> void
+Polhem.Chat.ChatConversation.LastPrompt.get -> Polhem.Chat.UserPromptEntry?

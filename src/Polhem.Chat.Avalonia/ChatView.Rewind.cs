@@ -57,13 +57,17 @@ public partial class ChatView
     /// </summary>
     public ICommand EditLastPromptCommand => _editLastPromptCommand ??= new ViewCommand(
         parameter => BeginEdit((UserPromptEntry)parameter!),
-        parameter => CanRewind && parameter is UserPromptEntry entry && ReferenceEquals(entry, LastOf<UserPromptEntry>()));
+        parameter => CanRewind && parameter is UserPromptEntry entry && ReferenceEquals(entry, LastPrompt));
 
     /// <summary>Gets the command that stops changing the last prompt and gives the box back what it held before.</summary>
     public ICommand CancelEditCommand => _cancelEditCommand ??= new ViewCommand(_ => CancelEdit(), _ => IsEditingPrompt);
 
     private bool CanRewind =>
-        (AllowsRewind ?? _activeRunner is not null) && !IsGenerating && LastOf<UserPromptEntry>() is not null;
+        (AllowsRewind ?? _activeRunner is not null) && !IsGenerating && LastPrompt is not null;
+
+    // NOTE: The prompt the conversation would replace, not the last prompt entry shown: an application may add entries
+    // of that type itself, or remove one, and editing must never replace another prompt than the one the user took.
+    private UserPromptEntry? LastPrompt => _shown?.LastPrompt;
 
     private T? LastOf<T>() where T : ChatEntry => _shown?.Entries.OfType<T>().LastOrDefault();
 
@@ -81,7 +85,7 @@ public partial class ChatView
         var entries = _shown!.Entries;
         return parameter is AssistantReplyEntry reply
             && ReferenceEquals(reply, LastOf<AssistantReplyEntry>())
-            && entries.IndexOf(reply) > entries.IndexOf(LastOf<UserPromptEntry>()!);
+            && entries.IndexOf(reply) > entries.IndexOf(LastPrompt!);
     }
 
     private void Regenerate()
@@ -126,24 +130,29 @@ public partial class ChatView
         UpdateEditing();
     }
 
-    /// <summary>Ends editing as the changed prompt is sent; the box was emptied by the submission.</summary>
-    private void EndEdit()
+    /// <summary>
+    /// Ends editing as the changed prompt is sent; the box was emptied by the submission. Returns what the box held
+    /// before the edit, for <see cref="ResumeEdit"/>.
+    /// </summary>
+    private (UserPromptEntry? Entry, (string? Prompt, DataContent[] Attachments)? Before) EndEdit()
     {
+        var ended = (_editing, _beforeEdit);
         _beforeEdit = null;
         _editing = null;
         UpdateEditing();
+        return ended;
     }
 
     /// <summary>
-    /// Edits the last prompt again after the runner's sending handler canceled the changed one, which went back into the
-    /// box; the box held nothing else before.
+    /// Edits the prompt again after the runner's sending handler canceled the changed one, which went back into the box,
+    /// keeping what the box held before the edit for a later cancel.
     /// </summary>
-    private void ResumeEdit()
+    private void ResumeEdit((UserPromptEntry? Entry, (string? Prompt, DataContent[] Attachments)? Before) ended)
     {
-        if (LastOf<UserPromptEntry>() is { } last)
+        if (ended.Entry is { } entry && ReferenceEquals(entry, LastPrompt))
         {
-            _beforeEdit = (string.Empty, []);
-            _editing = last;
+            _beforeEdit = ended.Before;
+            _editing = entry;
             UpdateEditing();
         }
     }
@@ -158,7 +167,7 @@ public partial class ChatView
     {
         // The edit belongs to the prompt it took: once that is no longer the last prompt of the conversation shown (a
         // suggestion was sent, the conversation was replaced or cleared), it ends.
-        if (IsEditingPrompt && !IsGenerating && (!CanRewind || !ReferenceEquals(_editing, LastOf<UserPromptEntry>())))
+        if (IsEditingPrompt && !IsGenerating && (!CanRewind || !ReferenceEquals(_editing, LastPrompt)))
         {
             CancelEdit();
         }

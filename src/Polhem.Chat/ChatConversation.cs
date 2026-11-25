@@ -212,6 +212,15 @@ public sealed class ChatConversation : INotifyPropertyChanged
     /// <summary>Returns the index in the history of the user's last prompt, or -1.</summary>
     internal int LastPromptIndex() => _history.FindLastIndex(_prompts.ContainsKey);
 
+    /// <summary>
+    /// Gets the entry of the prompt <see cref="RewindLastPrompt"/> would remove, or <see langword="null"/> when there is
+    /// none or the application removed its entry. A front end offers to send again or change only this prompt: a
+    /// <see cref="UserPromptEntry"/> the application added to the entries itself is not one.
+    /// </summary>
+    /// <remarks>It is computed when read; changes to the entries or the history raise no notification for it.</remarks>
+    public UserPromptEntry? LastPrompt =>
+        LastPromptIndex() is var index and >= 0 && _prompts[_history[index]] is var entry && Entries.Contains(entry) ? entry : null;
+
     /// <summary>Removes every message and entry.</summary>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
     public void Clear()

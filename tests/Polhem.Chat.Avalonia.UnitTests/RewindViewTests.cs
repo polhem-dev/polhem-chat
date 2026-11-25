@@ -132,6 +132,51 @@ public class RewindViewTests(HeadlessSession session)
         Assert.Equal(["First", "Second"], runner.Conversation.Entries.OfType<UserPromptEntry>().Select(p => p.Text));
     });
 
+    [Fact(DisplayName = "A prompt entry the application added is not offered for editing, and the real last prompt still is")]
+    public Task Edit_ApplicationEntry_IsNotOffered() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        var second = runner.Conversation.Entries.OfType<UserPromptEntry>().Last();
+        var added = new UserPromptEntry("app note");
+        runner.Conversation.Entries.Add(added);
+        Settle(window);
+
+        Assert.False(view.EditLastPromptCommand.CanExecute(added));
+        Assert.True(view.EditLastPromptCommand.CanExecute(second));
+        Assert.Same(second, runner.Conversation.LastPrompt);
+    });
+
+    [Fact(DisplayName = "When the application removed the last prompt's entry, no other prompt is offered for editing")]
+    public Task Edit_RemovedEntry_OffersNothing() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        var prompts = runner.Conversation.Entries.OfType<UserPromptEntry>().ToList();
+        runner.Conversation.Entries.Remove(prompts[1]);
+        Settle(window);
+
+        Assert.Null(runner.Conversation.LastPrompt);
+        Assert.False(view.EditLastPromptCommand.CanExecute(prompts[0]));
+        Assert.False(view.RegenerateCommand.CanExecute(null));
+    });
+
+    [Fact(DisplayName = "After a canceled edit goes back in the box, canceling the edit still gives back the draft from before")]
+    public Task Edit_CanceledThenEsc_RestoresTheDraft() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        runner.MessageSending += (_, e) => e.Cancel = e.ReplacesLastPrompt;
+        view.Prompt = "my draft";
+        view.EditLastPromptCommand.Execute(runner.Conversation.Entries.OfType<UserPromptEntry>().Last());
+        await view.SubmitAsync(null);
+        Settle(window);
+        Assert.True(view.IsEditingPrompt);
+
+        FocusPrompt(view);
+        Press(window, Key.Escape);
+
+        Assert.False(view.IsEditingPrompt);
+        Assert.Equal("my draft", view.Prompt);
+    });
+
     [Fact(DisplayName = "Without a runner nothing is offered until the application allows it, and then the view asks the application")]
     public Task HostDriven_AsksTheApplication() => session.RunAsync(() =>
     {

@@ -40,10 +40,7 @@ public partial class ChatView
         }
         ScrollToLatest();
 
-        if (editing)
-        {
-            EndEdit();
-        }
+        var ended = editing ? EndEdit() : default;
         if (_activeRunner is not { } runner)
         {
             return;
@@ -62,7 +59,7 @@ public partial class ChatView
             }
             if (editing)
             {
-                ResumeEdit();
+                ResumeEdit(ended);
             }
         }
     }
