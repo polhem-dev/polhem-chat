@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Polhem.Chat/Polhem.Chat.csproj" />
     <Project Path="src/Polhem.Chat.Avalonia/Polhem.Chat.Avalonia.csproj" />
+    <Project Path="src/Polhem.Chat.Blazor/Polhem.Chat.Blazor.csproj" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/ChatGallery/ChatGallery.csproj" />
@@ -9,6 +10,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Polhem.Chat.Avalonia.UnitTests/Polhem.Chat.Avalonia.UnitTests.csproj" />
+    <Project Path="tests/Polhem.Chat.Blazor.UnitTests/Polhem.Chat.Blazor.UnitTests.csproj" />
     <Project Path="tests/Polhem.Chat.UnitTests/Polhem.Chat.UnitTests.csproj" />
   </Folder>
 </Solution>

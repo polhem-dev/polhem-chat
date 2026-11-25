@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Polhem.Chat\Polhem.Chat.csproj" />
     <ProjectReference Include="..\..\src\Polhem.Chat.Avalonia\Polhem.Chat.Avalonia.csproj" />
+    <ProjectReference Include="..\..\src\Polhem.Chat.Blazor\Polhem.Chat.Blazor.csproj" />
   </ItemGroup>
 
 </Project>
