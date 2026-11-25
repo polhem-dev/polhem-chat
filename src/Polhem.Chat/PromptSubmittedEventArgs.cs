@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using Microsoft.Extensions.AI;
 
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
-/// <summary>Provides data for the <see cref="ChatView.PromptSubmitted"/> event.</summary>
+/// <summary>Provides data for the <see cref="ChatComposer.PromptSubmitted"/> event.</summary>
 public sealed class PromptSubmittedEventArgs : CancelEventArgs
 {
     /// <summary>Initializes a new instance of the <see cref="PromptSubmittedEventArgs"/> class.</summary>
@@ -26,7 +26,7 @@ public sealed class PromptSubmittedEventArgs : CancelEventArgs
 
     /// <summary>
     /// Gets a value indicating whether the prompt replaces the last one, which the user changed with
-    /// <see cref="ChatView.EditLastPromptCommand"/>. Without a <see cref="ChatView.Runner"/>, the application calls
+    /// <see cref="ChatComposer.EditLastPrompt"/>. Without a <see cref="ChatComposer.Runner"/>, the application calls
     /// <see cref="ChatConversation.RewindLastPrompt"/> before it sends the prompt.
     /// </summary>
     public bool IsEdit { get; init; }
@@ -35,8 +35,8 @@ public sealed class PromptSubmittedEventArgs : CancelEventArgs
     public string Text { get; }
 
     /// <summary>
-    /// Gets the files the user attached, already checked against <see cref="ChatView.AttachmentLimits"/>. Without a
-    /// <see cref="ChatView.Runner"/>, the application passes them to <see cref="ChatConversation.AddUserPrompt(string, IReadOnlyList{DataContent})"/>.
+    /// Gets the files the user attached, already checked against <see cref="ChatComposer.AttachmentLimits"/>. Without a
+    /// <see cref="ChatComposer.Runner"/>, the application passes them to <see cref="ChatConversation.AddUserPrompt(string, IReadOnlyList{DataContent})"/>.
     /// </summary>
     public IReadOnlyList<DataContent> Attachments { get; }
 }

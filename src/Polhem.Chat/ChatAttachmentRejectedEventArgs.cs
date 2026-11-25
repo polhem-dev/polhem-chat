@@ -1,6 +1,6 @@
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
-/// <summary>Provides data for the <see cref="ChatView.AttachmentRejected"/> event.</summary>
+/// <summary>Provides data for the <see cref="ChatComposer.AttachmentRejected"/> event.</summary>
 /// <param name="fileName">The name of the file as <see cref="ChatAttachmentLimits.FileNameOf"/> gives it.</param>
 /// <param name="problem">Why it was not attached.</param>
 public sealed class ChatAttachmentRejectedEventArgs(string fileName, ChatAttachmentProblem problem) : EventArgs

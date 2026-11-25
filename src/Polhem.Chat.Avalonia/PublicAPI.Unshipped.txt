@@ -1,4 +1,10 @@
 #nullable enable
+*REMOVED*Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs
+*REMOVED*Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs.ChatAttachmentRejectedEventArgs(string! fileName, Polhem.Chat.ChatAttachmentProblem problem) -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs.FileName.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs.Problem.get -> Polhem.Chat.ChatAttachmentProblem
+*REMOVED*Polhem.Chat.Avalonia.ChatView.AttachmentRejected -> System.EventHandler<Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs!>?
+*REMOVED*Polhem.Chat.Avalonia.ChatView.PromptSubmitted -> System.EventHandler<Polhem.Chat.Avalonia.PromptSubmittedEventArgs!>?
 *REMOVED*Polhem.Chat.Avalonia.ChatView.Strings.get -> Polhem.Chat.Avalonia.ChatViewStrings!
 *REMOVED*Polhem.Chat.Avalonia.ChatViewStrings
 *REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Approve.get -> string!
@@ -94,6 +100,13 @@
 *REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolRunning.set -> void
 *REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.TurnFailed.get -> string!
 *REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.TurnFailed.set -> void
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs.Attachments.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>!
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs.IsEdit.get -> bool
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs.IsEdit.init -> void
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text) -> void
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
+*REMOVED*Polhem.Chat.Avalonia.PromptSubmittedEventArgs.Text.get -> string!
 *REMOVED*static Polhem.Chat.Avalonia.ChatViewStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.Avalonia.ChatViewStrings!
 *REMOVED*static readonly Polhem.Chat.Avalonia.ChatView.StringsProperty -> Avalonia.StyledProperty<Polhem.Chat.Avalonia.ChatViewStrings!>!
 *REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
@@ -103,5 +116,7 @@
 *REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatFileSize(long bytes) -> string!
 *REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed, long outputTokens) -> string!
 *REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatTokens(long inputTokens, long outputTokens) -> string!
+Polhem.Chat.Avalonia.ChatView.AttachmentRejected -> System.EventHandler<Polhem.Chat.ChatAttachmentRejectedEventArgs!>?
+Polhem.Chat.Avalonia.ChatView.PromptSubmitted -> System.EventHandler<Polhem.Chat.PromptSubmittedEventArgs!>?
 Polhem.Chat.Avalonia.ChatView.Strings.get -> Polhem.Chat.ChatStrings!
 static readonly Polhem.Chat.Avalonia.ChatView.StringsProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatStrings!>!

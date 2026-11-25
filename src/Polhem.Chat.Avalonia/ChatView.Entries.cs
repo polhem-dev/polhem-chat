@@ -64,35 +64,7 @@ public partial class ChatView
     /// when an entry already shows it: the title of a running tool, or <see cref="ChatStrings.Thinking"/> while the
     /// model reasons or nothing has arrived yet. A reply that is being written shows itself.
     /// </summary>
-    internal string? Activity
-    {
-        get
-        {
-            if (!IsGenerating)
-            {
-                return null;
-            }
-            if (_shown?.CurrentTurn is { IsAwaitingApproval: true })
-            {
-                return Strings.AwaitingApproval + "…";
-            }
-            var last = _shown?.Entries.LastOrDefault();
-            if (ShowsActivity)
-            {
-                // The reasoning and tool call entries show their own progress.
-                return last is AssistantReplyEntry { IsStreaming: true } or ReasoningEntry { IsStreaming: true }
-                    or ToolCallEntry { Status: ToolCallStatus.Running }
-                    ? null
-                    : Strings.Thinking;
-            }
-            return last switch
-            {
-                AssistantReplyEntry { IsStreaming: true, Text.Length: > 0 } => null,
-                ToolCallEntry { Status: ToolCallStatus.Running } call => call.Title + "…",
-                _ => Strings.Thinking,
-            };
-        }
-    }
+    internal string? Activity => _composer.DescribeActivity(ShowsActivity);
 
     /// <summary>Gets a value indicating whether the line under the entries says what the model is doing.</summary>
     internal bool IsWaiting => Activity is not null;

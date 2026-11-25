@@ -20,7 +20,7 @@
 
 | 套件 | 用途 |
 |------|------|
-| `Polhem.Chat` | 對話模型：把串流更新轉成對話項目，並負責執行每一輪。不含 UI |
+| `Polhem.Chat` | 對話模型：把串流更新轉成對話項目、負責執行每一輪，以及使用者對 view 的操作（`ChatComposer`）。不含 UI |
 | `Polhem.Chat.Avalonia` | Avalonia 的聊天控制項，以 [Polhem.Markdown.Avalonia](https://github.com/polhem-dev/polhem-markdown) 呈現 Markdown |
 
 套件發佈在 [nuget.org](https://www.nuget.org/packages?q=Polhem.Chat)，各版變更見 [CHANGELOG](CHANGELOG.zh-TW.md)。
