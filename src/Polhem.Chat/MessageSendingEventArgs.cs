@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
 
@@ -17,6 +18,12 @@ public sealed class MessageSendingEventArgs : CancelEventArgs
         ArgumentNullException.ThrowIfNull(text);
         _text = text;
     }
+
+    /// <summary>
+    /// Gets the files that will be sent with the prompt. A handler may remove them, or replace one with another, for
+    /// example a text file with its text when the provider takes no text attachments.
+    /// </summary>
+    public IList<DataContent> Attachments { get; } = [];
 
     /// <summary>Gets or sets the prompt that will be sent.</summary>
     public string Text

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.AI;
 
@@ -14,7 +15,7 @@ namespace Polhem.Chat;
 /// <see cref="Options"/>; the calls and their results then show up as <see cref="ToolCallEntry"/> items.
 /// </para>
 /// <para>
-/// The runner continues on the context <see cref="SendAsync"/> is called on, so entries change on that thread. Call it
+/// The runner continues on the context <see cref="SendAsync(string, CancellationToken)"/> is called on, so entries change on that thread. Call it
 /// from the UI thread when the entries are bound to views.
 /// </para>
 /// </remarks>
@@ -94,22 +95,52 @@ public sealed class ChatRunner : INotifyPropertyChanged
     /// What the turn produced, or <see langword="null"/> when a <see cref="MessageSending"/> handler canceled it.
     /// </returns>
     /// <exception cref="InvalidOperationException">A turn is already in progress.</exception>
-    public async Task<ChatTurnResult?> SendAsync(string text, CancellationToken cancellationToken = default)
+    // The overload shipped in 0.1 keeps its optional token: removing it would break callers' binaries. The overload with
+    // attachments takes its token without a default, which is the analyzer's documented way to add one.
+    [SuppressMessage("ApiDesign", "RS0027", Justification = "The shipped overload keeps its optional parameter for binary compatibility.")]
+    public Task<ChatTurnResult?> SendAsync(string text, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(text);
+        return SendAsync(text, [], cancellationToken);
+    }
+
+    /// <summary>
+    /// Adds a prompt with files attached to the conversation and streams the model's reply into it. Errors do not throw:
+    /// they end the turn with <see cref="TurnOutcome.Failed"/> and are shown as an <see cref="ErrorEntry"/>.
+    /// </summary>
+    /// <param name="text">The prompt; it may be empty when there are attachments.</param>
+    /// <param name="attachments">The files to send with it, for example from <see cref="ChatAttachmentLimits.Check"/>.</param>
+    /// <param name="cancellationToken">Stops the turn, like <see cref="Stop"/>.</param>
+    /// <returns>
+    /// What the turn produced, or <see langword="null"/> when a <see cref="MessageSending"/> handler canceled it.
+    /// </returns>
+    /// <exception cref="ArgumentException">The text is blank and there are no attachments.</exception>
+    /// <exception cref="InvalidOperationException">A turn is already in progress.</exception>
+    public async Task<ChatTurnResult?> SendAsync(string text, IReadOnlyList<DataContent> attachments, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(attachments);
+        if (string.IsNullOrWhiteSpace(text) && attachments.Count == 0)
+        {
+            throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
+        }
         if (IsRunning || Conversation.CurrentTurn is not null)
         {
             throw new InvalidOperationException("A turn is already in progress.");
         }
 
         var sending = new MessageSendingEventArgs(text);
+        foreach (var attachment in attachments)
+        {
+            sending.Attachments.Add(attachment);
+        }
         MessageSending?.Invoke(this, sending);
         if (sending.Cancel)
         {
             return null;
         }
 
-        Conversation.AddUserPrompt(sending.Text);
+        Conversation.AddUserPrompt(sending.Text, [.. sending.Attachments]);
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _stop = stop;
         IsRunning = true;

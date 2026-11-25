@@ -51,6 +51,16 @@ public class ChatViewStrings
         SecondsFormat = Load(nameof(SecondsFormat), culture);
         MinutesFormat = Load(nameof(MinutesFormat), culture);
         OutputTokensFormat = Load(nameof(OutputTokensFormat), culture);
+        Attach = Load(nameof(Attach), culture);
+        RemoveAttachment = Load(nameof(RemoveAttachment), culture);
+        AttachmentTooLargeFormat = Load(nameof(AttachmentTooLargeFormat), culture);
+        AttachmentTotalTooLargeFormat = Load(nameof(AttachmentTotalTooLargeFormat), culture);
+        AttachmentTooManyFormat = Load(nameof(AttachmentTooManyFormat), culture);
+        AttachmentTypeNotAllowedFormat = Load(nameof(AttachmentTypeNotAllowedFormat), culture);
+        AttachmentContentMismatchFormat = Load(nameof(AttachmentContentMismatchFormat), culture);
+        AttachmentUnreadableFormat = Load(nameof(AttachmentUnreadableFormat), culture);
+        KilobytesFormat = Load(nameof(KilobytesFormat), culture);
+        MegabytesFormat = Load(nameof(MegabytesFormat), culture);
         Approve = Load(nameof(Approve), culture);
         Reject = Load(nameof(Reject), culture);
         AwaitingApproval = Load(nameof(AwaitingApproval), culture);
@@ -124,6 +134,36 @@ public class ChatViewStrings
     /// area, which tells the user there is more to read before deciding.
     /// </summary>
     public string ScrollForMore { get; set; }
+
+    /// <summary>Gets or sets the label of the button that attaches files, and of the file types the picker offers.</summary>
+    public string Attach { get; set; }
+
+    /// <summary>Gets or sets the label of the button that removes an attached file.</summary>
+    public string RemoveAttachment { get; set; }
+
+    /// <summary>Gets or sets the composite format of the message for a file larger than the limit. Argument 0 is the file name and argument 1 the limit, formatted with <see cref="FormatFileSize"/>.</summary>
+    public string AttachmentTooLargeFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of the message for a file that would bring the files of a prompt over their limit. Argument 0 is the file name and argument 1 the limit, formatted with <see cref="FormatFileSize"/>.</summary>
+    public string AttachmentTotalTooLargeFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of the message for a file past the count limit. Argument 0 is the file name and argument 1 the limit, as an <see cref="int"/>.</summary>
+    public string AttachmentTooManyFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of the message for a file of a type that is not allowed. Argument 0 is the file name.</summary>
+    public string AttachmentTypeNotAllowedFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of the message for a file whose content is not the type its name says. Argument 0 is the file name.</summary>
+    public string AttachmentContentMismatchFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of the message for a file that could not be read, is empty, or is text that is not UTF-8. Argument 0 is the file name.</summary>
+    public string AttachmentUnreadableFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of a size under a megabyte. Argument 0 is the number of kilobytes, as a <see cref="double"/>.</summary>
+    public string KilobytesFormat { get; set; }
+
+    /// <summary>Gets or sets the composite format of a size from a megabyte. Argument 0 is the number of megabytes, as a <see cref="double"/>.</summary>
+    public string MegabytesFormat { get; set; }
 
     /// <summary>Gets or sets the heading of the arguments of a tool call.</summary>
     public string ToolArguments { get; set; }
@@ -220,6 +260,36 @@ public class ChatViewStrings
     /// <returns>The formatted text.</returns>
     public virtual string FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) =>
         string.Format(Culture, CachedTokensFormat, inputTokens, cachedInputTokens, outputTokens);
+
+    /// <summary>
+    /// Formats the message for a file that was not attached, with the format of its problem. The file name shows with
+    /// the characters that draw nothing escaped.
+    /// </summary>
+    /// <param name="fileName">The name of the file.</param>
+    /// <param name="problem">Why it was not attached.</param>
+    /// <param name="limits">The limits it was checked against.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string FormatAttachmentProblem(string fileName, ChatAttachmentProblem problem, ChatAttachmentLimits limits)
+    {
+        ArgumentNullException.ThrowIfNull(limits);
+        var name = VisibleText.Escape(fileName);
+        return problem switch
+        {
+            ChatAttachmentProblem.TooLarge => string.Format(Culture, AttachmentTooLargeFormat, name, FormatFileSize(limits.MaxFileSize)),
+            ChatAttachmentProblem.TotalTooLarge => string.Format(Culture, AttachmentTotalTooLargeFormat, name, FormatFileSize(limits.MaxTotalSize)),
+            ChatAttachmentProblem.TooMany => string.Format(Culture, AttachmentTooManyFormat, name, limits.MaxCount),
+            ChatAttachmentProblem.TypeNotAllowed => string.Format(Culture, AttachmentTypeNotAllowedFormat, name),
+            ChatAttachmentProblem.ContentMismatch => string.Format(Culture, AttachmentContentMismatchFormat, name),
+            _ => string.Format(Culture, AttachmentUnreadableFormat, name),
+        };
+    }
+
+    /// <summary>Formats a file size with <see cref="KilobytesFormat"/> or <see cref="MegabytesFormat"/>.</summary>
+    /// <param name="bytes">The size in bytes.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string FormatFileSize(long bytes) => bytes < 1024 * 1024
+        ? string.Format(Culture, KilobytesFormat, Math.Max(1, Math.Ceiling(bytes / 1024.0)))
+        : string.Format(Culture, MegabytesFormat, bytes / (1024.0 * 1024));
 
     /// <summary>Formats the requests a turn sent with <see cref="CallsFormat"/>.</summary>
     /// <param name="calls">The count.</param>
