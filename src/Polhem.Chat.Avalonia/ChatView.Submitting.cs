@@ -49,18 +49,33 @@ public partial class ChatView
         var result = editing
             ? await runner.EditLastPromptAsync(text, attachments, CancellationToken.None)
             : await runner.SendAsync(text, attachments, CancellationToken.None);
-        // A MessageSending handler of the runner canceled the prompt: give it back to the user instead of losing it.
-        if (result is null && fromBox && string.IsNullOrEmpty(Prompt) && _pendingAttachments.Count == 0)
+        if (result is null && fromBox)
         {
-            SetCurrentValue(PromptProperty, text);
-            foreach (var attachment in attachments)
-            {
-                _pendingAttachments.Add(attachment);
-            }
-            if (editing)
-            {
-                ResumeEdit(ended);
-            }
+            GiveBack(text, attachments, editing ? ended : null);
+        }
+    }
+
+    /// <summary>
+    /// Gives a prompt the runner's sending handler canceled back to the box, instead of losing it, unless the user has
+    /// typed something new meanwhile; an edit goes on.
+    /// </summary>
+    private void GiveBack(
+        string text,
+        IReadOnlyList<DataContent> attachments,
+        (UserPromptEntry? Entry, (string? Prompt, DataContent[] Attachments)? Before)? edit)
+    {
+        if (!string.IsNullOrEmpty(Prompt) || _pendingAttachments.Count > 0)
+        {
+            return;
+        }
+        SetCurrentValue(PromptProperty, text);
+        foreach (var attachment in attachments)
+        {
+            _pendingAttachments.Add(attachment);
+        }
+        if (edit is { } ended)
+        {
+            ResumeEdit(ended);
         }
     }
 
