@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
@@ -83,4 +86,61 @@ public sealed class ToolCallEntry : ChatEntry
     /// approval.
     /// </summary>
     public ToolApprovalRequestContent? ApprovalRequest { get; internal set; }
+
+    /// <summary>
+    /// Reads an argument as a value of type <typeparamref name="T"/>: a value of that type as it is, or JSON (what most
+    /// clients pass) read with <paramref name="typeInfo"/>, which keeps this free of reflection.
+    /// </summary>
+    /// <typeparam name="T">The type to read.</typeparam>
+    /// <param name="name">The name of the argument, compared ordinally.</param>
+    /// <param name="typeInfo">The JSON contract of <typeparamref name="T"/>.</param>
+    /// <param name="value">The value, when it could be read.</param>
+    /// <returns><see langword="true"/> when the argument is there and is a <typeparamref name="T"/>.</returns>
+    public bool TryGetArgument<T>(string name, JsonTypeInfo<T> typeInfo, [MaybeNullWhen(false)] out T value)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(typeInfo);
+        if (Arguments is { } arguments && arguments.TryGetValue(name, out var raw))
+        {
+            return TryRead(raw, typeInfo, out value);
+        }
+        value = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Reads the result as a value of type <typeparamref name="T"/>: a value of that type as it is, or JSON read with
+    /// <paramref name="typeInfo"/>.
+    /// </summary>
+    /// <typeparam name="T">The type to read.</typeparam>
+    /// <param name="typeInfo">The JSON contract of <typeparamref name="T"/>.</param>
+    /// <param name="value">The value, when it could be read.</param>
+    /// <returns><see langword="true"/> when there is a result and it is a <typeparamref name="T"/>.</returns>
+    public bool TryGetResult<T>(JsonTypeInfo<T> typeInfo, [MaybeNullWhen(false)] out T value)
+    {
+        ArgumentNullException.ThrowIfNull(typeInfo);
+        return TryRead(Result, typeInfo, out value);
+    }
+
+    private static bool TryRead<T>(object? raw, JsonTypeInfo<T> typeInfo, [MaybeNullWhen(false)] out T value)
+    {
+        switch (raw)
+        {
+            case T typed:
+                value = typed;
+                return true;
+            case JsonElement element when element.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.Null):
+                try
+                {
+                    value = element.Deserialize(typeInfo);
+                    return value is not null;
+                }
+                catch (JsonException)
+                {
+                    break;
+                }
+        }
+        value = default;
+        return false;
+    }
 }

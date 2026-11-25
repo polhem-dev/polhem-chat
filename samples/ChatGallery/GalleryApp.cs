@@ -1,9 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Templates;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.Themes.Fluent;
+using Polhem.Chat;
 using Polhem.Chat.Avalonia;
 using Semi.Avalonia;
 
@@ -21,6 +23,13 @@ public sealed class GalleryApp : Application
     {
         Styles.Add(new FluentTheme());
         Styles.Add(new ChatTheme());
+
+        // Every call of the weather tool shows as a card of the gallery's own, in both tabs.
+        DataTemplates.Add(new ToolCallTemplate
+        {
+            ToolName = DemoReplies.WeatherTool,
+            Template = new FuncDataTemplate<ToolCallEntry>((_, _) => new WeatherCard()),
+        });
     }
 
     public override void OnFrameworkInitializationCompleted()

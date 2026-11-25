@@ -14,6 +14,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - **安全性：** 附加在提問上的檔案（`ChatView.AllowsAttachments`，預設關閉）依 `ChatAttachmentLimits` 檢查：類型採白名單、由檔案內容判斷而非檔名，大小與數量在讀檔前就先檢查。
 - **行為變更：** `ToolCallStatus` 新增 `AwaitingApproval` 與 `Rejected` 兩個值。
 - **行為變更：** 載入的歷史會顯示 user 訊息中的檔案；有檔案但沒有文字的 user 訊息也會顯示成提問。
+- `ToolCallTemplate` 以應用程式自己的樣板顯示某個工具的呼叫，即使隱藏活動也會顯示；`ToolCallEntry.TryGetArgument` 與 `TryGetResult` 不靠反射讀取參數與結果。
 - `ChatView.HeaderContent`、`PromptHeaderContent`、`PromptFooterContent`（各附樣板屬性）在對話上方、輸入框上方與下方顯示應用程式自己的內容。
 - `ChatTurn.AddEntry` 在回合進行中加入應用程式自己的項目，排在該輪摘要之前。
 

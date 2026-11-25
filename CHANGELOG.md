@@ -15,6 +15,7 @@ Details and migration steps: [docs/en/changelogs/0.2.0.md](docs/en/changelogs/0.
 - **Security:** Files attached to a prompt (`ChatView.AllowsAttachments`, off by default) are checked against `ChatAttachmentLimits`: an allowlist of types read from the content, not the name, and limits on size and count checked before a file is read.
 - **Changed:** `ToolCallStatus` has two new values, `AwaitingApproval` and `Rejected`.
 - **Changed:** A loaded history shows the files of its user messages, and a user message with files but no text shows as a prompt.
+- `ToolCallTemplate` draws the calls of one tool with a template of the application's own, shown even while the activity is hidden; `ToolCallEntry.TryGetArgument` and `TryGetResult` read their values without reflection.
 - `ChatView.HeaderContent`, `PromptHeaderContent` and `PromptFooterContent`, each with a template, show the application's own content above the conversation and above and below the prompt box.
 - `ChatTurn.AddEntry` adds an entry of the application's own while a turn is in progress, before the turn's summary.
 

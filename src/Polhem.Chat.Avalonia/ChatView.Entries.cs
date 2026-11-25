@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 
 namespace Polhem.Chat.Avalonia;
 
@@ -107,9 +108,10 @@ public partial class ChatView
     }
 
     // A call that waits for the user's approval is shown however ShowsActivity is set: hiding it would leave the turn
-    // waiting for a decision nobody can make.
-    private static bool IsActivity(object? item) =>
-        item is ReasoningEntry or ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval };
+    // waiting for a decision nobody can make. So is a call of a tool the application gave a template of its own.
+    private bool IsActivity(object? item) =>
+        item is ReasoningEntry
+        || (item is ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval } && this.FindDataTemplate(item) is not ToolCallTemplate);
 
     // NOTE: Hidden entries stay in the conversation and its history; only their containers are hidden, so they take no
     // room and no spacing in the list.

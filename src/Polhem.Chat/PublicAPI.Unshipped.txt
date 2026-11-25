@@ -1,25 +1,4 @@
 #nullable enable
-Polhem.Chat.ChatTurn.AddEntry(Polhem.Chat.ChatEntry! entry) -> void
-Polhem.Chat.ChatTurn.Approve(Polhem.Chat.ToolCallEntry! entry) -> void
-Polhem.Chat.ChatTurn.IsAwaitingApproval.get -> bool
-Polhem.Chat.ChatTurn.PendingApprovals.get -> System.Collections.Generic.IReadOnlyList<Polhem.Chat.ToolCallEntry!>!
-Polhem.Chat.ChatTurn.Reject(Polhem.Chat.ToolCallEntry! entry, string? reason = null) -> void
-Polhem.Chat.ChatTurn.WaitForApprovalsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Extensions.AI.ChatMessage!>!
-Polhem.Chat.ToolCallEntry.ApprovalRequest.get -> Microsoft.Extensions.AI.ToolApprovalRequestContent?
-Polhem.Chat.ToolCallEntry.RejectionReason.get -> string?
-Polhem.Chat.ToolCallEntry.RejectionReason.set -> void
-Polhem.Chat.ToolCallStatus.AwaitingApproval = 4 -> Polhem.Chat.ToolCallStatus
-Polhem.Chat.ToolCallStatus.Rejected = 5 -> Polhem.Chat.ToolCallStatus
-Polhem.Chat.ChatTurn.HasDecisionsToSend.get -> bool
-const Polhem.Chat.ChatAttachmentLimits.Csv = "text/csv" -> string!
-const Polhem.Chat.ChatAttachmentLimits.Gif = "image/gif" -> string!
-const Polhem.Chat.ChatAttachmentLimits.Jpeg = "image/jpeg" -> string!
-const Polhem.Chat.ChatAttachmentLimits.Json = "application/json" -> string!
-const Polhem.Chat.ChatAttachmentLimits.Markdown = "text/markdown" -> string!
-const Polhem.Chat.ChatAttachmentLimits.Pdf = "application/pdf" -> string!
-const Polhem.Chat.ChatAttachmentLimits.PlainText = "text/plain" -> string!
-const Polhem.Chat.ChatAttachmentLimits.Png = "image/png" -> string!
-const Polhem.Chat.ChatAttachmentLimits.WebP = "image/webp" -> string!
 Polhem.Chat.ChatAttachmentCheck
 Polhem.Chat.ChatAttachmentCheck.Attachment.get -> Microsoft.Extensions.AI.DataContent?
 Polhem.Chat.ChatAttachmentCheck.FileName.get -> string!
@@ -45,7 +24,30 @@ Polhem.Chat.ChatAttachmentProblem.TypeNotAllowed = 3 -> Polhem.Chat.ChatAttachme
 Polhem.Chat.ChatAttachmentProblem.Unreadable = 5 -> Polhem.Chat.ChatAttachmentProblem
 Polhem.Chat.ChatConversation.AddUserPrompt(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> Polhem.Chat.UserPromptEntry!
 Polhem.Chat.ChatRunner.SendAsync(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
+Polhem.Chat.ChatTurn.AddEntry(Polhem.Chat.ChatEntry! entry) -> void
+Polhem.Chat.ChatTurn.Approve(Polhem.Chat.ToolCallEntry! entry) -> void
+Polhem.Chat.ChatTurn.HasDecisionsToSend.get -> bool
+Polhem.Chat.ChatTurn.IsAwaitingApproval.get -> bool
+Polhem.Chat.ChatTurn.PendingApprovals.get -> System.Collections.Generic.IReadOnlyList<Polhem.Chat.ToolCallEntry!>!
+Polhem.Chat.ChatTurn.Reject(Polhem.Chat.ToolCallEntry! entry, string? reason = null) -> void
+Polhem.Chat.ChatTurn.WaitForApprovalsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Microsoft.Extensions.AI.ChatMessage!>!
 Polhem.Chat.MessageSendingEventArgs.Attachments.get -> System.Collections.Generic.IList<Microsoft.Extensions.AI.DataContent!>!
+Polhem.Chat.ToolCallEntry.ApprovalRequest.get -> Microsoft.Extensions.AI.ToolApprovalRequestContent?
+Polhem.Chat.ToolCallEntry.RejectionReason.get -> string?
+Polhem.Chat.ToolCallEntry.RejectionReason.set -> void
+Polhem.Chat.ToolCallEntry.TryGetArgument<T>(string! name, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! typeInfo, out T value) -> bool
+Polhem.Chat.ToolCallEntry.TryGetResult<T>(System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! typeInfo, out T value) -> bool
+Polhem.Chat.ToolCallStatus.AwaitingApproval = 4 -> Polhem.Chat.ToolCallStatus
+Polhem.Chat.ToolCallStatus.Rejected = 5 -> Polhem.Chat.ToolCallStatus
 Polhem.Chat.UserPromptEntry.Attachments.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>!
 Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
+const Polhem.Chat.ChatAttachmentLimits.Csv = "text/csv" -> string!
+const Polhem.Chat.ChatAttachmentLimits.Gif = "image/gif" -> string!
+const Polhem.Chat.ChatAttachmentLimits.Jpeg = "image/jpeg" -> string!
+const Polhem.Chat.ChatAttachmentLimits.Json = "application/json" -> string!
+const Polhem.Chat.ChatAttachmentLimits.Markdown = "text/markdown" -> string!
+const Polhem.Chat.ChatAttachmentLimits.Pdf = "application/pdf" -> string!
+const Polhem.Chat.ChatAttachmentLimits.PlainText = "text/plain" -> string!
+const Polhem.Chat.ChatAttachmentLimits.Png = "image/png" -> string!
+const Polhem.Chat.ChatAttachmentLimits.WebP = "image/webp" -> string!
 static Polhem.Chat.ChatAttachmentLimits.FileNameOf(string! path) -> string!

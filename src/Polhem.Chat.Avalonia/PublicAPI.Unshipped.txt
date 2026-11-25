@@ -25,6 +25,14 @@ Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.set -> void
 Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.get -> string!
 Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.set -> void
+Polhem.Chat.Avalonia.ToolCallTemplate
+Polhem.Chat.Avalonia.ToolCallTemplate.Build(object? param) -> Avalonia.Controls.Control?
+Polhem.Chat.Avalonia.ToolCallTemplate.Match(object? data) -> bool
+Polhem.Chat.Avalonia.ToolCallTemplate.Template.get -> Avalonia.Controls.Templates.IDataTemplate?
+Polhem.Chat.Avalonia.ToolCallTemplate.Template.set -> void
+Polhem.Chat.Avalonia.ToolCallTemplate.ToolCallTemplate() -> void
+Polhem.Chat.Avalonia.ToolCallTemplate.ToolName.get -> string?
+Polhem.Chat.Avalonia.ToolCallTemplate.ToolName.set -> void
 static readonly Polhem.Chat.Avalonia.ChatView.HeaderContentProperty -> Avalonia.StyledProperty<object?>!
 static readonly Polhem.Chat.Avalonia.ChatView.HeaderContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
 static readonly Polhem.Chat.Avalonia.ChatView.PromptFooterContentProperty -> Avalonia.StyledProperty<object?>!
