@@ -53,8 +53,8 @@ public partial class ChatView : TemplatedControl
             defaultBindingMode: BindingMode.TwoWay);
 
     /// <summary>Defines the <see cref="Strings"/> property.</summary>
-    public static readonly StyledProperty<ChatViewStrings> StringsProperty =
-        AvaloniaProperty.Register<ChatView, ChatViewStrings>(nameof(Strings), defaultValue: null!, coerce: CoerceStrings);
+    public static readonly StyledProperty<ChatStrings> StringsProperty =
+        AvaloniaProperty.Register<ChatView, ChatStrings>(nameof(Strings), defaultValue: null!, coerce: CoerceStrings);
 
     /// <summary>Defines the <see cref="EmptyContent"/> property.</summary>
     public static readonly StyledProperty<object?> EmptyContentProperty =
@@ -76,7 +76,7 @@ public partial class ChatView : TemplatedControl
 
     // NOTE: Captured once. Avalonia re-runs coercion whenever the property re-evaluates, and resets the UI thread's
     // culture after dispatcher operations, so creating the default inside the coercion would let the language drift.
-    private readonly ChatViewStrings _defaultStrings = ChatViewStrings.ForCulture(CultureInfo.CurrentUICulture);
+    private readonly ChatStrings _defaultStrings = ChatStrings.ForCulture(CultureInfo.CurrentUICulture);
     private readonly ViewCommand _submitCommand;
     private readonly ViewCommand _stopCommand;
     private readonly ViewCommand _copyCommand;
@@ -158,11 +158,11 @@ public partial class ChatView : TemplatedControl
     }
 
     /// <summary>
-    /// Gets or sets the texts the view shows. The default is <see cref="ChatViewStrings.ForCulture"/> for the UI culture
+    /// Gets or sets the texts the view shows. The default is <see cref="ChatStrings.ForCulture"/> for the UI culture
     /// of the thread that created the view; assign an instance to choose the language or change a text. Setting
     /// <see langword="null"/> restores the default.
     /// </summary>
-    public ChatViewStrings Strings
+    public ChatStrings Strings
     {
         get => GetValue(StringsProperty);
         set => SetValue(StringsProperty, value);
@@ -170,7 +170,7 @@ public partial class ChatView : TemplatedControl
 
     /// <summary>
     /// Gets or sets what the view shows above the <see cref="Suggestions"/> while the conversation is empty. The default
-    /// theme shows <see cref="ChatViewStrings.EmptyTitle"/> when it is <see langword="null"/>.
+    /// theme shows <see cref="ChatStrings.EmptyTitle"/> when it is <see langword="null"/>.
     /// </summary>
     public object? EmptyContent
     {
@@ -328,7 +328,7 @@ public partial class ChatView : TemplatedControl
         }
     }
 
-    private static ChatViewStrings CoerceStrings(AvaloniaObject owner, ChatViewStrings? value) =>
+    private static ChatStrings CoerceStrings(AvaloniaObject owner, ChatStrings? value) =>
         value ?? ((ChatView)owner)._defaultStrings;
 
     private void AttachRunner(ChatRunner? runner)

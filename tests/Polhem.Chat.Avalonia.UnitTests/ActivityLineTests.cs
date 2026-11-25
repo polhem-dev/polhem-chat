@@ -43,7 +43,7 @@ public class ActivityLineTests(HeadlessSession session)
     public Task Default_ActivityFollowsTheTurn() => session.RunAsync(() =>
     {
         var conversation = new ChatConversation();
-        var view = new ChatView { Conversation = conversation, Strings = new ChatViewStrings() };
+        var view = new ChatView { Conversation = conversation, Strings = new ChatStrings() };
         var window = Show(view);
         string? Line()
         {
@@ -110,7 +110,7 @@ public class ActivityLineTests(HeadlessSession session)
     public Task Progress_AddsOutputTokens() => session.RunAsync(() =>
     {
         var conversation = new ChatConversation();
-        var view = new ChatView { Conversation = conversation, Strings = new ChatViewStrings() };
+        var view = new ChatView { Conversation = conversation, Strings = new ChatStrings() };
         var window = Show(view);
         view.IsGenerating = true;
         var turn = conversation.BeginTurn();

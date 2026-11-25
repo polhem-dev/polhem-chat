@@ -4,13 +4,13 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
 /// <summary>
 /// Text from the model shown so that what the user reads is what a tool receives: characters that draw nothing or
-/// reorder the text around them show as escapes.
+/// reorder the text around them show as escapes. A view shows tool arguments, tool results and file names through it.
 /// </summary>
-internal static class VisibleText
+public static class VisibleText
 {
     /// <summary>
     /// Replaces control characters other than line feed and tab, format characters (zero-width characters, the
@@ -21,6 +21,8 @@ internal static class VisibleText
     /// character hides in it (the Trojan Source attacks). A user who approves a call must see every character the tool
     /// will receive, so none of these may be drawn as they are.
     /// </remarks>
+    /// <param name="text">The text to show.</param>
+    /// <returns>The text with those characters escaped; an empty string for <see langword="null"/>.</returns>
     public static string Escape(string? text)
     {
         if (string.IsNullOrEmpty(text) || !NeedsEscape(text))
@@ -46,6 +48,8 @@ internal static class VisibleText
     /// Formats the arguments of a tool call as indented JSON, with every value in full and the text escaped as by
     /// <see cref="Escape"/>. Letters of any script show as they are.
     /// </summary>
+    /// <param name="arguments">The arguments of the call.</param>
+    /// <returns>The JSON text; an empty string when there are no arguments.</returns>
     public static string FormatArguments(IDictionary<string, object?>? arguments)
     {
         if (arguments is null || arguments.Count == 0)
@@ -71,6 +75,37 @@ internal static class VisibleText
         }
         return Escape(Encoding.UTF8.GetString(stream.ToArray()));
     }
+
+    /// <summary>
+    /// Lists the arguments of a tool call as one <c>name: value</c> line each, escaped as by <see cref="Escape"/>.
+    /// </summary>
+    /// <param name="arguments">The arguments of the call.</param>
+    /// <returns>The lines; an empty string when there are no arguments.</returns>
+    public static string ListArguments(IDictionary<string, object?>? arguments)
+    {
+        if (arguments is null || arguments.Count == 0)
+        {
+            return string.Empty;
+        }
+        var text = new StringBuilder();
+        foreach (var (name, value) in arguments)
+        {
+            if (text.Length > 0)
+            {
+                text.Append('\n');
+            }
+            text.Append(Escape(name)).Append(": ").Append(FormatValue(value));
+        }
+        return text.ToString();
+    }
+
+    /// <summary>
+    /// Formats a tool argument or result as text, escaped as by <see cref="Escape"/>. A JSON element, which is what most
+    /// providers return, formats as its JSON text.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <returns>The text; an empty string for <see langword="null"/>.</returns>
+    public static string FormatValue(object? value) => Escape(Convert.ToString(value, CultureInfo.InvariantCulture));
 
     private static void WriteValue(Utf8JsonWriter writer, object? value)
     {

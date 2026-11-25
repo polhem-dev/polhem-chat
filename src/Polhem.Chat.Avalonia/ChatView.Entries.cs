@@ -61,7 +61,7 @@ public partial class ChatView
 
     /// <summary>
     /// What the line under the entries says the model is doing while a reply is in progress, or <see langword="null"/>
-    /// when an entry already shows it: the title of a running tool, or <see cref="ChatViewStrings.Thinking"/> while the
+    /// when an entry already shows it: the title of a running tool, or <see cref="ChatStrings.Thinking"/> while the
     /// model reasons or nothing has arrived yet. A reply that is being written shows itself.
     /// </summary>
     internal string? Activity

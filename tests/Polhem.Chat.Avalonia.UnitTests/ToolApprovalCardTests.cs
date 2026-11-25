@@ -17,7 +17,7 @@ public class ToolApprovalCardTests(HeadlessSession session)
         var conversation = new ChatConversation();
         conversation.AddUserPrompt("Delete my notes");
         var turn = conversation.BeginTurn();
-        var view = new ChatView { Conversation = conversation, Strings = new ChatViewStrings(), IsGenerating = true };
+        var view = new ChatView { Conversation = conversation, Strings = new ChatStrings(), IsGenerating = true };
         var window = Show(view);
         turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [Request(arguments)]));
         Settle(window);
@@ -76,7 +76,7 @@ public class ToolApprovalCardTests(HeadlessSession session)
         Assert.True(scroller.Bounds.Height <= 240);
         var note = Descendants<TextBlock>(card).Single(block => block.Classes.Contains("polhemChatScrollForMore"));
         Assert.True(IsShown(note));
-        Assert.Equal(new ChatViewStrings().ScrollForMore, note.Text);
+        Assert.Equal(new ChatStrings().ScrollForMore, note.Text);
     });
 
     [Fact(DisplayName = "Short arguments carry no note")]
