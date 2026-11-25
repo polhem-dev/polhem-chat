@@ -12,6 +12,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 - `Polhem.Chat` 新增 `ChatComposer`，承接使用者對 chat view 除了畫面以外的操作（輸入框、檔案、送出、停止、重新生成、編輯、核准），供各 UI 框架的 view 共用；`ChatView` 改用它，原有測試不需修改即全部通過。
 - `Polhem.Chat` 新增 `ChatPicturePreview`，不解碼、只讀圖片標頭來判斷附加的圖片是否小到可以預覽；各 view 顯示圖片前都會先用它檢查。
+- **安全性：** frame 超出宣告尺寸的 GIF，以及超過 5 MB 的圖片，不再顯示預覽。
 - **變更：** `PromptSubmittedEventArgs` 與 `ChatAttachmentRejectedEventArgs` 移到 `Polhem.Chat`。
 - **變更：** `ChatViewStrings` 改名為 `ChatStrings` 並移到 `Polhem.Chat`，由各 UI 框架的 view 共用，新增 `DescribeTurn` 與 `DescribeToolStatus`；`VisibleText` 在那裡改為公開。
 

@@ -42,6 +42,49 @@ public class ChatPicturePreviewTests
         Assert.Equal((width, height), (readWidth, readHeight));
     }
 
+    [Fact(DisplayName = "A GIF counts the frames past its logical screen, so a tiny file with a huge frame gets no preview")]
+    public void Gif_FramePastScreen_Counts()
+    {
+        // 64 x 64 screen with a global color table of two colors, a graphic control extension, then a frame at
+        // (10, 20) of 20000 x 20000 with no data: a few dozen bytes that a browser enlarges to the frame.
+        byte[] bomb =
+        [
+            .. "GIF89a"u8, 64, 0, 64, 0, 0x80, 0, 0,
+            0, 0, 0, 255, 255, 255,
+            0x21, 0xF9, 4, 0, 0, 0, 0, 0,
+            0x2C, 10, 0, 20, 0, 0x20, 0x4E, 0x20, 0x4E, 0, 2, 0, 0x3B,
+        ];
+
+        Assert.True(ChatPicturePreview.TryReadSize(bomb, out var width, out var height));
+        Assert.Equal((20010, 20020), (width, height));
+        Assert.False(ChatPicturePreview.CanPreview(new DataContent(bomb, ChatAttachmentLimits.Gif)));
+    }
+
+    [Fact(DisplayName = "A GIF whose frames stay inside its screen keeps the screen's size")]
+    public void Gif_FramesInside_KeepScreen()
+    {
+        byte[] gif =
+        [
+            .. "GIF89a"u8, 3, 0, 2, 0, 0, 0, 0,
+            0x2C, 0, 0, 0, 0, 3, 0, 2, 0, 0x81, 0, 0, 0, 255, 255, 255, 2, 2, 0x44, 0x01, 0,
+            0x2C, 1, 0, 1, 0, 2, 0, 1, 0, 0, 2, 0, 0x3B,
+        ];
+
+        Assert.True(ChatPicturePreview.TryReadSize(gif, out var width, out var height));
+        Assert.Equal((3, 2), (width, height));
+    }
+
+    [Fact(DisplayName = "A picture followed by more bytes than the preview allows gets none, and the limit is the default file limit")]
+    public void CanPreview_TooManyBytes()
+    {
+        Assert.Equal(ChatPicturePreview.MaxFileSize, new ChatAttachmentLimits().MaxFileSize);
+        var padded = new byte[ChatPicturePreview.MaxFileSize + 1];
+        AttachmentTests.Png.CopyTo(padded, 0);
+
+        Assert.False(ChatPicturePreview.CanPreview(new DataContent(padded, ChatAttachmentLimits.Png)));
+        Assert.True(ChatPicturePreview.CanPreview(new DataContent(AttachmentTests.Png, ChatAttachmentLimits.Png)));
+    }
+
     [Theory(DisplayName = "A header that is cut short, broken or of another format gives no size")]
     [InlineData("short-png")]
     [InlineData("jpeg-no-marker")]

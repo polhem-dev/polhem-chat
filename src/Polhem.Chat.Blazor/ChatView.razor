@@ -56,7 +56,7 @@
             }
             @if (reply.Text.Length > 0)
             {
-                <MarkdownViewer Markdown="@reply.Text" Options="MarkdownOptions" CopyCodeLabel="@S.CopyCode" />
+                <MarkdownViewer Markdown="@reply.Text" Options="ReplyOptions" CopyCodeLabel="@S.CopyCode" />
             }
             <div class="pch-reply-actions">
                 @if (reply.IsStopped)
@@ -108,8 +108,9 @@
                 </div>
             </details>
             @* WARNING: What the user approves is what the tool receives, so the arguments show in full and never cut short:
-               long ones scroll, with a note that there is more to read (polhem-chat.js marks the card), and characters
-               that draw nothing or reorder the text show as escapes. Nothing approves by default; only the button does. *@
+               long ones scroll, with a note that there is more to read (polhem-chat.js marks the card). VisibleText
+               escapes control and format characters, which include the ones that reorder text, and line and paragraph
+               separators. Nothing approves by default; only the button does. *@
             @if (call.Status == ToolCallStatus.AwaitingApproval)
             {
                 <div class="pch-approval">

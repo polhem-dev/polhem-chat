@@ -150,6 +150,7 @@ Polhem.Chat.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text, Syst
 Polhem.Chat.PromptSubmittedEventArgs.Text.get -> string!
 Polhem.Chat.VisibleText
 const Polhem.Chat.ChatPicturePreview.MaxAspectRatio = 20 -> int
+const Polhem.Chat.ChatPicturePreview.MaxFileSize = 5242880 -> int
 const Polhem.Chat.ChatPicturePreview.MaxPixels = 16777216 -> long
 static Polhem.Chat.ChatPicturePreview.CanPreview(Microsoft.Extensions.AI.DataContent! attachment) -> bool
 static Polhem.Chat.ChatPicturePreview.TryReadSize(System.ReadOnlySpan<byte> data, out int width, out int height) -> bool

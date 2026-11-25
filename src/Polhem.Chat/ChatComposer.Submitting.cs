@@ -67,20 +67,32 @@ public sealed partial class ChatComposer
     public bool CanDecide(ToolCallEntry? entry) =>
         entry is not null && _shown?.CurrentTurn?.PendingApprovals.Contains(entry) == true;
 
-    /// <summary>Approves a tool call that waits for the user's approval, so the client runs it.</summary>
+    /// <summary>
+    /// Approves a tool call that waits for the user's approval, so the client runs it. Nothing happens when
+    /// <see cref="CanDecide"/> is <see langword="false"/>, as for a second click on a button the view has not redrawn yet.
+    /// </summary>
     /// <param name="entry">The tool call.</param>
     public void Approve(ToolCallEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        _shown?.CurrentTurn?.Approve(entry);
+        if (CanDecide(entry))
+        {
+            _shown!.CurrentTurn!.Approve(entry);
+        }
     }
 
-    /// <summary>Rejects a tool call that waits for the user's approval, so the client does not run it.</summary>
+    /// <summary>
+    /// Rejects a tool call that waits for the user's approval, so the client does not run it. Nothing happens when
+    /// <see cref="CanDecide"/> is <see langword="false"/>.
+    /// </summary>
     /// <param name="entry">The tool call.</param>
     public void Reject(ToolCallEntry entry)
     {
         ArgumentNullException.ThrowIfNull(entry);
-        _shown?.CurrentTurn?.Reject(entry);
+        if (CanDecide(entry))
+        {
+            _shown!.CurrentTurn!.Reject(entry);
+        }
     }
 
     /// <summary>

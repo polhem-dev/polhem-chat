@@ -19,8 +19,9 @@ namespace Polhem.Chat.Blazor;
 /// set <see cref="IsGenerating"/> while a reply is in progress.
 /// </para>
 /// <para>
-/// IMPORTANT: The conversation must change on the component's dispatcher, which it does when the runner is started from
-/// a UI event. A conversation changed from another thread can change while the view reads it.
+/// IMPORTANT: The conversation must change on the dispatcher of the component that shows it, which it does when that
+/// component's UI event starts the runner. A conversation changed from another thread, or shown by views of two circuits
+/// at once (a singleton, or one user's two tabs), can change while a view reads it.
 /// </para>
 /// <para>
 /// The replies are drawn by <c>Polhem.Markdown.Blazor</c>, whose stylesheet the host page links:
@@ -32,6 +33,7 @@ public sealed partial class ChatView : IAsyncDisposable
     private const string ModulePath = "./_content/Polhem.Chat.Blazor/polhem-chat.js";
 
     private readonly ChatComposer _composer = new();
+    private readonly MarkdownOptions _noImages = CreateNoImages();
     private readonly List<ChatEntry> _watched = [];
     private RenderThrottle _throttle = null!;
     private RenderFragment<ChatEntry> _entryTemplate = null!;
@@ -73,12 +75,22 @@ public sealed partial class ChatView : IAsyncDisposable
 
     /// <summary>
     /// Gets or sets the texts the view shows. The default is <see cref="ChatStrings.ForCulture"/> for the UI culture of the
-    /// thread that created the view.
+    /// thread that created the view. Give it a new instance to change a text: changing a property of the instance the view
+    /// already shows does not redraw it.
     /// </summary>
     [Parameter]
     public ChatStrings? Strings { get; set; }
 
-    /// <summary>Gets or sets the options of the Markdown viewer that draws the replies.</summary>
+    /// <summary>
+    /// Gets or sets the options the replies are rendered with. <see langword="null"/>, the default, loads no images.
+    /// </summary>
+    /// <remarks>
+    /// A reply is the model's text, and an image in it loads from wherever the model points it: a prompt injection can
+    /// make the model write an image whose address carries what the conversation holds, and loading it sends that to the
+    /// address's server. So by default an image shows as its alternative text. Assigning an instance hands that choice to
+    /// the application, and a new <see cref="Polhem.Markdown.MarkdownOptions"/> loads images over <c>https</c>. Give the view
+    /// a new instance to change the options: changing the sets of the one it already shows does not redraw the replies.
+    /// </remarks>
     [Parameter]
     public MarkdownOptions? MarkdownOptions { get; set; }
 
@@ -94,6 +106,8 @@ public sealed partial class ChatView : IAsyncDisposable
     private IJSRuntime JS { get; set; } = null!;
 
     private ChatStrings S => _composer.Strings;
+
+    private MarkdownOptions ReplyOptions => MarkdownOptions ?? _noImages;
 
     private string RootClass => string.IsNullOrWhiteSpace(Class) ? "pch" : "pch " + Class;
 
@@ -155,12 +169,23 @@ public sealed partial class ChatView : IAsyncDisposable
     {
         if (firstRender)
         {
-            _module = await JS.InvokeAsync<IJSObjectReference>("import", ModulePath);
-            if (!_disposed)
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", ModulePath);
+            // NOTE: The view may be disposed while the module loads; it would then never dispose a module it held.
+            if (_disposed)
             {
-                await _module.InvokeVoidAsync("watchOverflow", _root);
+                await module.DisposeAsync();
+                return;
             }
+            _module = module;
+            await _module.InvokeVoidAsync("watchOverflow", _root);
         }
+    }
+
+    private static MarkdownOptions CreateNoImages()
+    {
+        var options = new MarkdownOptions();
+        options.AllowedImageSchemes.Clear();
+        return options;
     }
 
     // NOTE: Razor markup only finds public components, and EntryHost is not part of the package's API, so the list is

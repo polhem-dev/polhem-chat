@@ -30,15 +30,28 @@ export function watchOverflow(root) {
         }
     };
     const resize = new ResizeObserver(update);
-    const mutation = new MutationObserver(() => {
-        for (const box of root.querySelectorAll('.pch-approval-args')) {
-            resize.observe(box);
+    const observed = new Set();
+    // Only the boxes come and go; a streaming reply changes text, which the observer is not asked about. A box that
+    // appears is observed, and the resize observer then reports it at once.
+    const track = () => {
+        for (const box of observed) {
+            if (!box.isConnected) {
+                resize.unobserve(box);
+                observed.delete(box);
+            }
         }
-        update();
-    });
-    mutation.observe(root, { childList: true, subtree: true, characterData: true });
+        for (const box of root.querySelectorAll('.pch-approval-args')) {
+            if (!observed.has(box)) {
+                resize.observe(box);
+                observed.add(box);
+            }
+        }
+    };
+    const mutation = new MutationObserver(track);
+    mutation.observe(root, { childList: true, subtree: true });
     resize.observe(root);
     watched.set(root, { resize, mutation });
+    track();
     update();
 }
 

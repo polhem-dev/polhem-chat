@@ -217,6 +217,24 @@ public class ChatComposerTests
         Assert.Equal(TurnOutcome.Stopped, composer.ShownConversation!.Entries.OfType<TurnSummaryEntry>().Single().Outcome);
     }
 
+    [Fact(DisplayName = "A second decision on a call that no longer waits does nothing, as for a double click")]
+    public void Decide_Twice_SecondDoesNothing()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Clean up");
+        var turn = conversation.BeginTurn();
+        turn.Apply(new ChatResponseUpdate(ChatRole.Assistant, [new ToolApprovalRequestContent("r1", new FunctionCallContent("c1", "delete"))]));
+        var composer = new ChatComposer { Conversation = conversation };
+        var entry = conversation.Entries.OfType<ToolCallEntry>().Single();
+
+        composer.Approve(entry);
+        composer.Approve(entry);
+        composer.Reject(entry);
+
+        Assert.Equal(ToolCallStatus.Running, entry.Status);
+        Assert.False(composer.CanDecide(entry));
+    }
+
     [Fact(DisplayName = "The activity line says the model is thinking until a reply is being written, and nothing when idle")]
     public void DescribeActivity_FollowsTheTurn()
     {
