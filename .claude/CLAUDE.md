@@ -10,8 +10,8 @@
 
 ## Project overview
 
-An AI chat control for Avalonia on top of any `Microsoft.Extensions.AI` `IChatClient`. The scope and the steps are
-tracked in polhem-dev/polhem-chat#1.
+An AI chat control for Avalonia on top of any `Microsoft.Extensions.AI` `IChatClient`. What each release shipped is in
+`CHANGELOG.md`; planned work is tracked in the repository's GitHub issues.
 
 - `Polhem.Chat` is the conversation model: observable entries, the conversion of streamed `ChatResponseUpdate`
   contents into entries, and the runner that sends a turn, streams it, stops it and measures it. It has no UI.
