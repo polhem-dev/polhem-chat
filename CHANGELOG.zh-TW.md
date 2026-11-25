@@ -12,6 +12,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 - **安全性：** 以 `ApprovalRequiredAIFunction` 包裝的工具，要使用者在卡片上核准後才會執行；卡片顯示完整參數，隱藏字元一律跳脫顯示。停止或結束該輪則視為拒絕。
 - **行為變更：** `ToolCallStatus` 新增 `AwaitingApproval` 與 `Rejected` 兩個值。
+- `ToolCallTemplate` 以應用程式自己的樣板顯示某個工具的呼叫，即使隱藏活動也會顯示；`ToolCallEntry.TryGetArgument` 與 `TryGetResult` 不靠反射讀取參數與結果。
 - `ChatView.HeaderContent`、`PromptHeaderContent`、`PromptFooterContent`（各附樣板屬性）在對話上方、輸入框上方與下方顯示應用程式自己的內容。
 - `ChatTurn.AddEntry` 在回合進行中加入應用程式自己的項目，排在該輪摘要之前。
 

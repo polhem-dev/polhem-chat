@@ -13,6 +13,7 @@ Details and migration steps: [docs/en/changelogs/0.2.0.md](docs/en/changelogs/0.
 
 - **Security:** A tool wrapped in `ApprovalRequiredAIFunction` runs only after the user approves it on its card, which shows the arguments in full with hidden characters escaped; stopping or ending the turn rejects it.
 - **Changed:** `ToolCallStatus` has two new values, `AwaitingApproval` and `Rejected`.
+- `ToolCallTemplate` draws the calls of one tool with a template of the application's own, shown even while the activity is hidden; `ToolCallEntry.TryGetArgument` and `TryGetResult` read their values without reflection.
 - `ChatView.HeaderContent`, `PromptHeaderContent` and `PromptFooterContent`, each with a template, show the application's own content above the conversation and above and below the prompt box.
 - `ChatTurn.AddEntry` adds an entry of the application's own while a turn is in progress, before the turn's summary.
 
