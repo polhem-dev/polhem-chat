@@ -10,6 +10,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.3.0.md](docs/zh-TW/changelogs/0.3.0.md)
 
+- `Polhem.Chat` 新增 `ChatComposer`，承接使用者對 chat view 除了畫面以外的操作（輸入框、檔案、送出、停止、重新生成、編輯、核准），供各 UI 框架的 view 共用；`ChatView` 改用它，原有測試不需修改即全部通過。
+- **變更：** `PromptSubmittedEventArgs` 與 `ChatAttachmentRejectedEventArgs` 移到 `Polhem.Chat`。
 - **變更：** `ChatViewStrings` 改名為 `ChatStrings` 並移到 `Polhem.Chat`，由各 UI 框架的 view 共用，新增 `DescribeTurn` 與 `DescribeToolStatus`；`VisibleText` 在那裡改為公開。
 
 ## [0.2.1] - 2026-11-25

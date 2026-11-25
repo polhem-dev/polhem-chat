@@ -85,7 +85,7 @@ public partial class ChatView : TemplatedControl
     private readonly ViewCommand _rejectCommand;
     private ScrollViewer? _scrollViewer;
     private ItemsControl? _entries;
-    private ChatRunner? _activeRunner;
+    private readonly ChatComposer _composer = new();
     private ChatConversation? _shown;
     private readonly List<ChatEntry> _watchedEntries = [];
     private bool _isAttached;
@@ -101,6 +101,13 @@ public partial class ChatView : TemplatedControl
         _rejectCommand = new ViewCommand(parameter => Decide(parameter, approved: false), IsPendingApproval);
         CoerceValue(StringsProperty);
         CoerceValue(AttachmentLimitsProperty);
+        _composer.Strings = Strings;
+        _composer.AttachmentLimits = AttachmentLimits;
+        _composer.PropertyChanged += OnComposerPropertyChanged;
+        _composer.PromptSubmitted += OnComposerPromptSubmitted;
+        _composer.StopRequested += OnComposerStopRequested;
+        _composer.RegenerateRequested += OnComposerRegenerateRequested;
+        _composer.AttachmentRejected += OnComposerAttachmentRejected;
         PseudoClasses.Set(EmptyPseudoClass, true);
         AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
         AddHandler(ChatPromptBox.SubmitRequestedEvent, OnSubmitRequested);
@@ -266,11 +273,8 @@ public partial class ChatView : TemplatedControl
     {
         base.OnAttachedToVisualTree(e);
         _isAttached = true;
+        _composer.Connect();
         Subscribe();
-        if (_activeRunner is not null)
-        {
-            SetCurrentValue(IsGeneratingProperty, _activeRunner.IsRunning);
-        }
         UpdateEmpty();
     }
 
@@ -278,6 +282,7 @@ public partial class ChatView : TemplatedControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         Unsubscribe();
+        _composer.Disconnect();
         _isAttached = false;
         base.OnDetachedFromVisualTree(e);
     }
@@ -294,8 +299,13 @@ public partial class ChatView : TemplatedControl
         {
             ShowConversation();
         }
+        else if (change.Property == PromptProperty)
+        {
+            _composer.Prompt = change.GetNewValue<string?>();
+        }
         else if (change.Property == StringsProperty)
         {
+            _composer.Strings = change.GetNewValue<ChatStrings>();
             UpdateWaiting();
             UpdateProgress();
         }
@@ -310,7 +320,11 @@ public partial class ChatView : TemplatedControl
         }
         else if (change.Property == AllowsRewindProperty)
         {
-            UpdateRewind();
+            _composer.AllowsRewind = change.GetNewValue<bool?>();
+        }
+        else if (change.Property == AttachmentLimitsProperty)
+        {
+            _composer.AttachmentLimits = change.GetNewValue<ChatAttachmentLimits>();
         }
         else if (change.Property == AllowsAttachmentsProperty)
         {
@@ -319,6 +333,7 @@ public partial class ChatView : TemplatedControl
         }
         else if (change.Property == IsGeneratingProperty)
         {
+            _composer.IsGenerating = change.GetNewValue<bool>();
             PseudoClasses.Set(GeneratingPseudoClass, change.GetNewValue<bool>());
             UpdateWaiting();
             UpdateProgress();
@@ -334,30 +349,30 @@ public partial class ChatView : TemplatedControl
     private void AttachRunner(ChatRunner? runner)
     {
         Unsubscribe();
-        _activeRunner = runner;
-        _shown = runner?.Conversation ?? Conversation;
+        _composer.Runner = runner;
+        _shown = _composer.ShownConversation;
         Subscribe();
         Refresh();
     }
 
     private void ShowConversation()
     {
-        var conversation = _activeRunner?.Conversation ?? Conversation;
-        if (ReferenceEquals(conversation, _shown))
+        _composer.Conversation = Conversation;
+        if (ReferenceEquals(_composer.ShownConversation, _shown))
         {
             return;
         }
         Unsubscribe();
-        _shown = conversation;
+        _shown = _composer.ShownConversation;
         Subscribe();
         Refresh();
     }
 
     private void Refresh()
     {
-        if (_activeRunner is not null)
+        if (_composer.Runner is not null)
         {
-            SetCurrentValue(IsGeneratingProperty, _activeRunner.IsRunning);
+            SetCurrentValue(IsGeneratingProperty, _composer.IsGenerating);
         }
         if (_entries is not null)
         {
@@ -375,10 +390,6 @@ public partial class ChatView : TemplatedControl
         {
             return;
         }
-        if (_activeRunner is not null)
-        {
-            _activeRunner.PropertyChanged += OnRunnerPropertyChanged;
-        }
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged += OnEntriesChanged;
@@ -390,10 +401,6 @@ public partial class ChatView : TemplatedControl
 
     private void Unsubscribe()
     {
-        if (_activeRunner is not null)
-        {
-            _activeRunner.PropertyChanged -= OnRunnerPropertyChanged;
-        }
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged -= OnEntriesChanged;
@@ -403,11 +410,25 @@ public partial class ChatView : TemplatedControl
         WatchTurn(null);
     }
 
-    private void OnRunnerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnComposerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ChatRunner.IsRunning) && sender is ChatRunner runner)
+        switch (e.PropertyName)
         {
-            SetCurrentValue(IsGeneratingProperty, runner.IsRunning);
+            case nameof(ChatComposer.Prompt):
+                SetCurrentValue(PromptProperty, _composer.Prompt);
+                break;
+            case nameof(ChatComposer.IsGenerating):
+                SetCurrentValue(IsGeneratingProperty, _composer.IsGenerating);
+                break;
+            case nameof(ChatComposer.IsEditingPrompt):
+                UpdateEditing();
+                break;
+            case nameof(ChatComposer.CanRewind):
+                UpdateRewind();
+                break;
+            case nameof(ChatComposer.AttachmentError):
+                ShowAttachmentError(_composer.AttachmentError);
+                break;
         }
     }
 
@@ -439,6 +460,5 @@ public partial class ChatView : TemplatedControl
     {
         PseudoClasses.Set(EmptyPseudoClass, _shown is null || _shown.Entries.Count == 0);
         UpdateWaiting();
-        UpdateRewind();
     }
 }

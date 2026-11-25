@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
-using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat.Avalonia;
 
@@ -10,87 +9,11 @@ namespace Polhem.Chat.Avalonia;
 public partial class ChatView
 {
     /// <summary>
-    /// Submits a prompt: raises <see cref="PromptSubmitted"/>, then sends it through the <see cref="Runner"/> if there is
-    /// one. Nothing happens while a reply is in progress or when the prompt is blank.
+    /// Submits a prompt through the composer: raises <see cref="PromptSubmitted"/>, then sends it through the
+    /// <see cref="Runner"/> if there is one.
     /// </summary>
     /// <param name="text">The prompt, or <see langword="null"/> for the text in the prompt box.</param>
-    internal async Task SubmitAsync(string? text)
-    {
-        var fromBox = text is null;
-        text ??= Prompt ?? string.Empty;
-        // The files wait in the box, so only a prompt from the box carries them; a suggestion goes alone.
-        IReadOnlyList<DataContent> attachments = fromBox ? [.. _pendingAttachments] : [];
-        if (IsGenerating || (string.IsNullOrWhiteSpace(text) && attachments.Count == 0))
-        {
-            return;
-        }
-
-        var editing = fromBox && IsEditingPrompt;
-        var submitted = new PromptSubmittedEventArgs(text, attachments) { IsEdit = editing };
-        PromptSubmitted?.Invoke(this, submitted);
-        if (submitted.Cancel)
-        {
-            return;
-        }
-        if (fromBox)
-        {
-            EmptyBox();
-        }
-        ScrollToLatest();
-
-        var ended = editing ? EndEdit() : default;
-        if (_activeRunner is { } runner)
-        {
-            await SendThroughAsync(runner, text, attachments, fromBox, editing ? ended : null);
-        }
-    }
-
-    private async Task SendThroughAsync(
-        ChatRunner runner,
-        string text,
-        IReadOnlyList<DataContent> attachments,
-        bool fromBox,
-        (UserPromptEntry? Entry, (string? Prompt, DataContent[] Attachments)? Before)? edit)
-    {
-        var result = edit is not null
-            ? await runner.EditLastPromptAsync(text, attachments, CancellationToken.None)
-            : await runner.SendAsync(text, attachments, CancellationToken.None);
-        if (result is null && fromBox)
-        {
-            GiveBack(text, attachments, edit);
-        }
-    }
-
-    private void EmptyBox()
-    {
-        SetCurrentValue(PromptProperty, string.Empty);
-        _pendingAttachments.Clear();
-        ShowAttachmentError(null);
-    }
-
-    /// <summary>
-    /// Gives a prompt the runner's sending handler canceled back to the box, instead of losing it, unless the user has
-    /// typed something new meanwhile; an edit goes on.
-    /// </summary>
-    private void GiveBack(
-        string text,
-        IReadOnlyList<DataContent> attachments,
-        (UserPromptEntry? Entry, (string? Prompt, DataContent[] Attachments)? Before)? edit)
-    {
-        if (!string.IsNullOrEmpty(Prompt) || _pendingAttachments.Count > 0)
-        {
-            return;
-        }
-        SetCurrentValue(PromptProperty, text);
-        foreach (var attachment in attachments)
-        {
-            _pendingAttachments.Add(attachment);
-        }
-        if (edit is { } ended)
-        {
-            ResumeEdit(ended);
-        }
-    }
+    internal Task SubmitAsync(string? text) => _composer.SubmitAsync(text);
 
     /// <summary>Copies the text of an entry, or a string, to the clipboard.</summary>
     /// <param name="parameter">An entry or a string.</param>
@@ -111,30 +34,36 @@ public partial class ChatView
         _ => null,
     };
 
-    private bool IsPendingApproval(object? parameter) =>
-        parameter is ToolCallEntry entry && _shown?.CurrentTurn?.PendingApprovals.Contains(entry) == true;
+    private bool IsPendingApproval(object? parameter) => parameter is ToolCallEntry entry && _composer.CanDecide(entry);
 
     private void Decide(object? parameter, bool approved)
     {
-        if (parameter is not ToolCallEntry entry || _shown?.CurrentTurn is not { } turn)
+        if (parameter is not ToolCallEntry entry)
         {
             return;
         }
         if (approved)
         {
-            turn.Approve(entry);
+            _composer.Approve(entry);
         }
         else
         {
-            turn.Reject(entry);
+            _composer.Reject(entry);
         }
     }
 
-    private void Stop()
+    private void Stop() => _composer.Stop();
+
+    private void OnComposerPromptSubmitted(object? sender, PromptSubmittedEventArgs e)
     {
-        _activeRunner?.Stop();
-        StopRequested?.Invoke(this, EventArgs.Empty);
+        PromptSubmitted?.Invoke(this, e);
+        if (!e.Cancel)
+        {
+            ScrollToLatest();
+        }
     }
+
+    private void OnComposerStopRequested(object? sender, EventArgs e) => StopRequested?.Invoke(this, e);
 
     private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
     {
@@ -146,7 +75,7 @@ public partial class ChatView
         else if (e.Key == Key.Escape && IsEditingPrompt)
         {
             e.Handled = true;
-            CancelEdit();
+            _composer.CancelEdit();
         }
     }
 

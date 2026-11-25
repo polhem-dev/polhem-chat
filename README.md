@@ -20,7 +20,7 @@ bring the `IChatClient` you already use.
 
 | Package | For |
 |---------|-----|
-| `Polhem.Chat` | The conversation model: streamed updates turned into conversation entries, and a runner for each turn. No UI |
+| `Polhem.Chat` | The conversation model: streamed updates turned into conversation entries, a runner for each turn, and what the user does with a view (`ChatComposer`). No UI |
 | `Polhem.Chat.Avalonia` | The chat control for Avalonia, rendering Markdown with [Polhem.Markdown.Avalonia](https://github.com/polhem-dev/polhem-markdown) |
 
 The packages are published on [nuget.org](https://www.nuget.org/packages?q=Polhem.Chat); the changes of each release

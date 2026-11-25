@@ -1,4 +1,4 @@
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
 /// <summary>Reads a stream the caller owns without closing it when the reader is done.</summary>
 internal sealed class NonClosingStream(Stream inner) : Stream
