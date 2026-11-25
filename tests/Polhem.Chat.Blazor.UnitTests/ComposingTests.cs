@@ -229,7 +229,7 @@ public class ComposingTests : BunitContext
     }
 
     [Fact(DisplayName = "A picked picture waits under the box with its size, and its button removes it")]
-    public void Attach_PickedPicture()
+    public async Task Attach_PickedPicture()
     {
         var view = Render<ChatView>(parameters => parameters
             .Add(v => v.Conversation, new ChatConversation())
@@ -244,10 +244,10 @@ public class ComposingTests : BunitContext
         Assert.Equal(new ChatStrings().FormatFileSize(s_png.Length), view.Find(".pch-pending-size").TextContent);
         Assert.Single(view.FindAll(".pch-pending-thumbnail"));
 
-        view.Find(".pch-remove-attachment").Click();
+        await view.Find(".pch-remove-attachment").ClickAsync(new());
 
-        Assert.Empty(view.Instance.PendingAttachments);
-        Assert.Empty(view.FindAll(".pch-pending"));
+        view.WaitForAssertion(() => Assert.Empty(view.Instance.PendingAttachments));
+        view.WaitForAssertion(() => Assert.Empty(view.FindAll(".pch-pending")));
     }
 
     [Fact(DisplayName = "A file that is not allowed is not attached, says why, and tells the application")]
@@ -314,10 +314,10 @@ public class ComposingTests : BunitContext
         Assert.Null(await view.InvokeAsync(() => view.Instance.AddAttachmentAsync("pasted.png", content)));
         view.WaitForAssertion(() => Assert.Single(view.FindAll(".pch-pending-file")));
 
-        view.Find(".pch-send").Click();
+        await view.Find(".pch-send").ClickAsync(new());
 
-        Assert.Equal("pasted.png", Assert.Single(submitted!.Attachments).Name);
-        Assert.Empty(view.FindAll(".pch-pending"));
+        view.WaitForAssertion(() => Assert.Equal("pasted.png", Assert.Single(submitted!.Attachments).Name));
+        view.WaitForAssertion(() => Assert.Empty(view.FindAll(".pch-pending")));
     }
 
     [Fact(DisplayName = "A disposed view stops watching the keys of its box")]
