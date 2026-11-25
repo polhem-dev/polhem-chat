@@ -136,11 +136,10 @@ public class ChatAttachmentLimits
             return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.Unreadable);
         }
 
-        var extension = Path.GetExtension(name);
+        var extension = TypeExtension(name);
         var named = s_extensions.GetValueOrDefault(extension);
-        // A name with an extension this package does not know says a type it cannot check, such as photo.png.exe. A
-        // part after the last dot with no letter in it, as in "Scan 2026.11.25", is not an extension.
-        if (named is null && extension.Any(char.IsLetter))
+        // A name with an extension this package does not know says a type it cannot check, such as photo.png.exe.
+        if (named is null && extension.Length > 0)
         {
             return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.TypeNotAllowed);
         }
@@ -187,10 +186,37 @@ public class ChatAttachmentLimits
     {
         ArgumentNullException.ThrowIfNull(path);
         var name = path[(path.LastIndexOfAny(['/', '\\']) + 1)..];
-        return string.Concat(name.EnumerateRunes()
+        name = string.Concat(name.EnumerateRunes()
             .Where(rune => Rune.GetUnicodeCategory(rune) is not (UnicodeCategory.Control or UnicodeCategory.Format
                 or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator))
-            .Select(rune => rune.ToString())).Trim().TrimEnd('.', ' ');
+            .Select(rune => rune.ToString())).TrimStart();
+        // Spaces of any kind and dots, in any order, until none is left at the end; the result does not change when
+        // cleaned again.
+        var end = name.Length;
+        while (end > 0 && (name[end - 1] == '.' || char.IsWhiteSpace(name[end - 1])))
+        {
+            end--;
+        }
+        return name[..end];
+    }
+
+    /// <summary>
+    /// Returns the extension that says the type of a file. Parts after the last dots made of ASCII digits only, as in
+    /// "Scan 2026.11.25", are not extensions and are passed over, so "photo.exe.1" still says ".exe". Any other
+    /// character counts, since it may be a letter of another script or a symbol that passes for one.
+    /// </summary>
+    private static string TypeExtension(string name)
+    {
+        var rest = name;
+        while (true)
+        {
+            var extension = Path.GetExtension(rest);
+            if (extension.Length <= 1 || extension.AsSpan(1).ContainsAnyExcept("0123456789"))
+            {
+                return extension;
+            }
+            rest = rest[..^extension.Length];
+        }
     }
 
     private static string? Sniff(ReadOnlySpan<byte> content)

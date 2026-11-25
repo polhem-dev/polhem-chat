@@ -84,6 +84,11 @@ public class AttachmentTests
     [InlineData("photo.png.exe")]
     [InlineData("photo.png.exe.")]
     [InlineData("photo.png.exe . ")]
+    [InlineData("photo.exe.1")]
+    [InlineData("photo.png.\U0001D41E\U0001D431\U0001D41E")]
+    [InlineData("photo.png.\U0001F480")]
+    [InlineData("photo.png.\u0661")]
+    [InlineData("photo.exe.\u3000.")]
     [InlineData("photo.heic")]
     public void Check_UnknownExtension_IsRejected(string fileName) =>
         Assert.Equal(ChatAttachmentProblem.TypeNotAllowed, new ChatAttachmentLimits().Check(fileName, Png, []).Problem);
@@ -98,6 +103,23 @@ public class AttachmentTests
         Assert.Equal(ChatAttachmentProblem.Unreadable, limits.Check("folder/", Png, []).Problem);
         Assert.Equal(ChatAttachmentProblem.Unreadable, limits.Check("\u200B", Png, []).Problem);
     }
+
+    [Theory(DisplayName = "A cleaned name stays the same when cleaned again")]
+    [InlineData("photo.exe.\u3000.")]
+    [InlineData("photo.png\u2003.")]
+    [InlineData(" a/b\\c.png . . ")]
+    [InlineData("...")]
+    public void FileNameOf_IsStable(string path)
+    {
+        var name = ChatAttachmentLimits.FileNameOf(path);
+
+        Assert.Equal(name, ChatAttachmentLimits.FileNameOf(name));
+        Assert.False(name.EndsWith('.') || (name.Length > 0 && char.IsWhiteSpace(name[^1])));
+    }
+
+    [Fact(DisplayName = "A picture whose name ends in white space before a dot is still a picture")]
+    public void Check_TrailingSpaceBeforeDot_IsAllowed() =>
+        Assert.Equal("photo.png", new ChatAttachmentLimits().Check("photo.png\u2003.", Png, []).Attachment!.Name);
 
     [Fact(DisplayName = "Limits as large as a long holds do not overflow")]
     public void Check_HugeLimits()

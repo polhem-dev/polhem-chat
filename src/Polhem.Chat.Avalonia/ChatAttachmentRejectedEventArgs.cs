@@ -7,7 +7,7 @@ public sealed class ChatAttachmentRejectedEventArgs(string fileName, ChatAttachm
 {
     /// <summary>
     /// Gets the name of the file as <see cref="ChatAttachmentLimits.FileNameOf"/> gives it: without its folders and
-    /// without characters that draw nothing.
+    /// without characters that draw nothing. It is empty when nothing else was left of the name.
     /// </summary>
     public string FileName { get; } = fileName;
 
