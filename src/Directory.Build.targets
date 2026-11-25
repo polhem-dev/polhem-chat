@@ -2,9 +2,10 @@
 
   <!--
     Dependency gate. Each package may take only the external packages that do its job: Microsoft.Extensions.AI.Abstractions
-    for the conversation model, and Avalonia with the Markdown viewer for the control. Every package reference flows to
-    every consumer, so one that is not on the list fails the build. In particular, neither package may depend on the
-    Polhem framework: the packages are for any Avalonia application.
+    for the conversation model, Avalonia with the Markdown viewer for the Avalonia control, and Blazor with the Markdown
+    viewer for the Blazor component. Every package reference flows to every consumer, so one that is not on the list
+    fails the build. In particular, no package may depend on the Polhem framework: the packages are for any Avalonia or
+    Blazor application.
 
     Only references that flow to consumers count: a package with PrivateAssets="all" (SourceLink, analyzers) does not
     appear in the nuspec. tests/Polhem.Chat.UnitTests/DependencyGateTests.cs checks the assemblies each package actually
@@ -16,6 +17,10 @@
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'Polhem.Chat.Avalonia'">
     <_PolhemChatAllowedPackage Include="Avalonia" />
     <_PolhemChatAllowedPackage Include="Polhem.Markdown.Avalonia" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Polhem.Chat.Blazor'">
+    <_PolhemChatAllowedPackage Include="Microsoft.AspNetCore.Components.Web" />
+    <_PolhemChatAllowedPackage Include="Polhem.Markdown.Blazor" />
   </ItemGroup>
 
   <Target Name="PolhemChatDependencyGate" BeforeTargets="CoreCompile">

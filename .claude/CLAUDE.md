@@ -10,25 +10,31 @@
 
 ## Project overview
 
-An AI chat control for Avalonia on top of any `Microsoft.Extensions.AI` `IChatClient`. What each release shipped is in
+An AI chat control for Avalonia, and a Blazor component in progress, on top of any `Microsoft.Extensions.AI`
+`IChatClient`. What each release shipped is in
 `CHANGELOG.md`; planned work is tracked in the repository's GitHub issues.
 
 - `Polhem.Chat` is the conversation model: observable entries, the conversion of streamed `ChatResponseUpdate`
-  contents into entries, and the runner that sends a turn, streams it, stops it and measures it. It has no UI.
+  contents into entries, and the runner that sends a turn, streams it, stops it and measures it. It also holds what
+  every front end shares: `ChatComposer` (what the user does with a view) and `ChatStrings` (the texts). It has no UI.
 - `Polhem.Chat.Avalonia` is the control that shows that model.
+- `Polhem.Chat.Blazor` is the Blazor component that shows it. It is not packed yet (`IsPackable` is false in its
+  project) until it is complete.
 
 Rules that hold across the repository:
 
-- **Version**: `src/Directory.Build.props`, the only place it is declared. The two packages always ship together
-  under that version.
+- **Version**: `src/Directory.Build.props`, the only place it is declared. The packages always ship together under
+  that version.
 - **Dependencies**: `Polhem.Chat` takes only `Microsoft.Extensions.AI.Abstractions`; `Polhem.Chat.Avalonia` takes
-  `Polhem.Chat`, Avalonia and `Polhem.Markdown.Avalonia`. Neither may depend on the Polhem framework: the audience is any
-  Avalonia developer. `src/Directory.Build.targets` (CHAT9001) and `DependencyGateTests` enforce it. Do not add a
+  `Polhem.Chat`, Avalonia and `Polhem.Markdown.Avalonia`; `Polhem.Chat.Blazor` takes `Polhem.Chat`,
+  `Microsoft.AspNetCore.Components.Web` and `Polhem.Markdown.Blazor`. None may depend on the Polhem framework: the
+  audience is any Avalonia or Blazor developer. The two Markdown viewers pin `Polhem.Markdown` to an exact version, so
+  the front ends must take viewer versions that agree on it. `src/Directory.Build.targets` (CHAT9001) and `DependencyGateTests` enforce it. Do not add a
   package reference without asking.
 - **Lowest supported versions**: each package reference names the lowest version the package supports, not the newest,
   because that version becomes the minimum for every consumer.
-- **Type names**: no public type may share its simple name with a type of `Microsoft.Extensions.AI`, Avalonia or the
-  common .NET UI frameworks (`ChatMessage`, `Control`, `MenuItem`, `Message`…), because applications import those
+- **Type names**: no public type may share its simple name with a type of `Microsoft.Extensions.AI`, Avalonia, Blazor,
+  Microsoft's Blazor AI components or the common .NET UI frameworks (`ChatMessage`, `Control`, `MenuItem`, `Message`…), because applications import those
   namespaces next to ours. `PublicApiGateTests` enforces it.
 - **No provider client and no storage implementation** ship in these packages: they only know `IChatClient`, and history
   is loaded and saved as `Microsoft.Extensions.AI` messages the application stores however it likes.

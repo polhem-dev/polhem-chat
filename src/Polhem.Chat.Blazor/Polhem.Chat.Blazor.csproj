@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <Description>An AI chat component for Blazor: streamed replies rendered as Markdown, reasoning, tool calls, per-turn usage, stop and copy, on top of any Microsoft.Extensions.AI IChatClient.</Description>
+    <!-- The component runs on WebAssembly, where the application is trimmed. The trim and AOT analyzers turn every
+         incompatible call into a build error. -->
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- IMPORTANT: Not packed until the component is complete. A release packs every packable project of the solution,
+         and would otherwise publish this package empty. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The lowest versions the component supports, not the newest: they become the minimum for every consumer.
+         Polhem.Markdown.Blazor 0.2.1 takes the same Polhem.Markdown as Polhem.Markdown.Avalonia 0.2.1, which the Avalonia
+         control uses: Polhem.Markdown is pinned to an exact version, so the two front ends must agree on it. -->
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.1" />
+    <PackageReference Include="Polhem.Markdown.Blazor" Version="0.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Polhem.Chat.Blazor.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Polhem.Chat\Polhem.Chat.csproj" />
+  </ItemGroup>
+
+</Project>

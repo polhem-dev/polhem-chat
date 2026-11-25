@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- NOTE: bUnit 2.7.2 is the newest version that takes no newer Blazor than 10.0.0, so the tests run against the lowest
+       Microsoft.AspNetCore.Components.Web the component supports. Later versions raise it to 10.0.10 and beyond. -->
+  <!-- bUnit 2.7.2 takes AngleSharp 1.4.0, which has a known vulnerability (GHSA-pgww-w46g-26qg); 1.5.0 is the first
+       version that fixes it. -->
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="2.7.2" />
+    <PackageReference Include="AngleSharp" Version="1.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polhem.Chat.Blazor\Polhem.Chat.Blazor.csproj" />
+  </ItemGroup>
+
+  <!-- The runner is driven by the same scripted client as the model tests, so neither calls a real model. -->
+  <ItemGroup>
+    <Compile Include="..\Polhem.Chat.UnitTests\ScriptedChatClient.cs" Link="Shared\ScriptedChatClient.cs" />
+  </ItemGroup>
+
+</Project>
