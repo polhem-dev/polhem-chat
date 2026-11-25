@@ -9,6 +9,8 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-25
+
 Details and migration steps: [docs/en/changelogs/0.2.0.md](docs/en/changelogs/0.2.0.md)
 
 - **Security:** A tool wrapped in `ApprovalRequiredAIFunction` runs only after the user approves it on its card, which shows the arguments in full with hidden characters escaped; stopping or ending the turn rejects it.
@@ -50,7 +52,8 @@ Details: [docs/en/changelogs/0.1.0.md](docs/en/changelogs/0.1.0.md)
 - The prompt box sends on Enter and ignores the Enter that confirms an input method's composition.
 - English and Traditional Chinese texts, and a theme for Fluent and Semi, light and dark.
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/polhem-dev/polhem-chat/releases/tag/v0.1.0

@@ -36,7 +36,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
         _projector = new EntryProjector(this);
     }
 
-    /// <summary>Occurs when <see cref="CurrentTurn"/> changes.</summary>
+    /// <summary>
+    /// Occurs when <see cref="CurrentTurn"/> changes, and with <see cref="LastPrompt"/> when
+    /// <see cref="RewindLastPrompt"/> changed which prompt is the last one.
+    /// </summary>
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
@@ -206,6 +209,9 @@ public sealed class ChatConversation : INotifyPropertyChanged
             _projector.Forget(Entries[entry]);
             Entries.RemoveAt(entry);
         }
+        // The entries may not have changed (the application removed the prompt's entry), so a front end that follows
+        // them would not learn that another prompt is now the last one.
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPrompt)));
         return prompt;
     }
 
