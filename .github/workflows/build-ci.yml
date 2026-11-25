@@ -43,6 +43,17 @@ jobs:
         if: steps.changes.outputs.build == 'true'
         run: dotnet test Polhem.Chat.slnx --configuration Release --no-build
 
+      # The Blazor view's script is tested with Node's own test runner; no package is installed.
+      - name: Setup Node.js
+        if: steps.changes.outputs.build == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Test scripts
+        if: steps.changes.outputs.build == 'true'
+        run: node --test tests/Polhem.Chat.Blazor.ScriptTests/polhem-chat.test.mjs
+
   # SonarCloud analysis. It runs apart from the build job above, because the scanner wraps the build and turns warnings
   # back into warnings, so the build job stays the gate for TreatWarningsAsErrors. Settings tied to the files of this
   # repository are in SonarQube.Analysis.xml.
@@ -125,6 +136,22 @@ jobs:
       - name: Test with coverage
         if: steps.token.outputs.enabled == 'true'
         run: dotnet test Polhem.Chat.slnx --configuration Release --no-build --collect "Code Coverage;Format=xml" --results-directory TestResults/sonar
+
+      - name: Setup Node.js
+        if: steps.token.outputs.enabled == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 24
+
+      # The coverage of the Blazor view's script, as LCOV, which SonarQube.Analysis.xml points the scanner to.
+      - name: Test scripts with coverage
+        if: steps.token.outputs.enabled == 'true'
+        run: >-
+          mkdir -p TestResults/js &&
+          node --test --experimental-test-coverage --test-coverage-include='src/**'
+          --test-reporter=spec --test-reporter-destination=stdout
+          --test-reporter=lcov --test-reporter-destination=TestResults/js/lcov.info
+          tests/Polhem.Chat.Blazor.ScriptTests/polhem-chat.test.mjs
 
       - name: SonarScanner end
         if: steps.token.outputs.enabled == 'true'

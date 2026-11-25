@@ -114,7 +114,51 @@ public class ActivityAndScrollingTests : BunitContext
 
         Assert.True(view.Instance.FollowsLatest);
         Assert.Empty(view.FindAll(".pch-jump"));
-        _module.VerifyInvoke("scrollToLatest");
+        // The button went away, so the keyboard focus moves to the conversation.
+        Assert.Equal(true, _module.VerifyInvoke("scrollToLatest").Arguments[1]);
+    }
+
+    [Fact(DisplayName = "A cleared conversation follows its end again, without a jump button left over")]
+    public void Scrolling_Cleared()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var view = HostDriven(conversation, isGenerating: false);
+        Bridge().OnFollowsLatestChanged(false);
+        view.WaitForAssertion(() => Assert.Single(view.FindAll(".pch-jump")));
+
+        conversation.Clear();
+
+        view.WaitForAssertion(() => Assert.Empty(view.FindAll(".pch-jump")));
+        Assert.True(view.Instance.FollowsLatest);
+    }
+
+    [Fact(DisplayName = "Hiding the activity while idle moves the keyboard focus to the conversation, since the toggle goes away")]
+    public void Activity_ToggleOffWhileIdle_MovesFocus()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var view = Render<ChatView>(parameters => parameters
+            .Add(v => v.Conversation, conversation)
+            .Add(v => v.ShowsActivity, true)
+            .Add(v => v.Strings, new ChatStrings()));
+
+        view.Find(".pch-activity-toggle").Click();
+
+        Assert.Empty(view.FindAll(".pch-activity"));
+        Assert.Equal(true, _module.VerifyInvoke("scrollToLatest").Arguments[1]);
+    }
+
+    [Fact(DisplayName = "A view disposed while its script starts watching never starts following")]
+    public async Task Dispose_WhileWatching_DoesNotFollow()
+    {
+        var watching = _module.SetupVoid("watchOverflow", _ => true);
+        HostDriven(new ChatConversation(), isGenerating: false);
+
+        await DisposeComponentsAsync();
+        watching.SetVoidResult();
+
+        Assert.Empty(_module.Invocations["follow"]);
     }
 
     [Fact(DisplayName = "Showing another conversation scrolls to its newest entry")]

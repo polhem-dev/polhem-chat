@@ -7,19 +7,20 @@ const followers = new WeakMap();
 // make the view stop following a reply it never left.
 const endTolerance = 4;
 
-// How long after the user's last scroll input a move of the offset still counts as theirs. A wheel or trackpad keeps
-// sending events while it moves, so this only has to bridge the gap between two of them.
-const userScrollWindow = 400;
-
-const scrollKeys = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
-
-// Keeps the newest entry in sight as the content grows, until the user scrolls up; tells the view (bridge) when the user
-// leaves the end or comes back to it. A streaming reply is followed here, without a round trip to the server per token.
+// Keeps the newest entry in sight as the content grows, until the view leaves the end by scrolling up; tells the view
+// (bridge) when it leaves the end or comes back to it. A streaming reply is followed here, without a round trip to the
+// server per token.
+//
+// NOTE: Any upward move that leaves the end stops following, whoever made it. In a browser the user moves the offset in
+// many ways besides the wheel and the scroll bar: moving the keyboard focus to an earlier reply, finding text in the page,
+// a screen reader's cursor, a link to an anchor. Pulling the view back from any of those would leave keyboard and screen
+// reader users unable to read back. A move the browser makes itself, clamping the offset when the content shrinks,
+// stays at the end and changes nothing.
 export function follow(scroller, bridge) {
     if (followers.has(scroller)) {
         return;
     }
-    const state = { follows: true, lastInput: -Infinity, lastTop: scroller.scrollTop };
+    const state = { follows: true, lastTop: scroller.scrollTop };
     const atEnd = () => scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - endTolerance;
     const toEnd = () => {
         scroller.scrollTop = scroller.scrollHeight;
@@ -28,63 +29,41 @@ export function follow(scroller, bridge) {
     const set = (follows) => {
         if (state.follows !== follows) {
             state.follows = follows;
-            bridge.invokeMethodAsync('OnFollowsLatestChanged', follows);
+            // The view may be gone, or its circuit; there is no one left to tell then.
+            bridge.invokeMethodAsync('OnFollowsLatestChanged', follows).catch(() => { });
         }
     };
-    const input = () => { state.lastInput = performance.now(); };
-    // A press on the scroll bar targets the scroller itself; a press on the content (a button, a card) is not a scroll.
-    const pointerInput = (event) => {
-        if (event.target === scroller) {
-            input();
-        }
-    };
-    const keyInput = (event) => {
-        if (scrollKeys.has(event.key)) {
-            input();
-        }
-    };
-    // NOTE: The offset also moves without the user: the browser clamps it when the content shrinks, and an element that
-    // takes focus scrolls itself into view, often far above the end. So only an offset that went up while the user was
-    // scrolling leaves the end; any other move is followed back to it.
     const onScroll = () => {
         const top = scroller.scrollTop;
         const up = top < state.lastTop;
         state.lastTop = top;
-        if (up && performance.now() - state.lastInput < userScrollWindow) {
+        if (up || !state.follows) {
             set(atEnd());
-        } else if (state.follows) {
-            if (!atEnd()) {
-                toEnd();
-            }
-        } else if (!up && atEnd()) {
-            set(true);
         }
     };
+    // The content grew, or the box changed: a view that follows goes back to the end, and one that does not follows
+    // again once the content fits or ends in sight (after a clear or a rewind).
     const grow = new ResizeObserver(() => {
-        if (state.follows) {
+        if (!scroller.isConnected) {
+            unfollow(scroller);
+        } else if (state.follows) {
             toEnd();
+        } else if (atEnd()) {
+            set(true);
         }
     });
     for (const child of scroller.children) {
         grow.observe(child);
     }
     grow.observe(scroller);
-    const listeners = [
-        ['scroll', onScroll],
-        ['wheel', input],
-        ['touchmove', input],
-        ['pointerdown', pointerInput],
-        ['keydown', keyInput],
-    ];
-    for (const [name, handler] of listeners) {
-        scroller.addEventListener(name, handler, { passive: true });
-    }
-    followers.set(scroller, { state, grow, listeners, toEnd });
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    followers.set(scroller, { state, grow, onScroll, toEnd });
     toEnd();
 }
 
-// Scrolls to the newest entry and follows new entries again; the view already knows.
-export function scrollToLatest(scroller) {
+// Scrolls to the newest entry and follows new entries again; the view already knows. With focus, the keyboard focus moves
+// to the conversation, for a button that goes away once it has done its work.
+export function scrollToLatest(scroller, focus) {
     const follower = followers.get(scroller);
     if (follower) {
         follower.state.follows = true;
@@ -92,15 +71,16 @@ export function scrollToLatest(scroller) {
     } else {
         scroller.scrollTop = scroller.scrollHeight;
     }
+    if (focus) {
+        scroller.focus({ preventScroll: true });
+    }
 }
 
 export function unfollow(scroller) {
-    const follower = followers.get(scroller);
+    const follower = scroller && followers.get(scroller);
     if (follower) {
         follower.grow.disconnect();
-        for (const [name, handler] of follower.listeners) {
-            scroller.removeEventListener(name, handler);
-        }
+        scroller.removeEventListener('scroll', follower.onScroll);
         followers.delete(scroller);
     }
 }
@@ -123,6 +103,10 @@ export function watchOverflow(root) {
         return;
     }
     const update = () => {
+        if (!root.isConnected) {
+            unwatch(root);
+            return;
+        }
         for (const box of root.querySelectorAll('.pch-approval-args')) {
             const card = box.parentElement;
             if (box.scrollHeight > box.clientHeight + 1) {
@@ -159,7 +143,7 @@ export function watchOverflow(root) {
 }
 
 export function unwatch(root) {
-    const observers = watched.get(root);
+    const observers = root && watched.get(root);
     if (observers) {
         observers.resize.disconnect();
         observers.mutation.disconnect();

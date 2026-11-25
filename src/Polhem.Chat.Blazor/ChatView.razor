@@ -2,14 +2,15 @@
 @using Polhem.Markdown.Blazor
 
 <div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes">
-    <div class="pch-scroller" @ref="_scroller">
+    @* Focusable, so the keyboard scrolls the conversation (WCAG 2.1.1). *@
+    <div class="pch-scroller" tabindex="0" @ref="_scroller">
         <div class="pch-content">
             <div class="pch-entries">
                 @_entries
             </div>
             @if (_composer.IsGenerating || _showsActivity)
             {
-                var activity = _composer.DescribeActivity(_showsActivity);
+                var activity = DescribeActivity();
                 var progress = Progress;
                 @* While a reply is in progress: what the model is doing when no entry shows it, then the request the turn is
                    on, its seconds and its output tokens, kept current once a second. *@
@@ -36,7 +37,7 @@
     {
         @* A round button with an arrow down, or three pulsing dots while a reply is in progress, so it shows that new text
            is arriving below. The text is the tooltip and the accessible name. *@
-        <button type="button" class="pch-jump" title="@S.JumpToLatest" aria-label="@S.JumpToLatest" @onclick="ScrollToLatestAsync">
+        <button type="button" class="pch-jump" title="@S.JumpToLatest" aria-label="@S.JumpToLatest" @onclick="JumpToLatestAsync">
             @if (_composer.IsGenerating)
             {
                 <span class="pch-jump-dots" aria-hidden="true"><span></span><span></span><span></span></span>

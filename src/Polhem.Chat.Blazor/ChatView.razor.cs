@@ -122,7 +122,6 @@ public sealed partial class ChatView : IAsyncDisposable
         _disposed = true;
         _throttle.Stop();
         StopProgressTimer();
-        _scrollBridge?.Dispose();
         Show(null);
         _composer.PropertyChanged -= OnComposerPropertyChanged;
         _composer.Disconnect();
@@ -140,6 +139,8 @@ public sealed partial class ChatView : IAsyncDisposable
                 _module = null;
             }
         }
+        // After the script stopped following: a scroll in between would otherwise call a disposed reference.
+        _scrollBridge?.Dispose();
     }
 
     /// <inheritdoc/>
@@ -170,7 +171,7 @@ public sealed partial class ChatView : IAsyncDisposable
             _showsActivityParameter = ShowsActivity;
             _showsActivity = ShowsActivity;
         }
-        if (!ReferenceEquals(Strings, _strings) || !ReferenceEquals(MarkdownOptions, _markdownOptions) || activityChanged)
+        if (!ReferenceEquals(Strings, _strings) || !ReferenceEquals(MarkdownOptions, _markdownOptions))
         {
             _strings = Strings;
             _markdownOptions = MarkdownOptions;
@@ -199,8 +200,18 @@ public sealed partial class ChatView : IAsyncDisposable
             }
             _module = module;
             await _module.InvokeVoidAsync("watchOverflow", _root);
+            // NOTE: Disposing may also happen while the script starts watching; disposing has then cleaned up already.
+            if (_disposed)
+            {
+                return;
+            }
             _scrollBridge = DotNetObjectReference.Create(new ScrollBridge(OnFollowsLatestChanged));
             await _module.InvokeVoidAsync("follow", _scroller, _scrollBridge);
+        }
+        if (_focusConversation && _module is not null && !_disposed)
+        {
+            _focusConversation = false;
+            await _module.InvokeVoidAsync("scrollToLatest", _scroller, true);
         }
     }
 
@@ -294,6 +305,8 @@ public sealed partial class ChatView : IAsyncDisposable
         {
             UnwatchAll();
             Watch(_shown!.Entries);
+            // A cleared conversation starts over at its end, without a jump button left over from before.
+            _ = InvokeAsync(FollowLatestAsync);
         }
         else
         {
@@ -307,12 +320,17 @@ public sealed partial class ChatView : IAsyncDisposable
         _throttle.Request();
     }
 
-    // The list follows a tool call's state (whether it shows); the activity line follows a running tool's title and a
-    // reply's first text as well.
+    // The list follows a tool call's state (whether it shows). The activity line follows a running tool's title and a
+    // reply's first text as well, so a streaming reply renders the view only when what the line says changes, not with
+    // every token.
     private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ToolCallEntry.Status) or nameof(AssistantReplyEntry.IsStreaming) or nameof(ToolCallEntry.Title)
-            || (e.PropertyName == nameof(AssistantReplyEntry.Text) && _composer.IsGenerating))
+        if (e.PropertyName is nameof(ToolCallEntry.Status) or nameof(AssistantReplyEntry.IsStreaming))
+        {
+            _throttle.Request();
+        }
+        else if (e.PropertyName is nameof(ToolCallEntry.Title) or nameof(AssistantReplyEntry.Text)
+            && !string.Equals(_composer.DescribeActivity(_showsActivity), _shownActivity, StringComparison.Ordinal))
         {
             _throttle.Request();
         }
