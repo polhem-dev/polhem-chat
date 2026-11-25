@@ -2,6 +2,7 @@
 
 const watched = new WeakMap();
 const followers = new WeakMap();
+const prompts = new WeakMap();
 
 // How close to the end, in CSS pixels, still counts as being at the end. Without some slack a fractional offset would
 // make the view stop following a reply it never left.
@@ -148,5 +149,94 @@ export function unwatch(root) {
         observers.resize.disconnect();
         observers.mutation.disconnect();
         watched.delete(root);
+    }
+}
+
+// The keys and the files of the prompt box: Enter sends what the box holds, Shift+Enter starts a new line, and Esc
+// stops the reply or ends the edit while the view marks either (data-generating, data-editing). Files dropped on the view, or a picture pasted in the box,
+// go to the view's own file input, the one the attach button opens, so they are checked like the files the user picks.
+//
+// WARNING: An input method (Chinese, Japanese, Korean) confirms its composition with Enter and cancels it with Esc. Those
+// keys must reach the input method, never send or stop: isComposing tells it, and some browsers report it only as key
+// code 229.
+export function watchPrompt(root, box, bridge) {
+    if (prompts.has(root)) {
+        return;
+    }
+    const tell = (method, ...args) => bridge.invokeMethodAsync(method, ...args).catch(() => { });
+    const onKeyDown = (event) => {
+        if (event.isComposing || event.keyCode === 229) {
+            return;
+        }
+        if (event.key === 'Escape') {
+            if ('generating' in root.dataset || 'editing' in root.dataset) {
+                event.preventDefault();
+                event.stopPropagation();
+                tell('Escape');
+            }
+        } else if (event.key === 'Enter' && event.target === box && !event.shiftKey && !event.ctrlKey && !event.altKey
+            && !event.metaKey) {
+            event.preventDefault();
+            tell('Submit', box.value);
+        }
+    };
+    // Only while the view takes files; otherwise the page decides what a drop does.
+    const fileInput = () => root.querySelector('.pch-file-input');
+    const carriesFiles = (transfer) => Array.from(transfer?.types ?? []).includes('Files');
+    const take = (files) => {
+        const input = fileInput();
+        if (!input || !files || files.length === 0) {
+            return false;
+        }
+        input.files = files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+    };
+    const onDragOver = (event) => {
+        if (carriesFiles(event.dataTransfer) && fileInput()) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+            root.dataset.dropping = '';
+        }
+    };
+    const onDragLeave = (event) => {
+        if (!event.relatedTarget || !root.contains(event.relatedTarget)) {
+            delete root.dataset.dropping;
+        }
+    };
+    const onDrop = (event) => {
+        delete root.dataset.dropping;
+        if (take(event.dataTransfer?.files)) {
+            event.preventDefault();
+        }
+    };
+    const onPaste = (event) => {
+        // Text pastes as text, even when the clipboard carries a picture of it too, as a copy from a spreadsheet does;
+        // only files without text, such as a copied picture, are attached.
+        const data = event.clipboardData;
+        if (data?.getData?.('text/plain') || data?.getData?.('text/html')) {
+            return;
+        }
+        if (data?.files?.length > 0 && take(data.files)) {
+            event.preventDefault();
+        }
+    };
+    root.addEventListener('keydown', onKeyDown);
+    root.addEventListener('dragover', onDragOver);
+    root.addEventListener('dragleave', onDragLeave);
+    root.addEventListener('drop', onDrop);
+    box.addEventListener('paste', onPaste);
+    prompts.set(root, { box, onKeyDown, onDragOver, onDragLeave, onDrop, onPaste });
+}
+
+export function unwatchPrompt(root) {
+    const prompt = root && prompts.get(root);
+    if (prompt) {
+        root.removeEventListener('keydown', prompt.onKeyDown);
+        root.removeEventListener('dragover', prompt.onDragOver);
+        root.removeEventListener('dragleave', prompt.onDragLeave);
+        root.removeEventListener('drop', prompt.onDrop);
+        prompt.box.removeEventListener('paste', prompt.onPaste);
+        prompts.delete(root);
     }
 }

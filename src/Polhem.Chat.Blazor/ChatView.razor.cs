@@ -40,6 +40,7 @@ public sealed partial class ChatView : IAsyncDisposable
     private RenderFragment _entries = null!;
     private ElementReference _root;
     private IJSObjectReference? _module;
+    private DotNetObjectReference<PromptBridge>? _promptBridge;
     private ChatConversation? _shown;
     private ChatStrings? _strings;
     private MarkdownOptions? _markdownOptions;
@@ -124,11 +125,13 @@ public sealed partial class ChatView : IAsyncDisposable
         StopProgressTimer();
         Show(null);
         _composer.PropertyChanged -= OnComposerPropertyChanged;
+        DisconnectComposer();
         _composer.Disconnect();
         if (_module is not null)
         {
             try
             {
+                await _module.InvokeVoidAsync("unwatchPrompt", _root);
                 await _module.InvokeVoidAsync("unwatch", _root);
                 await _module.InvokeVoidAsync("unfollow", _scroller);
                 await _module.DisposeAsync();
@@ -139,8 +142,19 @@ public sealed partial class ChatView : IAsyncDisposable
                 _module = null;
             }
         }
-        // After the script stopped following: a scroll in between would otherwise call a disposed reference.
+        // After the script stopped following and watching the keys: a scroll or a key in between would otherwise call a
+        // disposed reference.
         _scrollBridge?.Dispose();
+        _promptBridge?.Dispose();
+    }
+
+    /// <inheritdoc/>
+    public override Task SetParametersAsync(ParameterView parameters)
+    {
+        // A parent passes the parameters it sets with every render, so this tells whether it binds the text now.
+        _promptBound = parameters.TryGetValue<string?>(nameof(Prompt), out _)
+            && parameters.TryGetValue<EventCallback<string?>>(nameof(PromptChanged), out var changed) && changed.HasDelegate;
+        return base.SetParametersAsync(parameters);
     }
 
     /// <inheritdoc/>
@@ -150,6 +164,7 @@ public sealed partial class ChatView : IAsyncDisposable
         _entryTemplate = RenderEntry;
         _entries = BuildEntries;
         _composer.PropertyChanged += OnComposerPropertyChanged;
+        ConnectComposer();
         _composer.Connect();
     }
 
@@ -163,6 +178,7 @@ public sealed partial class ChatView : IAsyncDisposable
             _composer.IsGenerating = IsGenerating;
         }
         _composer.Strings = Strings;
+        ApplyComposingParameters();
         // NOTE: The user's toggle changes the state without the parameter, so the state follows the parameter only when the
         // parameter itself changes; a parent that renders again without binding it does not undo the user's choice.
         var activityChanged = ShowsActivity != _showsActivityParameter;
@@ -207,6 +223,12 @@ public sealed partial class ChatView : IAsyncDisposable
             }
             _scrollBridge = DotNetObjectReference.Create(new ScrollBridge(OnFollowsLatestChanged));
             await _module.InvokeVoidAsync("follow", _scroller, _scrollBridge);
+            if (_disposed)
+            {
+                return;
+            }
+            _promptBridge = DotNetObjectReference.Create(new PromptBridge(SubmitFromBox, OnEscape));
+            await _module.InvokeVoidAsync("watchPrompt", _root, _promptBox, _promptBridge);
         }
         if (_focusConversation && _module is not null && !_disposed)
         {
@@ -241,9 +263,19 @@ public sealed partial class ChatView : IAsyncDisposable
             builder.AddComponentParameter(1, nameof(EntryHost.Entry), entry);
             builder.AddComponentParameter(2, nameof(EntryHost.Template), _entryTemplate);
             builder.AddComponentParameter(3, nameof(EntryHost.Revision), _revision);
+            builder.AddComponentParameter(4, nameof(EntryHost.CanRewind), CanRewind(entry));
             builder.CloseComponent();
         }
     }
+
+    // The last prompt shows a button to change it, and the last reply one to send its prompt again, while the composer
+    // allows it; their hosts render again when that changes.
+    private bool CanRewind(ChatEntry entry) => entry switch
+    {
+        UserPromptEntry prompt => _composer.CanEditLastPrompt(prompt),
+        AssistantReplyEntry reply => _composer.CanRegenerate(reply),
+        _ => false,
+    };
 
     // NOTE: Hidden entries stay in the conversation and its history; only the view leaves them out.
     private bool IsShown(ChatEntry entry) =>
@@ -336,10 +368,19 @@ public sealed partial class ChatView : IAsyncDisposable
 
     private void OnComposerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ChatComposer.IsGenerating) or nameof(ChatComposer.ShownConversation))
+        switch (e.PropertyName)
         {
-            _ = InvokeAsync(UpdateProgressTimer);
-            _throttle.Request();
+            case nameof(ChatComposer.IsGenerating) or nameof(ChatComposer.ShownConversation):
+                _ = InvokeAsync(UpdateProgressTimer);
+                _throttle.Request();
+                break;
+            case nameof(ChatComposer.Prompt):
+                NotifyPrompt();
+                _throttle.Request();
+                break;
+            case nameof(ChatComposer.CanRewind) or nameof(ChatComposer.IsEditingPrompt) or nameof(ChatComposer.AttachmentError):
+                _throttle.Request();
+                break;
         }
     }
 }
