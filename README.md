@@ -14,6 +14,10 @@ An AI chat control for [Avalonia](https://avaloniaui.net/), on top of any
 rendered as Markdown, a live line that shows what the model is doing (reasoning, tool calls, time and tokens), per-turn usage, stop and copy. It does not depend on any model provider;
 bring the `IChatClient` you already use.
 
+![One turn in the ChatGallery sample: the model thinks, calls a weather tool, streams a Markdown reply and shows the time and tokens it used](docs/images/chat-demo.gif)
+
+*One turn in the [ChatGallery](samples/ChatGallery) sample, whose replies are scripted so it runs without a key.*
+
 | Package | For |
 |---------|-----|
 | `Polhem.Chat` | The conversation model: streamed updates turned into conversation entries, and a runner for each turn. No UI |
