@@ -9,6 +9,10 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-25
+
+Details: [docs/en/changelogs/0.2.1.md](docs/en/changelogs/0.2.1.md)
+
 - The view's jump-to-latest button is a round icon: an arrow down, or three pulsing dots while a reply is in progress. Its text stays as the tooltip and the accessible name, and the dots take the new `PolhemChatScrollButtonDotBrush` resource.
 
 ## [0.2.0] - 2026-11-25
@@ -54,7 +58,8 @@ Details: [docs/en/changelogs/0.1.0.md](docs/en/changelogs/0.1.0.md)
 - The prompt box sends on Enter and ignores the Enter that confirms an input method's composition.
 - English and Traditional Chinese texts, and a theme for Fluent and Semi, light and dark.
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1

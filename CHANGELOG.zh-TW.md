@@ -8,6 +8,10 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-25
+
+詳細內容：[docs/zh-TW/changelogs/0.2.1.md](docs/zh-TW/changelogs/0.2.1.md)
+
 - 視圖的「回到最新」按鈕改為圓形圖示：平常是向下箭頭，回覆進行中改為三個依序閃動的圓點。原本的文字保留為提示與無障礙名稱；圓點顏色取自新的資源 `PolhemChatScrollButtonDotBrush`。
 
 ## [0.2.0] - 2026-11-25
@@ -53,7 +57,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - 輸入框按 Enter 送出，輸入法確認組字的 Enter 不會送出。
 - 內建英文與繁體中文字串，主題支援 Fluent 與 Semi 的淺色、深色。
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.0...v0.1.1
