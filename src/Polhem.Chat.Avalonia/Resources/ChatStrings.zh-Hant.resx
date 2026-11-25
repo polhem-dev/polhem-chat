@@ -135,4 +135,16 @@
   <data name="MegabytesFormat" xml:space="preserve">
     <value>{0:N1} MB</value>
   </data>
+  <data name="Regenerate" xml:space="preserve">
+    <value>重新生成</value>
+  </data>
+  <data name="EditPrompt" xml:space="preserve">
+    <value>編輯</value>
+  </data>
+  <data name="EditingPrompt" xml:space="preserve">
+    <value>正在編輯上一則提問</value>
+  </data>
+  <data name="CancelEdit" xml:space="preserve">
+    <value>取消編輯</value>
+  </data>
 </root>

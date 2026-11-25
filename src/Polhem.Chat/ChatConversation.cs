@@ -22,6 +22,11 @@ namespace Polhem.Chat;
 public sealed class ChatConversation : INotifyPropertyChanged
 {
     private readonly List<ChatMessage> _history = [];
+
+    // NOTE: Each prompt's message and the entry that shows it, so that rewinding cuts both lists at the same prompt,
+    // whatever entries the application added or removed. A message here is a prompt; one that only answers approval
+    // requests never is.
+    private readonly Dictionary<ChatMessage, UserPromptEntry> _prompts = [];
     private readonly EntryProjector _projector;
     private ChatTurn? _currentTurn;
 
@@ -64,8 +69,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
     {
         ArgumentNullException.ThrowIfNull(text);
         ThrowIfTurnInProgress();
-        _history.Add(new ChatMessage(ChatRole.User, text));
+        var message = new ChatMessage(ChatRole.User, text);
+        _history.Add(message);
         var entry = new UserPromptEntry(text);
+        _prompts[message] = entry;
         _projector.AddEntry(entry);
         return entry;
     }
@@ -96,8 +103,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
             contents.Add(new TextContent(text));
         }
         contents.AddRange(attachments);
-        _history.Add(new ChatMessage(ChatRole.User, contents));
+        var message = new ChatMessage(ChatRole.User, contents);
+        _history.Add(message);
         var entry = new UserPromptEntry(text, [.. attachments]);
+        _prompts[message] = entry;
         _projector.AddEntry(entry);
         return entry;
     }
@@ -159,12 +168,66 @@ public sealed class ChatConversation : INotifyPropertyChanged
     /// <returns>The messages, oldest first.</returns>
     public IReadOnlyList<ChatMessage> SaveHistory() => [.. _history];
 
+    /// <summary>
+    /// Removes the user's last prompt and everything after it, from the history and from the entries, so that it can be
+    /// sent again as it was or changed. Entries of the application's own after the prompt go too.
+    /// </summary>
+    /// <returns>The message of the prompt that was removed, with its text and attachments, or <see langword="null"/> when
+    /// the conversation has no prompt.</returns>
+    /// <remarks>
+    /// A prompt is a message added with <see cref="AddUserPrompt(string)"/> or shown from a loaded history; a user message
+    /// that only answers approval requests is not one, and neither is a <see cref="UserPromptEntry"/> the application
+    /// added to the entries itself. What the tools of the removed turns did is not undone; the model only stops seeing
+    /// it.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
+    public ChatMessage? RewindLastPrompt()
+    {
+        ThrowIfTurnInProgress();
+        var index = LastPromptIndex();
+        if (index < 0)
+        {
+            return null;
+        }
+        var prompt = _history[index];
+        var promptEntry = _prompts[prompt];
+        foreach (var removed in _history.Skip(index))
+        {
+            _prompts.Remove(removed);
+        }
+        _history.RemoveRange(index, _history.Count - index);
+
+        // The entries go from the prompt's own entry on. An application that removed that entry itself has left no
+        // place to cut at, and its entries stay as they are.
+        _projector.Break();
+        var first = Entries.IndexOf(promptEntry);
+        for (var entry = Entries.Count - 1; first >= 0 && entry >= first; entry--)
+        {
+            _projector.Forget(Entries[entry]);
+            Entries.RemoveAt(entry);
+        }
+        return prompt;
+    }
+
+    /// <summary>Returns the index in the history of the user's last prompt, or -1.</summary>
+    internal int LastPromptIndex() => _history.FindLastIndex(_prompts.ContainsKey);
+
+    /// <summary>
+    /// Gets the entry of the prompt <see cref="RewindLastPrompt"/> would remove, or <see langword="null"/> when there is
+    /// none or the application removed its entry. A front end offers to send again or change only this prompt: a
+    /// <see cref="UserPromptEntry"/> the application added to the entries itself is not one.
+    /// </summary>
+    /// <remarks>It is computed when read; changes to the entries or the history raise no notification for it.</remarks>
+    public UserPromptEntry? LastPrompt =>
+        LastPromptIndex() is var index and >= 0 && _prompts[_history[index]] is var entry && Entries.Contains(entry) ? entry : null;
+
     /// <summary>Removes every message and entry.</summary>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
     public void Clear()
     {
         ThrowIfTurnInProgress();
         _history.Clear();
+        _prompts.Clear();
         _projector.Reset();
         _projector.Break();
         Entries.Clear();
@@ -245,7 +308,9 @@ public sealed class ChatConversation : INotifyPropertyChanged
             var attachments = message.Contents.OfType<DataContent>().ToList();
             if (text.Length > 0 || attachments.Count > 0)
             {
-                _projector.AddEntry(new UserPromptEntry(text, attachments));
+                var entry = new UserPromptEntry(text, attachments);
+                _prompts[message] = entry;
+                _projector.AddEntry(entry);
             }
             foreach (var response in message.Contents.OfType<ToolApprovalResponseContent>())
             {

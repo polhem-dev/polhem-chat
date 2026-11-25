@@ -46,9 +46,25 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <Grid ColumnDefinitions="*,Auto">
         <SelectableTextBlock Text="{Binding Text}"
                              TextWrapping="Wrap"
+                             VerticalAlignment="Center"
                              IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <!-- Shown on the last prompt only, while the user may change it (ChatView.EditLastPromptCommand); it fades in
+             while the pointer is over the prompt (ChatTheme). -->
+        <Button Grid.Column="1"
+                Classes="polhemChatEdit"
+                Margin="6,0,-6,0"
+                VerticalAlignment="Center"
+                ToolTip.Tip="{Binding $parent[local:ChatView].Strings.EditPrompt}"
+                AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.EditPrompt}"
+                Command="{Binding $parent[local:ChatView].EditLastPromptCommand}"
+                CommandParameter="{Binding}"
+                IsVisible="{Binding $self.IsEffectivelyEnabled}">
+          <PathIcon Width="12" Height="12" Data="M3 17.2V21h3.8l11-11-3.8-3.8L3 17.2zM20.7 7a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.8 3.8L20.7 7z" />
+        </Button>
+        </Grid>
       </StackPanel>
     </Border>
   </DataTemplate>
@@ -93,6 +109,17 @@
               <Binding Path="Text" Converter="{x:Static StringConverters.IsNotNullOrEmpty}" />
             </MultiBinding>
           </Button.IsVisible>
+        </Button>
+        <!-- Shown on the last reply only, while the user may send its prompt again (ChatView.RegenerateCommand). -->
+        <Button Classes="polhemChatRegenerate"
+                ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Regenerate}"
+                AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Regenerate}"
+                Command="{Binding $parent[local:ChatView].RegenerateCommand}"
+                CommandParameter="{Binding}"
+                IsVisible="{Binding $self.IsEffectivelyEnabled}">
+          <PathIcon Width="13"
+                    Height="13"
+                    Data="M12 4a8 8 0 0 1 7.4 5H17v2h6V5h-2v2.3A10 10 0 1 0 22 12h-2a8 8 0 1 1-8-8z" />
         </Button>
       </StackPanel>
     </StackPanel>

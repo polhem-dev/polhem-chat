@@ -25,6 +25,13 @@ public sealed class MessageSendingEventArgs : CancelEventArgs
     /// </summary>
     public IList<DataContent> Attachments { get; } = [];
 
+    /// <summary>
+    /// Gets a value indicating whether the prompt replaces the last one, as <see cref="ChatRunner.RegenerateAsync"/> and
+    /// <see cref="ChatRunner.EditLastPromptAsync"/> send it. Its text is then the prompt as it was sent before, after
+    /// the handlers of that time changed it, so a handler that adds to the text should not add again.
+    /// </summary>
+    public bool ReplacesLastPrompt { get; init; }
+
     /// <summary>Gets or sets the prompt that will be sent.</summary>
     public string Text
     {

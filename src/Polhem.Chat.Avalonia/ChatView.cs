@@ -32,7 +32,7 @@ namespace Polhem.Chat.Avalonia;
 /// </remarks>
 [TemplatePart(ScrollViewerPart, typeof(ScrollViewer))]
 [TemplatePart(EntriesPart, typeof(ItemsControl))]
-[PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass, WaitingPseudoClass)]
+[PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass, WaitingPseudoClass, EditingPseudoClass)]
 public partial class ChatView : TemplatedControl
 {
     /// <summary>Defines the <see cref="Runner"/> property.</summary>
@@ -308,6 +308,10 @@ public partial class ChatView : TemplatedControl
             UpdateEntryVisibility();
             UpdateWaiting();
         }
+        else if (change.Property == AllowsRewindProperty)
+        {
+            UpdateRewind();
+        }
         else if (change.Property == AllowsAttachmentsProperty)
         {
             DragDrop.SetAllowDrop(this, change.GetNewValue<bool>());
@@ -320,6 +324,7 @@ public partial class ChatView : TemplatedControl
             UpdateProgress();
             _submitCommand.RaiseCanExecuteChanged();
             _stopCommand.RaiseCanExecuteChanged();
+            UpdateRewind();
         }
     }
 
@@ -434,5 +439,6 @@ public partial class ChatView : TemplatedControl
     {
         PseudoClasses.Set(EmptyPseudoClass, _shown is null || _shown.Entries.Count == 0);
         UpdateWaiting();
+        UpdateRewind();
     }
 }

@@ -143,6 +143,25 @@
                 <StackPanel Spacing="8">
                   <!-- The application's own content above and below the prompt box (ChatView.PromptHeaderContent and
                        PromptFooterContent). -->
+                  <!-- While the box holds the last prompt to change (ChatView.IsEditingPrompt). -->
+                  <Border Name="PART_EditBanner"
+                          Classes="polhemChatEditBanner"
+                          Padding="8,4"
+                          CornerRadius="6"
+                          IsVisible="False"
+                          Background="{DynamicResource PolhemChatPromptBackground}">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock VerticalAlignment="Center"
+                                 FontSize="12"
+                                 Text="{Binding $parent[local:ChatView].Strings.EditingPrompt}" />
+                      <Button Grid.Column="1"
+                              Classes="polhemChatCancelEdit"
+                              Padding="6,2"
+                              FontSize="12"
+                              Content="{Binding $parent[local:ChatView].Strings.CancelEdit}"
+                              Command="{Binding $parent[local:ChatView].CancelEditCommand}" />
+                    </Grid>
+                  </Border>
                   <ContentPresenter Name="PART_PromptHeader"
                                     Content="{TemplateBinding PromptHeaderContent}"
                                     ContentTemplate="{TemplateBinding PromptHeaderContentTemplate}"
@@ -250,6 +269,9 @@
           </ControlTemplate>
         </Setter>
 
+        <Style Selector="^:editing /template/ Border#PART_EditBanner">
+          <Setter Property="IsVisible" Value="True" />
+        </Style>
         <Style Selector="^:empty /template/ StackPanel#PART_EmptyState">
           <Setter Property="IsVisible" Value="True" />
         </Style>
@@ -291,6 +313,19 @@
     <Setter Property="Opacity" Value="0" />
   </Style>
   <Style Selector="StackPanel.polhemChatReply:pointerover Button.polhemChatCopy, Button.polhemChatCopy:focus-visible">
+    <Setter Property="Opacity" Value="0.7" />
+  </Style>
+
+  <!-- The regenerate and edit buttons look and fade in like the copy button. -->
+  <Style Selector="Button.polhemChatRegenerate, Button.polhemChatEdit">
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Opacity" Value="0" />
+  </Style>
+  <Style Selector="StackPanel.polhemChatReply:pointerover Button.polhemChatRegenerate, Border.polhemChatPrompt:pointerover Button.polhemChatEdit, Button.polhemChatRegenerate:focus-visible, Button.polhemChatEdit:focus-visible">
     <Setter Property="Opacity" Value="0.7" />
   </Style>
 

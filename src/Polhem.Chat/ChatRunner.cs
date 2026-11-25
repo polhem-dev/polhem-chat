@@ -124,12 +124,70 @@ public sealed class ChatRunner : INotifyPropertyChanged
         {
             throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
         }
+        ThrowIfRunning();
+        return await SendCoreAsync(text, attachments, replacesLastPrompt: false, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends the user's last prompt again, with its attachments, in place of it and of everything after it: the model
+    /// answers it anew. <see cref="MessageSending"/> is raised as for any prompt, and canceling it leaves the conversation
+    /// as it was.
+    /// </summary>
+    /// <param name="cancellationToken">Stops the turn, like <see cref="Stop"/>.</param>
+    /// <returns>What the new turn produced, or <see langword="null"/> when there is no prompt to send again or a
+    /// <see cref="MessageSending"/> handler canceled it.</returns>
+    /// <remarks>What the tools of the replaced turns did is not undone.</remarks>
+    /// <exception cref="InvalidOperationException">A turn is already in progress.</exception>
+    public Task<ChatTurnResult?> RegenerateAsync(CancellationToken cancellationToken)
+    {
+        ThrowIfRunning();
+        var index = Conversation.LastPromptIndex();
+        if (index < 0)
+        {
+            return Task.FromResult<ChatTurnResult?>(null);
+        }
+        var prompt = Conversation.History[index];
+        return SendCoreAsync(prompt.Text, [.. prompt.Contents.OfType<DataContent>()], replacesLastPrompt: true, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends a changed version of the user's last prompt in place of it and of everything after it.
+    /// <see cref="MessageSending"/> is raised as for any prompt, and canceling it leaves the conversation as it was.
+    /// </summary>
+    /// <param name="text">The new prompt; it may be empty when there are attachments.</param>
+    /// <param name="attachments">The files to send with it.</param>
+    /// <param name="cancellationToken">Stops the turn, like <see cref="Stop"/>.</param>
+    /// <returns>What the new turn produced, or <see langword="null"/> when there is no prompt to replace or a
+    /// <see cref="MessageSending"/> handler canceled it.</returns>
+    /// <remarks>What the tools of the replaced turns did is not undone.</remarks>
+    /// <exception cref="ArgumentException">The text is blank and there are no attachments.</exception>
+    /// <exception cref="InvalidOperationException">A turn is already in progress.</exception>
+    public Task<ChatTurnResult?> EditLastPromptAsync(string text, IReadOnlyList<DataContent> attachments, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(attachments);
+        if (string.IsNullOrWhiteSpace(text) && attachments.Count == 0)
+        {
+            throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
+        }
+        ThrowIfRunning();
+        return Conversation.LastPromptIndex() < 0
+            ? Task.FromResult<ChatTurnResult?>(null)
+            : SendCoreAsync(text, attachments, replacesLastPrompt: true, cancellationToken);
+    }
+
+    private void ThrowIfRunning()
+    {
         if (IsRunning || Conversation.CurrentTurn is not null)
         {
             throw new InvalidOperationException("A turn is already in progress.");
         }
+    }
 
-        var sending = new MessageSendingEventArgs(text);
+    private async Task<ChatTurnResult?> SendCoreAsync(
+        string text, IReadOnlyList<DataContent> attachments, bool replacesLastPrompt, CancellationToken cancellationToken)
+    {
+        var sending = new MessageSendingEventArgs(text) { ReplacesLastPrompt = replacesLastPrompt };
         foreach (var attachment in attachments)
         {
             sending.Attachments.Add(attachment);
@@ -140,6 +198,10 @@ public sealed class ChatRunner : INotifyPropertyChanged
             return null;
         }
 
+        if (replacesLastPrompt)
+        {
+            Conversation.RewindLastPrompt();
+        }
         Conversation.AddUserPrompt(sending.Text, [.. sending.Attachments]);
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _stop = stop;

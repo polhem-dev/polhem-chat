@@ -42,6 +42,26 @@ public sealed class HostSession : INotifyPropertyChanged
     /// <summary>Gets the command the buttons of a <see cref="ChoiceEntry"/> run, with the picked answer.</summary>
     public ICommand ChooseCommand { get; }
 
+    /// <summary>Sends the last prompt again in place of its turn, which the view asks for with its regenerate button.</summary>
+    public Task RegenerateAsync()
+    {
+        if (IsGenerating || Conversation.RewindLastPrompt() is not { } prompt)
+        {
+            return Task.CompletedTask;
+        }
+        return SendAsync(prompt.Text);
+    }
+
+    /// <summary>Sends a prompt; one the user edited replaces the last prompt and everything after it.</summary>
+    public Task SendAsync(string prompt, bool replacesLast)
+    {
+        if (replacesLast && !IsGenerating)
+        {
+            Conversation.RewindLastPrompt();
+        }
+        return SendAsync(prompt);
+    }
+
     public async Task SendAsync(string prompt)
     {
         if (IsGenerating)
