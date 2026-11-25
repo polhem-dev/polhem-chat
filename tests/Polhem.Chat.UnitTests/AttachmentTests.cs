@@ -135,6 +135,15 @@ public class AttachmentTests
         Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), watch.Elapsed.ToString());
     }
 
+    [Fact(DisplayName = "By default a file may be 5 MB, the picture limit of common providers, and no larger")]
+    public void Defaults_FileSize()
+    {
+        var limits = new ChatAttachmentLimits();
+
+        Assert.Null(limits.CheckSize(5L * 1024 * 1024, []));
+        Assert.Equal(ChatAttachmentProblem.TooLarge, limits.CheckSize((5L * 1024 * 1024) + 1, []));
+    }
+
     [Fact(DisplayName = "Limits as large as a long holds do not overflow")]
     public void Check_HugeLimits()
     {
