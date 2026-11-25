@@ -154,7 +154,7 @@ public class ChatComposerTests
         ChatAttachmentRejectedEventArgs? rejected = null;
         composer.AttachmentRejected += (_, e) => rejected = e;
 
-        var problem = await composer.AddAttachmentAsync("/tmp/huge‮gnp.exe", 50L * 1024 * 1024, () => throw new InvalidOperationException("Never opened."));
+        var problem = await composer.AddAttachmentAsync("/tmp/huge\u202Egnp.exe", 50L * 1024 * 1024, () => throw new InvalidOperationException("Never opened."));
 
         Assert.Equal(ChatAttachmentProblem.TooLarge, problem);
         Assert.Equal("hugegnp.exe", rejected!.FileName);
