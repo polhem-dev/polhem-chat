@@ -9,6 +9,10 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.3.0.md)
+
+- **Changed:** `ChatViewStrings` is now `ChatStrings` in `Polhem.Chat`, shared by the views of every UI framework, with `DescribeTurn` and `DescribeToolStatus`; `VisibleText` is public there.
+
 ## [0.2.1] - 2026-11-25
 
 Details: [docs/en/changelogs/0.2.1.md](docs/en/changelogs/0.2.1.md)

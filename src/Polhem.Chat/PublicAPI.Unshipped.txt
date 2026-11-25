@@ -1,1 +1,110 @@
 #nullable enable
+Polhem.Chat.ChatStrings
+Polhem.Chat.ChatStrings.Approve.get -> string!
+Polhem.Chat.ChatStrings.Approve.set -> void
+Polhem.Chat.ChatStrings.Attach.get -> string!
+Polhem.Chat.ChatStrings.Attach.set -> void
+Polhem.Chat.ChatStrings.AttachmentContentMismatchFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentContentMismatchFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTooLargeFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTooLargeFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTooManyFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTooManyFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTotalTooLargeFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTotalTooLargeFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTypeNotAllowedFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTypeNotAllowedFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentUnreadableFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentUnreadableFormat.set -> void
+Polhem.Chat.ChatStrings.AwaitingApproval.get -> string!
+Polhem.Chat.ChatStrings.AwaitingApproval.set -> void
+Polhem.Chat.ChatStrings.CachedTokensFormat.get -> string!
+Polhem.Chat.ChatStrings.CachedTokensFormat.set -> void
+Polhem.Chat.ChatStrings.CallFormat.get -> string!
+Polhem.Chat.ChatStrings.CallFormat.set -> void
+Polhem.Chat.ChatStrings.CallsFormat.get -> string!
+Polhem.Chat.ChatStrings.CallsFormat.set -> void
+Polhem.Chat.ChatStrings.CancelEdit.get -> string!
+Polhem.Chat.ChatStrings.CancelEdit.set -> void
+Polhem.Chat.ChatStrings.ChatStrings() -> void
+Polhem.Chat.ChatStrings.Copy.get -> string!
+Polhem.Chat.ChatStrings.Copy.set -> void
+Polhem.Chat.ChatStrings.CopyCode.get -> string!
+Polhem.Chat.ChatStrings.CopyCode.set -> void
+Polhem.Chat.ChatStrings.Culture.get -> System.Globalization.CultureInfo!
+Polhem.Chat.ChatStrings.Culture.set -> void
+Polhem.Chat.ChatStrings.EditPrompt.get -> string!
+Polhem.Chat.ChatStrings.EditPrompt.set -> void
+Polhem.Chat.ChatStrings.EditingPrompt.get -> string!
+Polhem.Chat.ChatStrings.EditingPrompt.set -> void
+Polhem.Chat.ChatStrings.ElapsedFormat.get -> string!
+Polhem.Chat.ChatStrings.ElapsedFormat.set -> void
+Polhem.Chat.ChatStrings.EmptyTitle.get -> string!
+Polhem.Chat.ChatStrings.EmptyTitle.set -> void
+Polhem.Chat.ChatStrings.JumpToLatest.get -> string!
+Polhem.Chat.ChatStrings.JumpToLatest.set -> void
+Polhem.Chat.ChatStrings.KilobytesFormat.get -> string!
+Polhem.Chat.ChatStrings.KilobytesFormat.set -> void
+Polhem.Chat.ChatStrings.MegabytesFormat.get -> string!
+Polhem.Chat.ChatStrings.MegabytesFormat.set -> void
+Polhem.Chat.ChatStrings.MinutesFormat.get -> string!
+Polhem.Chat.ChatStrings.MinutesFormat.set -> void
+Polhem.Chat.ChatStrings.OutputTokensFormat.get -> string!
+Polhem.Chat.ChatStrings.OutputTokensFormat.set -> void
+Polhem.Chat.ChatStrings.PromptPlaceholder.get -> string!
+Polhem.Chat.ChatStrings.PromptPlaceholder.set -> void
+Polhem.Chat.ChatStrings.Reasoning.get -> string!
+Polhem.Chat.ChatStrings.Reasoning.set -> void
+Polhem.Chat.ChatStrings.Regenerate.get -> string!
+Polhem.Chat.ChatStrings.Regenerate.set -> void
+Polhem.Chat.ChatStrings.Reject.get -> string!
+Polhem.Chat.ChatStrings.Reject.set -> void
+Polhem.Chat.ChatStrings.RemoveAttachment.get -> string!
+Polhem.Chat.ChatStrings.RemoveAttachment.set -> void
+Polhem.Chat.ChatStrings.ScrollForMore.get -> string!
+Polhem.Chat.ChatStrings.ScrollForMore.set -> void
+Polhem.Chat.ChatStrings.SecondsFormat.get -> string!
+Polhem.Chat.ChatStrings.SecondsFormat.set -> void
+Polhem.Chat.ChatStrings.Send.get -> string!
+Polhem.Chat.ChatStrings.Send.set -> void
+Polhem.Chat.ChatStrings.Stop.get -> string!
+Polhem.Chat.ChatStrings.Stop.set -> void
+Polhem.Chat.ChatStrings.Stopped.get -> string!
+Polhem.Chat.ChatStrings.Stopped.set -> void
+Polhem.Chat.ChatStrings.Thinking.get -> string!
+Polhem.Chat.ChatStrings.Thinking.set -> void
+Polhem.Chat.ChatStrings.TokensFormat.get -> string!
+Polhem.Chat.ChatStrings.TokensFormat.set -> void
+Polhem.Chat.ChatStrings.ToolArguments.get -> string!
+Polhem.Chat.ChatStrings.ToolArguments.set -> void
+Polhem.Chat.ChatStrings.ToolAwaitingApproval.get -> string!
+Polhem.Chat.ChatStrings.ToolAwaitingApproval.set -> void
+Polhem.Chat.ChatStrings.ToolCanceled.get -> string!
+Polhem.Chat.ChatStrings.ToolCanceled.set -> void
+Polhem.Chat.ChatStrings.ToolCompleted.get -> string!
+Polhem.Chat.ChatStrings.ToolCompleted.set -> void
+Polhem.Chat.ChatStrings.ToolFailed.get -> string!
+Polhem.Chat.ChatStrings.ToolFailed.set -> void
+Polhem.Chat.ChatStrings.ToolRejected.get -> string!
+Polhem.Chat.ChatStrings.ToolRejected.set -> void
+Polhem.Chat.ChatStrings.ToolResult.get -> string!
+Polhem.Chat.ChatStrings.ToolResult.set -> void
+Polhem.Chat.ChatStrings.ToolRunning.get -> string!
+Polhem.Chat.ChatStrings.ToolRunning.set -> void
+Polhem.Chat.ChatStrings.TurnFailed.get -> string!
+Polhem.Chat.ChatStrings.TurnFailed.set -> void
+Polhem.Chat.VisibleText
+static Polhem.Chat.ChatStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.ChatStrings!
+static Polhem.Chat.VisibleText.Escape(string? text) -> string!
+static Polhem.Chat.VisibleText.FormatArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
+static Polhem.Chat.VisibleText.FormatValue(object? value) -> string!
+static Polhem.Chat.VisibleText.ListArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
+virtual Polhem.Chat.ChatStrings.DescribeToolStatus(Polhem.Chat.ToolCallStatus status) -> string!
+virtual Polhem.Chat.ChatStrings.DescribeTurn(Polhem.Chat.TurnSummaryEntry! summary) -> string!
+virtual Polhem.Chat.ChatStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
+virtual Polhem.Chat.ChatStrings.FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) -> string!
+virtual Polhem.Chat.ChatStrings.FormatCalls(int calls) -> string!
+virtual Polhem.Chat.ChatStrings.FormatElapsed(System.TimeSpan elapsed) -> string!
+virtual Polhem.Chat.ChatStrings.FormatFileSize(long bytes) -> string!
+virtual Polhem.Chat.ChatStrings.FormatProgress(int calls, System.TimeSpan elapsed, long outputTokens) -> string!
+virtual Polhem.Chat.ChatStrings.FormatTokens(long inputTokens, long outputTokens) -> string!

@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Styling;
-using Polhem.Chat.Avalonia;
+using Polhem.Chat;
 
 namespace ChatGallery;
 
@@ -51,7 +51,7 @@ public sealed partial class GalleryView : UserControl
         {
             // The texts are passed with their culture: Avalonia resets the culture of the UI thread, so the view does not
             // read it later.
-            var strings = ChatViewStrings.ForCulture(session.Culture);
+            var strings = ChatStrings.ForCulture(session.Culture);
             runner.Chat.Strings = strings;
             host.Chat.Strings = strings;
         }

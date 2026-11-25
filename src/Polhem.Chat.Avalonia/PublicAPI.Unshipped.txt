@@ -1,1 +1,107 @@
 #nullable enable
+*REMOVED*Polhem.Chat.Avalonia.ChatView.Strings.get -> Polhem.Chat.Avalonia.ChatViewStrings!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Approve.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Approve.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Attach.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Attach.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentContentMismatchFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentContentMismatchFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooLargeFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooLargeFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooManyFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooManyFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTotalTooLargeFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTotalTooLargeFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTypeNotAllowedFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTypeNotAllowedFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentUnreadableFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AttachmentUnreadableFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AwaitingApproval.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.AwaitingApproval.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CachedTokensFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CachedTokensFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CallFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CallFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CallsFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CallsFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CancelEdit.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CancelEdit.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ChatViewStrings() -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Copy.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Copy.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CopyCode.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.CopyCode.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Culture.get -> System.Globalization.CultureInfo!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Culture.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.EditPrompt.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.EditPrompt.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.EditingPrompt.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.EditingPrompt.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ElapsedFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ElapsedFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.EmptyTitle.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.JumpToLatest.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.KilobytesFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.KilobytesFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.MegabytesFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.MegabytesFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.MinutesFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.MinutesFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.OutputTokensFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.OutputTokensFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.PromptPlaceholder.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Reasoning.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Regenerate.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Regenerate.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Reject.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Reject.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.RemoveAttachment.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.RemoveAttachment.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ScrollForMore.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ScrollForMore.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.SecondsFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.SecondsFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Send.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Send.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Stop.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Stop.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Stopped.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Stopped.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Thinking.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.Thinking.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.TokensFormat.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.TokensFormat.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolArguments.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolArguments.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolAwaitingApproval.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolCanceled.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolCanceled.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolCompleted.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolCompleted.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolFailed.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolFailed.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolRejected.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolResult.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolResult.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolRunning.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.ToolRunning.set -> void
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.TurnFailed.get -> string!
+*REMOVED*Polhem.Chat.Avalonia.ChatViewStrings.TurnFailed.set -> void
+*REMOVED*static Polhem.Chat.Avalonia.ChatViewStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.Avalonia.ChatViewStrings!
+*REMOVED*static readonly Polhem.Chat.Avalonia.ChatView.StringsProperty -> Avalonia.StyledProperty<Polhem.Chat.Avalonia.ChatViewStrings!>!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) -> string!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatCalls(int calls) -> string!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatElapsed(System.TimeSpan elapsed) -> string!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatFileSize(long bytes) -> string!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatProgress(int calls, System.TimeSpan elapsed, long outputTokens) -> string!
+*REMOVED*virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatTokens(long inputTokens, long outputTokens) -> string!
+Polhem.Chat.Avalonia.ChatView.Strings.get -> Polhem.Chat.ChatStrings!
+static readonly Polhem.Chat.Avalonia.ChatView.StringsProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatStrings!>!

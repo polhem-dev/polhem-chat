@@ -8,6 +8,10 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 ## [Unreleased]
 
+詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.3.0.md](docs/zh-TW/changelogs/0.3.0.md)
+
+- **變更：** `ChatViewStrings` 改名為 `ChatStrings` 並移到 `Polhem.Chat`，由各 UI 框架的 view 共用，新增 `DescribeTurn` 與 `DescribeToolStatus`；`VisibleText` 在那裡改為公開。
+
 ## [0.2.1] - 2026-11-25
 
 詳細內容：[docs/zh-TW/changelogs/0.2.1.md](docs/zh-TW/changelogs/0.2.1.md)

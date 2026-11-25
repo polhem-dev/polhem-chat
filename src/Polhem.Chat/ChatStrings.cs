@@ -1,29 +1,28 @@
 using System.Globalization;
 using System.Resources;
 
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
 /// <summary>
-/// The texts a <see cref="ChatView"/> shows: button labels, status words and the formats of the turn summary. The
-/// package ships English and Traditional Chinese; an application changes any of them by assigning its own instance to
-/// <see cref="ChatView.Strings"/>.
+/// The texts a chat view shows: button labels, status words and the formats of the turn summary. The package ships
+/// English and Traditional Chinese; an application changes any of them by giving the view its own instance.
 /// </summary>
 /// <remarks>
 /// A view reads the strings when its templates are built, so changing a property of an instance the view already shows
-/// does not update it. Assign a new instance instead.
+/// does not update it. Give it a new instance instead.
 /// </remarks>
-public class ChatViewStrings
+public class ChatStrings
 {
     private static readonly ResourceManager s_resources =
-        new("Polhem.Chat.Avalonia.Resources.ChatStrings", typeof(ChatViewStrings).Assembly);
+        new("Polhem.Chat.Resources.ChatStrings", typeof(ChatStrings).Assembly);
 
-    /// <summary>Initializes a new instance of the <see cref="ChatViewStrings"/> class with the English texts.</summary>
-    public ChatViewStrings()
+    /// <summary>Initializes a new instance of the <see cref="ChatStrings"/> class with the English texts.</summary>
+    public ChatStrings()
         : this(CultureInfo.InvariantCulture)
     {
     }
 
-    private ChatViewStrings(CultureInfo culture)
+    private ChatStrings(CultureInfo culture)
     {
         Culture = culture;
         PromptPlaceholder = Load(nameof(PromptPlaceholder), culture);
@@ -246,14 +245,14 @@ public class ChatViewStrings
     /// <param name="culture">The culture to load the texts for.</param>
     /// <returns>A new instance, which the caller may change before assigning it to a view.</returns>
     /// <remarks>
-    /// The culture is always passed explicitly. Avalonia resets the culture of the UI thread after dispatcher
-    /// operations, so reading <see cref="CultureInfo.CurrentUICulture"/> later could return a different language than the
-    /// application chose.
+    /// The culture is always passed explicitly. Some UI frameworks reset the culture of the UI thread, Avalonia after its
+    /// dispatcher operations for one, so reading <see cref="CultureInfo.CurrentUICulture"/> later could return a
+    /// different language than the application chose.
     /// </remarks>
-    public static ChatViewStrings ForCulture(CultureInfo culture)
+    public static ChatStrings ForCulture(CultureInfo culture)
     {
         ArgumentNullException.ThrowIfNull(culture);
-        return new ChatViewStrings(culture);
+        return new ChatStrings(culture);
     }
 
     /// <summary>Formats the time a turn took with <see cref="ElapsedFormat"/>.</summary>
@@ -306,6 +305,51 @@ public class ChatViewStrings
     public virtual string FormatFileSize(long bytes) => bytes < 1024 * 1024
         ? string.Format(Culture, KilobytesFormat, Math.Max(1, Math.Ceiling(bytes / 1024.0)))
         : string.Format(Culture, MegabytesFormat, bytes / (1024.0 * 1024));
+
+    /// <summary>
+    /// Describes a finished turn in one line: its time, the requests it sent when there were several, its tokens when the
+    /// provider reported them, and whether it was stopped or failed.
+    /// </summary>
+    /// <param name="summary">The summary of the turn.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string DescribeTurn(TurnSummaryEntry summary)
+    {
+        ArgumentNullException.ThrowIfNull(summary);
+        var parts = new List<string> { FormatElapsed(summary.Elapsed) };
+        // One request is the usual case and says nothing; the count is worth a place only when a turn took several.
+        if (summary.Calls > 1)
+        {
+            parts.Add(FormatCalls(summary.Calls));
+        }
+        if (summary.Usage is { } usage && (usage.InputTokenCount is not null || usage.OutputTokenCount is not null))
+        {
+            parts.Add(usage.CachedInputTokenCount is > 0
+                ? FormatCachedTokens(usage.InputTokenCount ?? 0, usage.CachedInputTokenCount.Value, usage.OutputTokenCount ?? 0)
+                : FormatTokens(usage.InputTokenCount ?? 0, usage.OutputTokenCount ?? 0));
+        }
+        if (summary.Outcome == TurnOutcome.Stopped)
+        {
+            parts.Add(Stopped);
+        }
+        else if (summary.Outcome == TurnOutcome.Failed)
+        {
+            parts.Add(TurnFailed);
+        }
+        return string.Join(" · ", parts);
+    }
+
+    /// <summary>Returns the word for the state of a tool call, such as <see cref="ToolRunning"/>.</summary>
+    /// <param name="status">The state of the call.</param>
+    /// <returns>The word.</returns>
+    public virtual string DescribeToolStatus(ToolCallStatus status) => status switch
+    {
+        ToolCallStatus.Running => ToolRunning,
+        ToolCallStatus.Completed => ToolCompleted,
+        ToolCallStatus.Failed => ToolFailed,
+        ToolCallStatus.AwaitingApproval => ToolAwaitingApproval,
+        ToolCallStatus.Rejected => ToolRejected,
+        _ => ToolCanceled,
+    };
 
     /// <summary>Formats the requests a turn sent with <see cref="CallsFormat"/>.</summary>
     /// <param name="calls">The count.</param>

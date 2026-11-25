@@ -175,7 +175,7 @@ public class EntryTemplateTests(HeadlessSession session)
         var conversation = new ChatConversation();
         var usage = new UsageDetails { InputTokenCount = 1200, OutputTokenCount = 30 };
         conversation.Entries.Add(new TurnSummaryEntry(TimeSpan.FromSeconds(1.5), usage, TurnOutcome.Stopped));
-        var view = new ChatView { Conversation = conversation, Strings = new ChatViewStrings() };
+        var view = new ChatView { Conversation = conversation, Strings = new ChatStrings() };
         Show(view);
 
         Assert.Equal("1.5 s · 1,200 in · 30 out · Stopped", Assert.IsType<TextBlock>(EntryView(view, 0)).Text);

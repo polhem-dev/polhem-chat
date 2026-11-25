@@ -34,7 +34,7 @@ public class AttachmentViewTests(HeadlessSession session)
     [Fact(DisplayName = "An allowed file waits in the box, shows its name and size, and can be removed")]
     public Task AddAttachment_ShowsAndRemoves() => session.RunAsync(async () =>
     {
-        var view = new ChatView { Conversation = new ChatConversation(), AllowsAttachments = true, Strings = new ChatViewStrings() };
+        var view = new ChatView { Conversation = new ChatConversation(), AllowsAttachments = true, Strings = new ChatStrings() };
         var window = Show(view);
 
         Assert.Null(await view.AddAttachmentAsync("/tmp/photo.png", s_png.Length, Open(s_png)));
@@ -57,7 +57,7 @@ public class AttachmentViewTests(HeadlessSession session)
     [Fact(DisplayName = "A file whose reported size is over the limit is never opened, and the reason shows under the box")]
     public Task AddAttachment_TooLarge_IsNotRead() => session.RunAsync(async () =>
     {
-        var view = new ChatView { Conversation = new ChatConversation(), AllowsAttachments = true, Strings = new ChatViewStrings() };
+        var view = new ChatView { Conversation = new ChatConversation(), AllowsAttachments = true, Strings = new ChatStrings() };
         var window = Show(view);
         var opened = false;
         ChatAttachmentRejectedEventArgs? rejected = null;
