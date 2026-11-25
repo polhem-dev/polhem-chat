@@ -256,10 +256,18 @@ test('a view that stopped following follows again once its content fits, as afte
 
 test('a view whose circuit went away does not fail when the user scrolls', async () => {
     const scroller = chat();
-    script.follow(scroller, new FakeBridge({ fails: true }));
+    const bridge = new FakeBridge({ fails: true });
+    const unhandled = [];
+    const record = (reason) => unhandled.push(reason);
+    process.on('unhandledRejection', record);
+    script.follow(scroller, bridge);
 
     scroller.scrollTo(0);
     await new Promise((resolve) => setImmediate(resolve));
+
+    process.off('unhandledRejection', record);
+    assert.deepEqual(bridge.calls, [['OnFollowsLatestChanged', false]]);
+    assert.deepEqual(unhandled, []);
 
     script.unfollow(scroller);
 });

@@ -116,7 +116,7 @@ public class ActivityAndScrollingTests : BunitContext
         Assert.True(view.Instance.FollowsLatest);
         Assert.Empty(view.FindAll(".pch-jump"));
         // The button went away, so the keyboard focus moves to the conversation.
-        Assert.Equal(true, _module.VerifyInvoke("scrollToLatest").Arguments[1]);
+        Assert.True((bool)_module.VerifyInvoke("scrollToLatest").Arguments[1]!);
     }
 
     [Fact(DisplayName = "A cleared conversation follows its end again, without a jump button left over")]
@@ -147,7 +147,7 @@ public class ActivityAndScrollingTests : BunitContext
         view.Find(".pch-activity-toggle").Click();
 
         Assert.Empty(view.FindAll(".pch-activity"));
-        Assert.Equal(true, _module.VerifyInvoke("scrollToLatest").Arguments[1]);
+        Assert.True((bool)_module.VerifyInvoke("scrollToLatest").Arguments[1]!);
     }
 
     [Fact(DisplayName = "A view disposed while its script starts watching never starts following")]

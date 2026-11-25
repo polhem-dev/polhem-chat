@@ -325,12 +325,10 @@ public sealed partial class ChatView : IAsyncDisposable
     // every token.
     private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(ToolCallEntry.Status) or nameof(AssistantReplyEntry.IsStreaming))
-        {
-            _throttle.Request();
-        }
-        else if (e.PropertyName is nameof(ToolCallEntry.Title) or nameof(AssistantReplyEntry.Text)
-            && !string.Equals(_composer.DescribeActivity(_showsActivity), _shownActivity, StringComparison.Ordinal))
+        var changesView = e.PropertyName is nameof(ToolCallEntry.Status) or nameof(AssistantReplyEntry.IsStreaming)
+            || (e.PropertyName is nameof(ToolCallEntry.Title) or nameof(AssistantReplyEntry.Text)
+                && !string.Equals(_composer.DescribeActivity(_showsActivity), _shownActivity, StringComparison.Ordinal));
+        if (changesView)
         {
             _throttle.Request();
         }

@@ -127,6 +127,7 @@ jobs:
           /d:sonar.token="$SONAR_TOKEN"
           /d:sonar.host.url="https://sonarcloud.io"
           /d:sonar.qualitygate.wait=true
+          /d:sonar.javascript.lcov.reportPaths="$GITHUB_WORKSPACE/TestResults/js/lcov.info"
           /s:"$GITHUB_WORKSPACE/SonarQube.Analysis.xml"
 
       - name: Build
@@ -143,15 +144,19 @@ jobs:
         with:
           node-version: 24
 
-      # The coverage of the Blazor view's script, as LCOV, which SonarQube.Analysis.xml points the scanner to.
+      # The coverage of the Blazor view's script, as LCOV, which "SonarScanner begin" points the scanner to.
+      # NOTE: The scanner reads the report for the project the script belongs to, src/Polhem.Chat.Blazor, and resolves
+      # relative paths against that project's folder; the report's path and the paths of the files in it are therefore
+      # absolute.
       - name: Test scripts with coverage
         if: steps.token.outputs.enabled == 'true'
-        run: >-
-          mkdir -p TestResults/js &&
-          node --test --experimental-test-coverage --test-coverage-include='src/**'
-          --test-reporter=spec --test-reporter-destination=stdout
-          --test-reporter=lcov --test-reporter-destination=TestResults/js/lcov.info
-          tests/Polhem.Chat.Blazor.ScriptTests/polhem-chat.test.mjs
+        run: |
+          mkdir -p TestResults/js
+          node --test --experimental-test-coverage --test-coverage-include='src/**' \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=lcov --test-reporter-destination=TestResults/js/lcov.info \
+            tests/Polhem.Chat.Blazor.ScriptTests/polhem-chat.test.mjs
+          sed -i "s|^SF:|SF:$GITHUB_WORKSPACE/|" TestResults/js/lcov.info
 
       - name: SonarScanner end
         if: steps.token.outputs.enabled == 'true'
