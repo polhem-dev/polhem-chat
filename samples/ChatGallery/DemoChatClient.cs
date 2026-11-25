@@ -42,6 +42,20 @@ public sealed class DemoChatClient : IChatClient
             }
             yield break;
         }
+        // A prompt with files: say what arrived, which is all a scripted model can do with them.
+        if (list.LastOrDefault(message => message.Role == ChatRole.User) is { } asked
+            && asked.Contents.OfType<DataContent>().ToList() is { Count: > 0 } files)
+        {
+            var lines = files.Select(file => $"- **{file.Name}**: {file.MediaType}, {file.Data.Length:N0} bytes");
+            var received = (chinese ? "收到 " + files.Count + " 個檔案：\n\n" : $"I received {files.Count} file(s):\n\n")
+                + string.Join("\n", lines);
+            foreach (var chunk in Chunks(received))
+            {
+                await Task.Delay(s_chunkDelay, cancellationToken);
+                yield return new ChatResponseUpdate(ChatRole.Assistant, chunk);
+            }
+            yield break;
+        }
         if (DemoTools.AsksToDelete(prompt))
         {
             await Task.Delay(s_chunkDelay * 10, cancellationToken);

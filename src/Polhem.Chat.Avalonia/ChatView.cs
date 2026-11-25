@@ -100,6 +100,7 @@ public partial class ChatView : TemplatedControl
         _approveCommand = new ViewCommand(parameter => Decide(parameter, approved: true), IsPendingApproval);
         _rejectCommand = new ViewCommand(parameter => Decide(parameter, approved: false), IsPendingApproval);
         CoerceValue(StringsProperty);
+        CoerceValue(AttachmentLimitsProperty);
         PseudoClasses.Set(EmptyPseudoClass, true);
         AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
         AddHandler(ChatPromptBox.SubmitRequestedEvent, OnSubmitRequested);

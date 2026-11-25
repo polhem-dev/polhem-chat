@@ -85,6 +85,24 @@ public partial class ChatView
         return await AddAttachmentAsync(file.Name, (long?)properties.Size, file.OpenReadAsync);
     }
 
+    /// <summary>
+    /// Attaches content from a source of the application's own, such as a picture pasted from the clipboard, with the
+    /// same checks as a file the user picks. The stream's length is checked first when it can tell it.
+    /// </summary>
+    /// <param name="fileName">The name to give the attachment; only the name is kept, without folders.</param>
+    /// <param name="content">The content, read from its current position; the caller keeps ownership of it.</param>
+    /// <returns>
+    /// <see langword="null"/> when the content was attached, and why not otherwise; content that is not attached also
+    /// raises <see cref="AttachmentRejected"/>.
+    /// </returns>
+    public Task<ChatAttachmentProblem?> AddAttachmentAsync(string fileName, Stream content)
+    {
+        ArgumentNullException.ThrowIfNull(fileName);
+        ArgumentNullException.ThrowIfNull(content);
+        long? size = content.CanSeek ? content.Length - content.Position : null;
+        return AddAttachmentAsync(fileName, size, () => Task.FromResult<Stream>(new NonClosingStream(content)));
+    }
+
     /// <summary>Checks, reads and attaches a file, whatever it comes from.</summary>
     internal async Task<ChatAttachmentProblem?> AddAttachmentAsync(string name, long? size, Func<Task<Stream>> open)
     {

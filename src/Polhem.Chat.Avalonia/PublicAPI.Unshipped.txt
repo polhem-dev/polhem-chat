@@ -70,3 +70,4 @@ static readonly Polhem.Chat.Avalonia.ChatView.AllowsAttachmentsProperty -> Avalo
 static readonly Polhem.Chat.Avalonia.ChatView.AttachmentLimitsProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatAttachmentLimits!>!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatFileSize(long bytes) -> string!
+Polhem.Chat.Avalonia.ChatView.AddAttachmentAsync(string! fileName, System.IO.Stream! content) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!

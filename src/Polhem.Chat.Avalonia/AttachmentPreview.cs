@@ -23,9 +23,10 @@ internal static class AttachmentPreview
             using var stream = new MemoryStream(attachment.Data.ToArray(), writable: false);
             return Bitmap.DecodeToWidth(stream, ThumbnailWidth);
         }
-        // The content starts like a picture (the attachment check makes sure), but its body may still be broken; the
-        // decoder reports that with one of these.
-        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or NotSupportedException or IOException)
+        // The content starts like a picture (the attachment check makes sure), but its body may still be broken. NOTE:
+        // Avalonia.Skia reports a body it cannot decode with a NullReferenceException (checked with 12.0), the other
+        // types with the exceptions a stream or an argument throws.
+        catch (Exception exception) when (exception is NullReferenceException or ArgumentException or InvalidOperationException or NotSupportedException or IOException)
         {
             return null;
         }
