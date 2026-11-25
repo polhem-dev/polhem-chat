@@ -8,6 +8,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 ## [Unreleased]
 
+- 視圖的「回到最新」按鈕改為圓形圖示：平常是向下箭頭，回覆進行中改為三個依序閃動的圓點。原本的文字保留為提示與無障礙名稱；圓點顏色取自新的資源 `PolhemChatScrollButtonDotBrush`。
+
 ## [0.2.0] - 2026-11-25
 
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.2.0.md](docs/zh-TW/changelogs/0.2.0.md)

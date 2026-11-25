@@ -88,6 +88,34 @@ public class AutoScrollTests(HeadlessSession session)
         Assert.True(IsAtEnd(scrollViewer));
     });
 
+    [Fact(DisplayName = "Jump to latest is an arrow while nothing is arriving, and pulsing dots while a reply is in progress")]
+    public Task JumpToLatest_Icon_FollowsGenerating() => session.RunAsync(() =>
+    {
+        var (window, view, _, _) = ShowLongConversation();
+        var button = Part<Button>(view, "PART_ScrollToLatest");
+        Assert.Equal(view.Strings.JumpToLatest, global::Avalonia.Automation.AutomationProperties.GetName(button));
+        Assert.Equal(view.Strings.JumpToLatest, ToolTip.GetTip(button));
+
+        window.MouseWheel(new Point(250, 100), new Vector(0, 10));
+        Settle(window);
+        // The button's content exists once the button shows.
+        var arrow = Part<PathIcon>(view, "PART_ScrollToLatestArrow");
+        var dots = Part<StackPanel>(view, "PART_ScrollToLatestDots");
+        Assert.True(IsShown(arrow));
+        Assert.False(IsShown(dots));
+
+        view.IsGenerating = true;
+        Settle(window);
+        Assert.False(IsShown(arrow));
+        Assert.True(IsShown(dots));
+        Assert.Equal(3, dots.Children.Count);
+
+        view.IsGenerating = false;
+        Settle(window);
+        Assert.True(IsShown(arrow));
+        Assert.False(IsShown(dots));
+    });
+
     [Fact(DisplayName = "Scrolling back to the end by hand follows new text again")]
     public Task ScrolledBackToEnd_FollowsAgain() => session.RunAsync(() =>
     {
