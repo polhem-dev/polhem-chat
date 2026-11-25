@@ -11,7 +11,7 @@ namespace Polhem.Chat;
 /// <remarks>
 /// <para>
 /// A <see cref="ChatRunner"/> drives a conversation with an <see cref="IChatClient"/>. An application that runs its own
-/// loop drives it directly instead: <see cref="AddUserPrompt"/>, then <see cref="BeginTurn"/> and
+/// loop drives it directly instead: <see cref="AddUserPrompt(string)"/>, then <see cref="BeginTurn"/> and
 /// <see cref="ChatTurn.Apply"/> for each streamed update, then <see cref="ChatTurn.Complete"/>.
 /// </para>
 /// <para>
@@ -66,6 +66,38 @@ public sealed class ChatConversation : INotifyPropertyChanged
         ThrowIfTurnInProgress();
         _history.Add(new ChatMessage(ChatRole.User, text));
         var entry = new UserPromptEntry(text);
+        _projector.AddEntry(entry);
+        return entry;
+    }
+
+    /// <summary>Adds a prompt from the user with files attached to the history and to the entries.</summary>
+    /// <param name="text">The text of the prompt; it may be empty when there are attachments.</param>
+    /// <param name="attachments">The files, sent after the text in the same message.</param>
+    /// <returns>The entry that shows the prompt.</returns>
+    /// <exception cref="ArgumentException">Both the text and the attachments are empty.</exception>
+    /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
+    public UserPromptEntry AddUserPrompt(string text, IReadOnlyList<DataContent> attachments)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        ArgumentNullException.ThrowIfNull(attachments);
+        // A provider may reject a text block of nothing but white space, and the files say all there is to say.
+        if (attachments.Count > 0 && string.IsNullOrWhiteSpace(text))
+        {
+            text = string.Empty;
+        }
+        if (text.Length == 0 && attachments.Count == 0)
+        {
+            throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
+        }
+        ThrowIfTurnInProgress();
+        var contents = new List<AIContent>(attachments.Count + 1);
+        if (text.Length > 0)
+        {
+            contents.Add(new TextContent(text));
+        }
+        contents.AddRange(attachments);
+        _history.Add(new ChatMessage(ChatRole.User, contents));
+        var entry = new UserPromptEntry(text, [.. attachments]);
         _projector.AddEntry(entry);
         return entry;
     }
@@ -210,9 +242,10 @@ public sealed class ChatConversation : INotifyPropertyChanged
         if (message.Role == ChatRole.User)
         {
             var text = message.Text;
-            if (text.Length > 0)
+            var attachments = message.Contents.OfType<DataContent>().ToList();
+            if (text.Length > 0 || attachments.Count > 0)
             {
-                _projector.AddEntry(new UserPromptEntry(text));
+                _projector.AddEntry(new UserPromptEntry(text, attachments));
             }
             foreach (var response in message.Contents.OfType<ToolApprovalResponseContent>())
             {

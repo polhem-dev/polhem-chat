@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:chat="using:Polhem.Chat"
                     xmlns:local="using:Polhem.Chat.Avalonia"
+                    xmlns:ai="using:Microsoft.Extensions.AI"
                     x:Class="Polhem.Chat.Avalonia.DefaultEntryTemplates"
                     x:ClassModifier="internal">
 
@@ -15,7 +16,40 @@
             Padding="12,8"
             CornerRadius="12"
             Background="{DynamicResource PolhemChatPromptBackground}">
-      <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+      <StackPanel Spacing="6">
+        <!-- The files sent with the prompt: pictures as small previews, other files as an icon and their name. -->
+        <ItemsControl ItemsSource="{Binding Attachments}"
+                      IsVisible="{Binding Attachments.Count, Converter={x:Static local:EntryConverters.IsPositive}}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel ItemSpacing="6" LineSpacing="6" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="ai:DataContent">
+              <StackPanel Classes="polhemChatPromptAttachment" Orientation="Horizontal" Spacing="6">
+                <Image MaxWidth="96"
+                       MaxHeight="96"
+                       Source="{Binding Converter={x:Static local:EntryConverters.Thumbnail}}"
+                       IsVisible="{Binding $self.Source, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <PathIcon Width="14"
+                          Height="14"
+                          IsVisible="{Binding Converter={x:Static local:EntryConverters.IsDocument}}"
+                          Data="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5z" />
+                <TextBlock Text="{Binding Name, Converter={x:Static local:EntryConverters.Visible}}"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           MaxWidth="200"
+                           TextTrimming="CharacterEllipsis"
+                           IsVisible="{Binding Converter={x:Static local:EntryConverters.IsDocument}}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <SelectableTextBlock Text="{Binding Text}"
+                             TextWrapping="Wrap"
+                             IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      </StackPanel>
     </Border>
   </DataTemplate>
 

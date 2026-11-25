@@ -105,4 +105,34 @@
   <data name="ScrollForMore" xml:space="preserve">
     <value>內容還有，請捲動看完。</value>
   </data>
+  <data name="Attach" xml:space="preserve">
+    <value>附加檔案</value>
+  </data>
+  <data name="RemoveAttachment" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="AttachmentTooLargeFormat" xml:space="preserve">
+    <value>{0} 超過 {1}。</value>
+  </data>
+  <data name="AttachmentTotalTooLargeFormat" xml:space="preserve">
+    <value>加上 {0} 後，檔案總大小會超過 {1}。</value>
+  </data>
+  <data name="AttachmentTooManyFormat" xml:space="preserve">
+    <value>沒有附加 {0}：一次最多 {1} 個檔案。</value>
+  </data>
+  <data name="AttachmentTypeNotAllowedFormat" xml:space="preserve">
+    <value>{0}：不能附加這種類型的檔案。</value>
+  </data>
+  <data name="AttachmentContentMismatchFormat" xml:space="preserve">
+    <value>{0}：檔案內容與檔名表示的類型不符。</value>
+  </data>
+  <data name="AttachmentUnreadableFormat" xml:space="preserve">
+    <value>無法讀取 {0}。</value>
+  </data>
+  <data name="KilobytesFormat" xml:space="preserve">
+    <value>{0:N0} KB</value>
+  </data>
+  <data name="MegabytesFormat" xml:space="preserve">
+    <value>{0:N1} MB</value>
+  </data>
 </root>

@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Text;
 using Avalonia;
 using Avalonia.Data.Converters;
+using Avalonia.Media.Imaging;
+using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat.Avalonia;
 
@@ -41,6 +43,20 @@ internal static class EntryConverters
     /// <summary>Converts the extent and the viewport of a scroll viewer to whether its content is taller than its area.</summary>
     public static IMultiValueConverter IsOverflowing { get; } = new FuncMultiValueConverter<object?, bool>(values =>
         values.ToList() is [Size extent, Size viewport] && extent.Height > viewport.Height + 1);
+
+    /// <summary>Converts a count to whether it is above zero.</summary>
+    public static IValueConverter IsPositive { get; } = new FuncValueConverter<int, bool>(count => count > 0);
+
+    /// <summary>Converts an attachment to a small picture of it, or <see langword="null"/> when it is not a picture.</summary>
+    public static IValueConverter Thumbnail { get; } = new FuncValueConverter<DataContent?, Bitmap?>(AttachmentPreview.Thumbnail);
+
+    /// <summary>Converts an attachment to whether it is not a picture, which shows a document icon instead.</summary>
+    public static IValueConverter IsDocument { get; } =
+        new FuncValueConverter<DataContent?, bool>(attachment => attachment is not null && !attachment.HasTopLevelMediaType("image"));
+
+    /// <summary>Converts an attachment and the view's <see cref="ChatViewStrings"/> to its size.</summary>
+    public static IMultiValueConverter FileSize { get; } = new FuncMultiValueConverter<object?, string>(values =>
+        values.ToList() is [DataContent attachment, ChatViewStrings strings] ? strings.FormatFileSize(attachment.Data.Length) : string.Empty);
 
     /// <summary>Converts the arguments of a tool call to whether there are any.</summary>
     public static IValueConverter HasArguments { get; } =

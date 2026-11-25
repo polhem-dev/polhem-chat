@@ -9,7 +9,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 
 namespace Polhem.Chat.Avalonia;
@@ -101,9 +100,12 @@ public partial class ChatView : TemplatedControl
         _approveCommand = new ViewCommand(parameter => Decide(parameter, approved: true), IsPendingApproval);
         _rejectCommand = new ViewCommand(parameter => Decide(parameter, approved: false), IsPendingApproval);
         CoerceValue(StringsProperty);
+        CoerceValue(AttachmentLimitsProperty);
         PseudoClasses.Set(EmptyPseudoClass, true);
         AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
         AddHandler(ChatPromptBox.SubmitRequestedEvent, OnSubmitRequested);
+        AddHandler(DragDrop.DragOverEvent, OnDragOver);
+        AddHandler(DragDrop.DropEvent, OnDrop);
     }
 
     /// <summary>
@@ -249,6 +251,7 @@ public partial class ChatView : TemplatedControl
             spinner.Child = _activityIcon;
         }
         _progressText = e.NameScope.Find<TextBlock>(ProgressPart);
+        TakeAttachmentError(e.NameScope);
         if (_entries is not null)
         {
             _entries.ItemTemplate = new ChatEntryTemplate(this);
@@ -305,6 +308,11 @@ public partial class ChatView : TemplatedControl
             UpdateEntryVisibility();
             UpdateWaiting();
         }
+        else if (change.Property == AllowsAttachmentsProperty)
+        {
+            DragDrop.SetAllowDrop(this, change.GetNewValue<bool>());
+            _attachCommand?.RaiseCanExecuteChanged();
+        }
         else if (change.Property == IsGeneratingProperty)
         {
             PseudoClasses.Set(GeneratingPseudoClass, change.GetNewValue<bool>());
@@ -315,89 +323,8 @@ public partial class ChatView : TemplatedControl
         }
     }
 
-    /// <summary>
-    /// Submits a prompt: raises <see cref="PromptSubmitted"/>, then sends it through the <see cref="Runner"/> if there is
-    /// one. Nothing happens while a reply is in progress or when the prompt is blank.
-    /// </summary>
-    /// <param name="text">The prompt, or <see langword="null"/> for the text in the prompt box.</param>
-    internal async Task SubmitAsync(string? text)
-    {
-        var fromBox = text is null;
-        text ??= Prompt;
-        if (IsGenerating || string.IsNullOrWhiteSpace(text))
-        {
-            return;
-        }
-
-        var submitted = new PromptSubmittedEventArgs(text);
-        PromptSubmitted?.Invoke(this, submitted);
-        if (submitted.Cancel)
-        {
-            return;
-        }
-        if (fromBox)
-        {
-            SetCurrentValue(PromptProperty, string.Empty);
-        }
-        ScrollToLatest();
-
-        if (_activeRunner is { } runner)
-        {
-            var result = await runner.SendAsync(text);
-            // A MessageSending handler of the runner canceled the prompt: give it back to the user instead of losing it.
-            if (result is null && fromBox && string.IsNullOrEmpty(Prompt))
-            {
-                SetCurrentValue(PromptProperty, text);
-            }
-        }
-    }
-
-    /// <summary>Copies the text of an entry, or a string, to the clipboard.</summary>
-    /// <param name="parameter">An entry or a string.</param>
-    internal async Task CopyAsync(object? parameter)
-    {
-        if (CopyText(parameter) is { } text && TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
-        {
-            await clipboard.SetTextAsync(text);
-        }
-    }
-
     private static ChatViewStrings CoerceStrings(AvaloniaObject owner, ChatViewStrings? value) =>
         value ?? ((ChatView)owner)._defaultStrings;
-
-    private static string? CopyText(object? parameter) => parameter switch
-    {
-        AssistantReplyEntry { IsStreaming: false } reply when reply.Text.Length > 0 => reply.Text,
-        UserPromptEntry prompt => prompt.Text,
-        ReasoningEntry { IsStreaming: false } reasoning => reasoning.Text,
-        string text when text.Length > 0 => text,
-        _ => null,
-    };
-
-    private bool IsPendingApproval(object? parameter) =>
-        parameter is ToolCallEntry entry && _shown?.CurrentTurn?.PendingApprovals.Contains(entry) == true;
-
-    private void Decide(object? parameter, bool approved)
-    {
-        if (parameter is not ToolCallEntry entry || _shown?.CurrentTurn is not { } turn)
-        {
-            return;
-        }
-        if (approved)
-        {
-            turn.Approve(entry);
-        }
-        else
-        {
-            turn.Reject(entry);
-        }
-    }
-
-    private void Stop()
-    {
-        _activeRunner?.Stop();
-        StopRequested?.Invoke(this, EventArgs.Empty);
-    }
 
     private void AttachRunner(ChatRunner? runner)
     {
@@ -507,20 +434,5 @@ public partial class ChatView : TemplatedControl
     {
         PseudoClasses.Set(EmptyPseudoClass, _shown is null || _shown.Entries.Count == 0);
         UpdateWaiting();
-    }
-
-    private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape && IsGenerating)
-        {
-            e.Handled = true;
-            Stop();
-        }
-    }
-
-    private void OnSubmitRequested(object? sender, RoutedEventArgs e)
-    {
-        e.Handled = true;
-        _ = SubmitAsync(null);
     }
 }

@@ -39,3 +39,43 @@ static readonly Polhem.Chat.Avalonia.ChatView.PromptFooterContentProperty -> Ava
 static readonly Polhem.Chat.Avalonia.ChatView.PromptFooterContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
 static readonly Polhem.Chat.Avalonia.ChatView.PromptHeaderContentProperty -> Avalonia.StyledProperty<object?>!
 static readonly Polhem.Chat.Avalonia.ChatView.PromptHeaderContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!
+Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs
+Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs.ChatAttachmentRejectedEventArgs(string! fileName, Polhem.Chat.ChatAttachmentProblem problem) -> void
+Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs.FileName.get -> string!
+Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs.Problem.get -> Polhem.Chat.ChatAttachmentProblem
+Polhem.Chat.Avalonia.ChatView.AddAttachmentAsync(Avalonia.Platform.Storage.IStorageFile! file) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!
+Polhem.Chat.Avalonia.ChatView.AllowsAttachments.get -> bool
+Polhem.Chat.Avalonia.ChatView.AllowsAttachments.set -> void
+Polhem.Chat.Avalonia.ChatView.AttachCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.AttachmentLimits.get -> Polhem.Chat.ChatAttachmentLimits!
+Polhem.Chat.Avalonia.ChatView.AttachmentLimits.set -> void
+Polhem.Chat.Avalonia.ChatView.AttachmentRejected -> System.EventHandler<Polhem.Chat.Avalonia.ChatAttachmentRejectedEventArgs!>?
+Polhem.Chat.Avalonia.ChatView.PendingAttachments.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<Microsoft.Extensions.AI.DataContent!>!
+Polhem.Chat.Avalonia.ChatView.RemoveAttachmentCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatViewStrings.Attach.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Attach.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentContentMismatchFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentContentMismatchFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooLargeFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooLargeFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooManyFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTooManyFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTotalTooLargeFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTotalTooLargeFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTypeNotAllowedFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentTypeNotAllowedFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentUnreadableFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.AttachmentUnreadableFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.KilobytesFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.KilobytesFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.MegabytesFormat.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.MegabytesFormat.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.RemoveAttachment.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.RemoveAttachment.set -> void
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs.Attachments.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>!
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
+static readonly Polhem.Chat.Avalonia.ChatView.AllowsAttachmentsProperty -> Avalonia.StyledProperty<bool>!
+static readonly Polhem.Chat.Avalonia.ChatView.AttachmentLimitsProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatAttachmentLimits!>!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
+virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatFileSize(long bytes) -> string!
+Polhem.Chat.Avalonia.ChatView.AddAttachmentAsync(string! fileName, System.IO.Stream! content) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!
