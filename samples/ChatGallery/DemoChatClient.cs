@@ -17,6 +17,7 @@ public sealed class DemoChatClient : IChatClient
     private static readonly TimeSpan s_chunkDelay = TimeSpan.FromMilliseconds(30);
     private static readonly TimeSpan s_slowChunkDelay = TimeSpan.FromMilliseconds(120);
     private int _callCount;
+    private int _replyCount;
 
     public Task<ChatResponse> GetResponseAsync(
         IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default) =>
@@ -73,8 +74,10 @@ public sealed class DemoChatClient : IChatClient
             : new FunctionResultContent(callId, replies.ToolResult);
         yield return new ChatResponseUpdate(ChatRole.Tool, [result]);
 
+        // Each reply opens with another line, so a regenerated reply shows it is new.
+        var opening = Openings(chinese)[Interlocked.Increment(ref _replyCount) % 3];
         var shown = 0;
-        foreach (var chunk in Chunks(replies.Answer))
+        foreach (var chunk in Chunks(opening + "\n\n" + replies.Answer))
         {
             await Task.Delay(delay, cancellationToken);
             shown += chunk.Length;
@@ -121,6 +124,10 @@ public sealed class DemoChatClient : IChatClient
         return (chinese ? "收到 " + files.Count + " 個檔案：\n\n" : $"I received {files.Count} file(s):\n\n")
             + string.Join("\n", lines);
     }
+
+    private static string[] Openings(bool chinese) => chinese
+        ? ["好的，來看看。", "沒問題，這是我的建議。", "我重新整理了一次。"]
+        : ["Sure, let's see.", "Here is what I suggest.", "Let me put it another way."];
 
     private static IEnumerable<string> Chunks(string text)
     {

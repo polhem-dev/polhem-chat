@@ -21,7 +21,10 @@ public sealed partial class HostDrivenDemo : UserControl
         InitializeComponent();
         var chat = Chat;
         chat.Suggestions = ["Plan three days in Kyoto", "Delete my old notes", "規劃京都三日遊"];
-        chat.PromptSubmitted += (_, e) => _ = session.SendAsync(e.Text);
+        // The host's own loop has no tools that change anything, so it lets the user send the last prompt again.
+        chat.AllowsRewind = true;
+        chat.PromptSubmitted += (_, e) => _ = session.SendAsync(e.Text, e.IsEdit);
+        chat.RegenerateRequested += (_, _) => _ = session.RegenerateAsync();
         chat.StopRequested += (_, _) => session.Stop();
         ReloadButton.Click += (_, _) => session.ReloadHistory();
         ClearButton.Click += (_, _) => session.Clear();
