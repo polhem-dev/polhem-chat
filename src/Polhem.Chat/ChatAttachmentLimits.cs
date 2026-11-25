@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Globalization;
 using System.Text;
 using System.Text.Unicode;
@@ -68,6 +69,8 @@ public class ChatAttachmentLimits
 
     private static readonly HashSet<string> s_textTypes = [PlainText, Markdown, Csv, Json];
 
+    private static readonly SearchValues<char> s_digits = SearchValues.Create("0123456789");
+
     /// <summary>Gets or sets the largest file, in bytes. The default is 10 MB.</summary>
     /// <remarks>
     /// Providers have limits of their own, often lower for pictures than for documents (Anthropic, for example, takes
@@ -136,40 +139,38 @@ public class ChatAttachmentLimits
             return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.Unreadable);
         }
 
+        var (mediaType, typeProblem) = ReadType(name, content);
+        if (typeProblem is { } wrongType)
+        {
+            return ChatAttachmentCheck.Rejected(name, wrongType);
+        }
+        if (!AllowedMediaTypes.Contains(mediaType!))
+        {
+            return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.TypeNotAllowed);
+        }
+        return ChatAttachmentCheck.Allowed(name, new DataContent(content.ToArray(), mediaType!) { Name = name });
+    }
+
+    /// <summary>Reads the media type of a file from its content and its name, or why it has none it may have.</summary>
+    private static (string? MediaType, ChatAttachmentProblem? Problem) ReadType(string name, ReadOnlySpan<byte> content)
+    {
         var extension = TypeExtension(name);
         var named = s_extensions.GetValueOrDefault(extension);
         // A name with an extension this package does not know says a type it cannot check, such as photo.png.exe.
         if (named is null && extension.Length > 0)
         {
-            return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.TypeNotAllowed);
+            return (null, ChatAttachmentProblem.TypeNotAllowed);
         }
-        var mediaType = Sniff(content);
-        if (mediaType is not null)
+        if (Sniff(content) is { } sniffed)
         {
-            if (named is not null && named != mediaType)
-            {
-                return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.ContentMismatch);
-            }
+            return named is null || named == sniffed ? (sniffed, null) : (null, ChatAttachmentProblem.ContentMismatch);
         }
-        else if (named is not null && s_textTypes.Contains(named))
+        if (named is not null && s_textTypes.Contains(named))
         {
-            if (!IsText(content))
-            {
-                return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.Unreadable);
-            }
-            mediaType = named;
+            return IsText(content) ? (named, null) : (null, ChatAttachmentProblem.Unreadable);
         }
-        else
-        {
-            // A known binary type whose content does not start the way that type does, or a name with no known type.
-            return ChatAttachmentCheck.Rejected(name, named is null ? ChatAttachmentProblem.TypeNotAllowed : ChatAttachmentProblem.ContentMismatch);
-        }
-
-        if (!AllowedMediaTypes.Contains(mediaType))
-        {
-            return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.TypeNotAllowed);
-        }
-        return ChatAttachmentCheck.Allowed(name, new DataContent(content.ToArray(), mediaType) { Name = name });
+        // A known binary type whose content does not start the way that type does, or a name with no known type.
+        return (null, named is null ? ChatAttachmentProblem.TypeNotAllowed : ChatAttachmentProblem.ContentMismatch);
     }
 
     /// <summary>
@@ -219,7 +220,7 @@ public class ChatAttachmentLimits
                 return string.Empty;
             }
             var extension = name.AsSpan(dot, end - dot);
-            if (extension[1..].ContainsAnyExcept("0123456789") || dot == 0)
+            if (extension[1..].ContainsAnyExcept(s_digits) || dot == 0)
             {
                 return extension.ToString();
             }

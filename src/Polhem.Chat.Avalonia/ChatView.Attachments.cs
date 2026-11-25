@@ -175,7 +175,7 @@ public partial class ChatView
         int read;
         while (buffer.Length < cap && (read = await stream.ReadAsync(chunk.AsMemory(0, (int)Math.Min(chunk.Length, cap - buffer.Length)))) > 0)
         {
-            buffer.Write(chunk, 0, read);
+            await buffer.WriteAsync(chunk.AsMemory(0, read));
         }
         return buffer.ToArray();
     }

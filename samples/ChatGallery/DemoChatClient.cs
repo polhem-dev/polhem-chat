@@ -31,25 +31,9 @@ public sealed class DemoChatClient : IChatClient
         var prompt = list.LastOrDefault(message => message.Role == ChatRole.User && message.Text.Length > 0)?.Text ?? "";
         var chinese = DemoReplies.IsChinese(prompt);
 
-        // The client that runs tools sends the result of the delete call back: answer it and stop.
-        if (list.LastOrDefault() is { } last && last.Role == ChatRole.Tool
-            && last.Contents.OfType<FunctionResultContent>().FirstOrDefault() is { } deleteResult)
+        if (ShortReply(list, chinese) is { } shortReply)
         {
-            foreach (var chunk in Chunks(DemoTools.After(deleteResult, chinese)))
-            {
-                await Task.Delay(s_chunkDelay, cancellationToken);
-                yield return new ChatResponseUpdate(ChatRole.Assistant, chunk);
-            }
-            yield break;
-        }
-        // A prompt with files: say what arrived, which is all a scripted model can do with them.
-        if (list.LastOrDefault(message => message.Role == ChatRole.User) is { } asked
-            && asked.Contents.OfType<DataContent>().ToList() is { Count: > 0 } files)
-        {
-            var lines = files.Select(file => $"- **{file.Name}**: {file.MediaType}, {file.Data.Length:N0} bytes");
-            var received = (chinese ? "收到 " + files.Count + " 個檔案：\n\n" : $"I received {files.Count} file(s):\n\n")
-                + string.Join("\n", lines);
-            foreach (var chunk in Chunks(received))
+            foreach (var chunk in Chunks(shortReply))
             {
                 await Task.Delay(s_chunkDelay, cancellationToken);
                 yield return new ChatResponseUpdate(ChatRole.Assistant, chunk);
@@ -115,6 +99,27 @@ public sealed class DemoChatClient : IChatClient
 
     public void Dispose()
     {
+    }
+
+    /// <summary>
+    /// The reply to the result of the delete call, which the client that runs tools sends back, or to a prompt with
+    /// files, of which a scripted model can only say what arrived; <see langword="null"/> for any other request.
+    /// </summary>
+    private static string? ShortReply(List<ChatMessage> messages, bool chinese)
+    {
+        if (messages.LastOrDefault() is { } last && last.Role == ChatRole.Tool
+            && last.Contents.OfType<FunctionResultContent>().FirstOrDefault() is { } deleteResult)
+        {
+            return DemoTools.After(deleteResult, chinese);
+        }
+        if (messages.LastOrDefault(message => message.Role == ChatRole.User) is not { } asked
+            || asked.Contents.OfType<DataContent>().ToList() is not { Count: > 0 } files)
+        {
+            return null;
+        }
+        var lines = files.Select(file => $"- **{file.Name}**: {file.MediaType}, {file.Data.Length:N0} bytes");
+        return (chinese ? "收到 " + files.Count + " 個檔案：\n\n" : $"I received {files.Count} file(s):\n\n")
+            + string.Join("\n", lines);
     }
 
     private static IEnumerable<string> Chunks(string text)
