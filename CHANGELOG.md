@@ -9,6 +9,8 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- The view's jump-to-latest button is a round icon: an arrow down, or three pulsing dots while a reply is in progress. Its text stays as the tooltip and the accessible name, and the dots take the new `PolhemChatScrollButtonDotBrush` resource.
+
 ## [0.2.0] - 2026-11-25
 
 Details and migration steps: [docs/en/changelogs/0.2.0.md](docs/en/changelogs/0.2.0.md)
