@@ -79,6 +79,8 @@
                                   Opacity="0.6"
                                   IsVisible="False"
                                   IsChecked="{Binding $parent[local:ChatView].ShowsActivity, Mode=TwoWay}"
+                                  ToolTip.Tip="{Binding $parent[local:ChatView].Strings.ShowActivity}"
+                                  AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.ShowActivity}"
                                   Content="›"
                                   Cursor="Hand"
                                   RenderTransformOrigin="50%,50%">

@@ -2,9 +2,51 @@
 @using Polhem.Markdown.Blazor
 
 <div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes">
-    <div class="pch-entries">
-        @_entries
+    <div class="pch-scroller" @ref="_scroller">
+        <div class="pch-content">
+            <div class="pch-entries">
+                @_entries
+            </div>
+            @if (_composer.IsGenerating || _showsActivity)
+            {
+                var activity = _composer.DescribeActivity(_showsActivity);
+                var progress = Progress;
+                @* While a reply is in progress: what the model is doing when no entry shows it, then the request the turn is
+                   on, its seconds and its output tokens, kept current once a second. *@
+                <div class="pch-activity">
+                    @if (_composer.IsGenerating)
+                    {
+                        <span class="pch-spinner" aria-hidden="true"></span>
+                    }
+                    @if (activity is not null)
+                    {
+                        <span class="pch-waiting">@activity</span>
+                    }
+                    @if (progress is not null)
+                    {
+                        <span class="pch-progress">@progress</span>
+                    }
+                    <button type="button" class="pch-activity-toggle" title="@S.ShowActivity" aria-label="@S.ShowActivity"
+                            aria-pressed="@(_showsActivity ? "true" : "false")" @onclick="ToggleActivityAsync">›</button>
+                </div>
+            }
+        </div>
     </div>
+    @if (!_followsLatest)
+    {
+        @* A round button with an arrow down, or three pulsing dots while a reply is in progress, so it shows that new text
+           is arriving below. The text is the tooltip and the accessible name. *@
+        <button type="button" class="pch-jump" title="@S.JumpToLatest" aria-label="@S.JumpToLatest" @onclick="ScrollToLatestAsync">
+            @if (_composer.IsGenerating)
+            {
+                <span class="pch-jump-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+            }
+            else
+            {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v12.17l5.59-5.58L20 12l-8 8-8-8 1.41-1.41L11 16.17V4z" /></svg>
+            }
+        </button>
+    }
 </div>
 
 @code {

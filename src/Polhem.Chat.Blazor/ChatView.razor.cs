@@ -43,7 +43,7 @@ public sealed partial class ChatView : IAsyncDisposable
     private ChatConversation? _shown;
     private ChatStrings? _strings;
     private MarkdownOptions? _markdownOptions;
-    private bool _showsActivity;
+    private bool _showsActivityParameter;
     private int _revision;
     private bool _disposed;
 
@@ -68,10 +68,15 @@ public sealed partial class ChatView : IAsyncDisposable
     /// <summary>
     /// Gets or sets a value indicating whether the model's reasoning and its tool calls show as entries. By default they
     /// do not, except a tool call that waits for the user's approval: hiding it would leave the turn waiting for a decision
-    /// nobody can make.
+    /// nobody can make. The user turns it on and off with the toggle on the activity line, which raises
+    /// <see cref="ShowsActivityChanged"/>, so it binds two-way with <c>@bind-ShowsActivity</c>.
     /// </summary>
     [Parameter]
     public bool ShowsActivity { get; set; }
+
+    /// <summary>Gets or sets the callback raised when the user turns <see cref="ShowsActivity"/> on or off.</summary>
+    [Parameter]
+    public EventCallback<bool> ShowsActivityChanged { get; set; }
 
     /// <summary>
     /// Gets or sets the texts the view shows. The default is <see cref="ChatStrings.ForCulture"/> for the UI culture of the
@@ -116,6 +121,8 @@ public sealed partial class ChatView : IAsyncDisposable
     {
         _disposed = true;
         _throttle.Stop();
+        StopProgressTimer();
+        _scrollBridge?.Dispose();
         Show(null);
         _composer.PropertyChanged -= OnComposerPropertyChanged;
         _composer.Disconnect();
@@ -124,6 +131,7 @@ public sealed partial class ChatView : IAsyncDisposable
             try
             {
                 await _module.InvokeVoidAsync("unwatch", _root);
+                await _module.InvokeVoidAsync("unfollow", _scroller);
                 await _module.DisposeAsync();
             }
             // NOTE: On Blazor Server the circuit may already be gone, and the browser's side of the module with it.
@@ -154,14 +162,27 @@ public sealed partial class ChatView : IAsyncDisposable
             _composer.IsGenerating = IsGenerating;
         }
         _composer.Strings = Strings;
-        if (!ReferenceEquals(Strings, _strings) || !ReferenceEquals(MarkdownOptions, _markdownOptions) || ShowsActivity != _showsActivity)
+        // NOTE: The user's toggle changes the state without the parameter, so the state follows the parameter only when the
+        // parameter itself changes; a parent that renders again without binding it does not undo the user's choice.
+        var activityChanged = ShowsActivity != _showsActivityParameter;
+        if (activityChanged)
+        {
+            _showsActivityParameter = ShowsActivity;
+            _showsActivity = ShowsActivity;
+        }
+        if (!ReferenceEquals(Strings, _strings) || !ReferenceEquals(MarkdownOptions, _markdownOptions) || activityChanged)
         {
             _strings = Strings;
             _markdownOptions = MarkdownOptions;
-            _showsActivity = ShowsActivity;
             _revision++;
         }
+        var shownBefore = _shown;
         Show(_composer.ShownConversation);
+        if (!ReferenceEquals(shownBefore, _shown))
+        {
+            _ = FollowLatestAsync();
+        }
+        UpdateProgressTimer();
     }
 
     /// <inheritdoc/>
@@ -178,6 +199,8 @@ public sealed partial class ChatView : IAsyncDisposable
             }
             _module = module;
             await _module.InvokeVoidAsync("watchOverflow", _root);
+            _scrollBridge = DotNetObjectReference.Create(new ScrollBridge(OnFollowsLatestChanged));
+            await _module.InvokeVoidAsync("follow", _scroller, _scrollBridge);
         }
     }
 
@@ -213,7 +236,7 @@ public sealed partial class ChatView : IAsyncDisposable
 
     // NOTE: Hidden entries stay in the conversation and its history; only the view leaves them out.
     private bool IsShown(ChatEntry entry) =>
-        ShowsActivity || entry is not (ReasoningEntry or ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval });
+        _showsActivity || entry is not (ReasoningEntry or ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval });
 
     private async Task CopyAsync(string text)
     {
@@ -232,14 +255,17 @@ public sealed partial class ChatView : IAsyncDisposable
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged -= OnEntriesChanged;
+            _shown.PropertyChanged -= OnConversationPropertyChanged;
         }
         UnwatchAll();
         _shown = conversation;
         if (_shown is not null)
         {
             _shown.Entries.CollectionChanged += OnEntriesChanged;
+            _shown.PropertyChanged += OnConversationPropertyChanged;
             Watch(_shown.Entries);
         }
+        WatchTurn(_shown?.CurrentTurn);
     }
 
     // NOTE: A tool call that stops waiting for approval leaves the list while the activity is hidden, so the view follows
@@ -281,9 +307,12 @@ public sealed partial class ChatView : IAsyncDisposable
         _throttle.Request();
     }
 
+    // The list follows a tool call's state (whether it shows); the activity line follows a running tool's title and a
+    // reply's first text as well.
     private void OnEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ToolCallEntry.Status))
+        if (e.PropertyName is nameof(ToolCallEntry.Status) or nameof(AssistantReplyEntry.IsStreaming) or nameof(ToolCallEntry.Title)
+            || (e.PropertyName == nameof(AssistantReplyEntry.Text) && _composer.IsGenerating))
         {
             _throttle.Request();
         }
@@ -293,6 +322,7 @@ public sealed partial class ChatView : IAsyncDisposable
     {
         if (e.PropertyName is nameof(ChatComposer.IsGenerating) or nameof(ChatComposer.ShownConversation))
         {
+            _ = InvokeAsync(UpdateProgressTimer);
             _throttle.Request();
         }
     }
