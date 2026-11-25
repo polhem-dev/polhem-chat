@@ -25,7 +25,8 @@ public partial class ChatView
             return;
         }
 
-        var submitted = new PromptSubmittedEventArgs(text, attachments);
+        var editing = fromBox && IsEditingPrompt;
+        var submitted = new PromptSubmittedEventArgs(text, attachments) { IsEdit = editing };
         PromptSubmitted?.Invoke(this, submitted);
         if (submitted.Cancel)
         {
@@ -39,17 +40,29 @@ public partial class ChatView
         }
         ScrollToLatest();
 
-        if (_activeRunner is { } runner)
+        if (_activeRunner is not { } runner)
         {
-            var result = await runner.SendAsync(text, attachments, CancellationToken.None);
-            // A MessageSending handler of the runner canceled the prompt: give it back to the user instead of losing it.
-            if (result is null && fromBox && string.IsNullOrEmpty(Prompt) && _pendingAttachments.Count == 0)
+            if (editing)
             {
-                SetCurrentValue(PromptProperty, text);
-                foreach (var attachment in attachments)
-                {
-                    _pendingAttachments.Add(attachment);
-                }
+                EndEdit();
+            }
+            return;
+        }
+
+        var result = editing
+            ? await runner.EditLastPromptAsync(text, attachments, CancellationToken.None)
+            : await runner.SendAsync(text, attachments, CancellationToken.None);
+        if (editing && result is not null)
+        {
+            EndEdit();
+        }
+        // A MessageSending handler of the runner canceled the prompt: give it back to the user instead of losing it.
+        if (result is null && fromBox && string.IsNullOrEmpty(Prompt) && _pendingAttachments.Count == 0)
+        {
+            SetCurrentValue(PromptProperty, text);
+            foreach (var attachment in attachments)
+            {
+                _pendingAttachments.Add(attachment);
             }
         }
     }
@@ -104,6 +117,11 @@ public partial class ChatView
         {
             e.Handled = true;
             Stop();
+        }
+        else if (e.Key == Key.Escape && IsEditingPrompt)
+        {
+            e.Handled = true;
+            CancelEdit();
         }
     }
 

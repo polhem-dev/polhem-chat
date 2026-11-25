@@ -79,3 +79,21 @@ static readonly Polhem.Chat.Avalonia.ChatView.AttachmentLimitsProperty -> Avalon
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
 virtual Polhem.Chat.Avalonia.ChatViewStrings.FormatFileSize(long bytes) -> string!
 Polhem.Chat.Avalonia.ChatView.AddAttachmentAsync(string! fileName, System.IO.Stream! content) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!
+Polhem.Chat.Avalonia.ChatView.AllowsRewind.get -> bool?
+Polhem.Chat.Avalonia.ChatView.AllowsRewind.set -> void
+Polhem.Chat.Avalonia.ChatView.CancelEditCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.EditLastPromptCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.IsEditingPrompt.get -> bool
+Polhem.Chat.Avalonia.ChatView.RegenerateCommand.get -> System.Windows.Input.ICommand!
+Polhem.Chat.Avalonia.ChatView.RegenerateRequested -> System.EventHandler?
+Polhem.Chat.Avalonia.ChatViewStrings.CancelEdit.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.CancelEdit.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.EditPrompt.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.EditPrompt.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.EditingPrompt.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.EditingPrompt.set -> void
+Polhem.Chat.Avalonia.ChatViewStrings.Regenerate.get -> string!
+Polhem.Chat.Avalonia.ChatViewStrings.Regenerate.set -> void
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs.IsEdit.get -> bool
+Polhem.Chat.Avalonia.PromptSubmittedEventArgs.IsEdit.init -> void
+static readonly Polhem.Chat.Avalonia.ChatView.AllowsRewindProperty -> Avalonia.StyledProperty<bool?>!

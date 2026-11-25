@@ -17,6 +17,15 @@ internal sealed class EntryProjector(ChatConversation conversation)
 
     public ToolCallEntry? FindToolCall(string callId) => _toolCalls.GetValueOrDefault(callId);
 
+    /// <summary>Forgets an entry that left the conversation, so a call id it had may be used again.</summary>
+    public void Forget(ChatEntry entry)
+    {
+        if (entry is ToolCallEntry call && _toolCalls.TryGetValue(call.CallId, out var known) && ReferenceEquals(known, call))
+        {
+            _toolCalls.Remove(call.CallId);
+        }
+    }
+
     /// <summary>Ends the current reply or reasoning block, so the next text starts a new one.</summary>
     public void Break()
     {

@@ -23,6 +23,9 @@ Polhem.Chat.ChatAttachmentProblem.TotalTooLarge = 1 -> Polhem.Chat.ChatAttachmen
 Polhem.Chat.ChatAttachmentProblem.TypeNotAllowed = 3 -> Polhem.Chat.ChatAttachmentProblem
 Polhem.Chat.ChatAttachmentProblem.Unreadable = 5 -> Polhem.Chat.ChatAttachmentProblem
 Polhem.Chat.ChatConversation.AddUserPrompt(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> Polhem.Chat.UserPromptEntry!
+Polhem.Chat.ChatConversation.RewindLastPrompt() -> Microsoft.Extensions.AI.ChatMessage?
+Polhem.Chat.ChatRunner.EditLastPromptAsync(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
+Polhem.Chat.ChatRunner.RegenerateAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
 Polhem.Chat.ChatRunner.SendAsync(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
 Polhem.Chat.ChatTurn.AddEntry(Polhem.Chat.ChatEntry! entry) -> void
 Polhem.Chat.ChatTurn.Approve(Polhem.Chat.ToolCallEntry! entry) -> void

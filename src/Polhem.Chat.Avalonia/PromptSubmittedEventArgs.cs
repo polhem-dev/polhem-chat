@@ -24,6 +24,13 @@ public sealed class PromptSubmittedEventArgs : CancelEventArgs
         Attachments = attachments;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the prompt replaces the last one, which the user changed with
+    /// <see cref="ChatView.EditLastPromptCommand"/>. Without a <see cref="ChatView.Runner"/>, the application calls
+    /// <see cref="ChatConversation.RewindLastPrompt"/> before it sends the prompt.
+    /// </summary>
+    public bool IsEdit { get; init; }
+
     /// <summary>Gets the prompt the user submitted.</summary>
     public string Text { get; }
 

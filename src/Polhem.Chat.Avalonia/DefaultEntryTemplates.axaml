@@ -10,6 +10,17 @@
        template of its own. Colors come from ChatTheme's resources, so an application can change them. -->
 
   <DataTemplate x:Key="UserPrompt" DataType="chat:UserPromptEntry">
+    <StackPanel Classes="polhemChatPromptRow" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+    <!-- Shown on the last prompt only, while the user may change it (ChatView.EditLastPromptCommand). -->
+    <Button Classes="polhemChatCopy polhemChatEdit"
+            VerticalAlignment="Top"
+            ToolTip.Tip="{Binding $parent[local:ChatView].Strings.EditPrompt}"
+            AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.EditPrompt}"
+            Command="{Binding $parent[local:ChatView].EditLastPromptCommand}"
+            CommandParameter="{Binding}"
+            IsVisible="{Binding $self.IsEffectivelyEnabled}">
+      <PathIcon Width="13" Height="13" Data="M3 17.2V21h3.8l11-11-3.8-3.8L3 17.2zM20.7 7a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.8 3.8L20.7 7z" />
+    </Button>
     <Border Classes="polhemChatPrompt"
             HorizontalAlignment="Right"
             MaxWidth="640"
@@ -51,6 +62,7 @@
                              IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       </StackPanel>
     </Border>
+    </StackPanel>
   </DataTemplate>
 
   <DataTemplate x:Key="AssistantReply" DataType="chat:AssistantReplyEntry">
@@ -93,6 +105,17 @@
               <Binding Path="Text" Converter="{x:Static StringConverters.IsNotNullOrEmpty}" />
             </MultiBinding>
           </Button.IsVisible>
+        </Button>
+        <!-- Shown on the last reply only, while the user may send its prompt again (ChatView.RegenerateCommand). -->
+        <Button Classes="polhemChatCopy polhemChatRegenerate"
+                ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Regenerate}"
+                AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Regenerate}"
+                Command="{Binding $parent[local:ChatView].RegenerateCommand}"
+                CommandParameter="{Binding}"
+                IsVisible="{Binding $self.IsEffectivelyEnabled}">
+          <PathIcon Width="13"
+                    Height="13"
+                    Data="M12 4a8 8 0 0 1 7.4 5H17v2h6V5h-2v2.3A10 10 0 1 0 22 12h-2a8 8 0 1 1-8-8z" />
         </Button>
       </StackPanel>
     </StackPanel>

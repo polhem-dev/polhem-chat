@@ -159,6 +159,48 @@ public sealed class ChatConversation : INotifyPropertyChanged
     /// <returns>The messages, oldest first.</returns>
     public IReadOnlyList<ChatMessage> SaveHistory() => [.. _history];
 
+    /// <summary>
+    /// Removes the user's last prompt and everything after it, from the history and from the entries, so that it can be
+    /// sent again as it was or changed. Entries of the application's own after the prompt go too.
+    /// </summary>
+    /// <returns>The message of the prompt that was removed, with its text and attachments, or <see langword="null"/> when
+    /// the conversation has no prompt.</returns>
+    /// <remarks>
+    /// A user message that only answers approval requests is not a prompt. What the tools of the removed turns did is not
+    /// undone; the model only stops seeing it.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
+    public ChatMessage? RewindLastPrompt()
+    {
+        ThrowIfTurnInProgress();
+        var index = LastPromptIndex();
+        if (index < 0)
+        {
+            return null;
+        }
+        var prompt = _history[index];
+        _history.RemoveRange(index, _history.Count - index);
+
+        var first = Entries.Count;
+        while (first > 0 && Entries[first - 1] is not UserPromptEntry)
+        {
+            first--;
+        }
+        first = first > 0 ? first - 1 : Entries.Count;
+        _projector.Break();
+        for (var entry = Entries.Count - 1; entry >= first; entry--)
+        {
+            _projector.Forget(Entries[entry]);
+            Entries.RemoveAt(entry);
+        }
+        return prompt;
+    }
+
+    /// <summary>Returns the index in the history of the user's last prompt, or -1.</summary>
+    internal int LastPromptIndex() =>
+        _history.FindLastIndex(message => message.Role == ChatRole.User
+            && (message.Text.Length > 0 || message.Contents.Any(content => content is DataContent)));
+
     /// <summary>Removes every message and entry.</summary>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
     public void Clear()

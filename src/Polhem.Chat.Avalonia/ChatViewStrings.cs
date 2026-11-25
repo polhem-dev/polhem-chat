@@ -51,6 +51,10 @@ public class ChatViewStrings
         SecondsFormat = Load(nameof(SecondsFormat), culture);
         MinutesFormat = Load(nameof(MinutesFormat), culture);
         OutputTokensFormat = Load(nameof(OutputTokensFormat), culture);
+        Regenerate = Load(nameof(Regenerate), culture);
+        EditPrompt = Load(nameof(EditPrompt), culture);
+        EditingPrompt = Load(nameof(EditingPrompt), culture);
+        CancelEdit = Load(nameof(CancelEdit), culture);
         Attach = Load(nameof(Attach), culture);
         RemoveAttachment = Load(nameof(RemoveAttachment), culture);
         AttachmentTooLargeFormat = Load(nameof(AttachmentTooLargeFormat), culture);
@@ -164,6 +168,18 @@ public class ChatViewStrings
 
     /// <summary>Gets or sets the composite format of a size from a megabyte. Argument 0 is the number of megabytes, as a <see cref="double"/>.</summary>
     public string MegabytesFormat { get; set; }
+
+    /// <summary>Gets or sets the label of the button that sends the last prompt again.</summary>
+    public string Regenerate { get; set; }
+
+    /// <summary>Gets or sets the label of the button that puts the last prompt in the box to change it.</summary>
+    public string EditPrompt { get; set; }
+
+    /// <summary>Gets or sets the note above the prompt box while it holds the last prompt to change.</summary>
+    public string EditingPrompt { get; set; }
+
+    /// <summary>Gets or sets the label of the button that stops changing the last prompt.</summary>
+    public string CancelEdit { get; set; }
 
     /// <summary>Gets or sets the heading of the arguments of a tool call.</summary>
     public string ToolArguments { get; set; }
