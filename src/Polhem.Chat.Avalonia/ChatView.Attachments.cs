@@ -152,8 +152,9 @@ public partial class ChatView
         return null;
     }
 
-    /// <summary>The name of a file without its folders, with either separator.</summary>
-    internal static string NameOnly(string name) => name[(name.LastIndexOfAny(['/', '\\']) + 1)..];
+    // NOTE: The message on screen shows the name as the file has it, hidden characters escaped, so the user sees that a
+    // name tried to pass for another. The event and the model get the cleaned name.
+    private static string NameOnly(string name) => name[(name.LastIndexOfAny(['/', '\\']) + 1)..];
 
     private static ChatAttachmentLimits CoerceLimits(AvaloniaObject owner, ChatAttachmentLimits? value) =>
         value ?? ((ChatView)owner)._defaultLimits;
@@ -182,7 +183,7 @@ public partial class ChatView
     private ChatAttachmentProblem Reject(string fileName, ChatAttachmentProblem problem)
     {
         ShowAttachmentError(Strings.FormatAttachmentProblem(fileName, problem, AttachmentLimits));
-        AttachmentRejected?.Invoke(this, new ChatAttachmentRejectedEventArgs(fileName, problem));
+        AttachmentRejected?.Invoke(this, new ChatAttachmentRejectedEventArgs(ChatAttachmentLimits.FileNameOf(fileName), problem));
         return problem;
     }
 

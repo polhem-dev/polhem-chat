@@ -27,6 +27,9 @@ public class AttachmentTests
         { "photo.webp", s_webp, ChatAttachmentLimits.WebP },
         { "paper.pdf", s_pdf, ChatAttachmentLimits.Pdf },
         { "no-extension", Png, ChatAttachmentLimits.Png },
+        { "Scan 2026.11.25", Png, ChatAttachmentLimits.Png },
+        { "photo.jfif", s_jpeg, ChatAttachmentLimits.Jpeg },
+        { "photo.jpe", s_jpeg, ChatAttachmentLimits.Jpeg },
     };
 
     [Theory(DisplayName = "Pictures and PDF are allowed by default, with the media type read from their content")]
@@ -79,6 +82,8 @@ public class AttachmentTests
 
     [Theory(DisplayName = "A name with an extension the package does not know is rejected, whatever the content")]
     [InlineData("photo.png.exe")]
+    [InlineData("photo.png.exe.")]
+    [InlineData("photo.png.exe . ")]
     [InlineData("photo.heic")]
     public void Check_UnknownExtension_IsRejected(string fileName) =>
         Assert.Equal(ChatAttachmentProblem.TypeNotAllowed, new ChatAttachmentLimits().Check(fileName, Png, []).Problem);

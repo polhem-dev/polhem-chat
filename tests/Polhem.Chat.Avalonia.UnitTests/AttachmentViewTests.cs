@@ -73,6 +73,7 @@ public class AttachmentViewTests(HeadlessSession session)
         Assert.Equal(ChatAttachmentProblem.TooLarge, problem);
         Assert.False(opened);
         Assert.Equal(ChatAttachmentProblem.TooLarge, rejected!.Problem);
+        Assert.Equal("hugegnp.exe", rejected.FileName);
         var error = Part<TextBlock>(view, "PART_AttachmentError");
         Assert.True(IsShown(error));
         Assert.Equal("huge\\u{202E}gnp.exe is larger than 10.0 MB.", error.Text);
@@ -183,6 +184,26 @@ public class AttachmentViewTests(HeadlessSession session)
 
         Assert.Equal((12000, 12000), ImageHeader.ReadSize(huge));
         Assert.Null(AttachmentPreview.Thumbnail(new DataContent(huge, ChatAttachmentLimits.Png)));
+    });
+
+    [Theory(DisplayName = "A long strip gets no preview, and a tall picture is decoded to the preview's height")]
+    [InlineData(16, 999_999, false)]
+    [InlineData(10, 300, false)]
+    [InlineData(100, 1000, true)]
+    public Task Thumbnail_TallPictures(int width, int height, bool previewed) => session.RunAsync(() =>
+    {
+        var tall = (byte[])s_png.Clone();
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(tall.AsSpan(16), width);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(tall.AsSpan(20), height);
+
+        // The body is a 1 × 1 picture, so a decode that is allowed fails or yields a small bitmap; neither may be large.
+        var thumbnail = AttachmentPreview.Thumbnail(new DataContent(tall, ChatAttachmentLimits.Png));
+
+        if (!previewed)
+        {
+            Assert.Null(thumbnail);
+        }
+        Assert.True(thumbnail is null || thumbnail.PixelSize.Height <= AttachmentPreview.ThumbnailWidth);
     });
 
     [Fact(DisplayName = "The same attachment is decoded once, and a type the package does not check gets no preview")]

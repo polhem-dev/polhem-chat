@@ -1,11 +1,14 @@
 namespace Polhem.Chat.Avalonia;
 
 /// <summary>Provides data for the <see cref="ChatView.AttachmentRejected"/> event.</summary>
-/// <param name="fileName">The name of the file, without its folders.</param>
+/// <param name="fileName">The name of the file as <see cref="ChatAttachmentLimits.FileNameOf"/> gives it.</param>
 /// <param name="problem">Why it was not attached.</param>
 public sealed class ChatAttachmentRejectedEventArgs(string fileName, ChatAttachmentProblem problem) : EventArgs
 {
-    /// <summary>Gets the name of the file, without its folders.</summary>
+    /// <summary>
+    /// Gets the name of the file as <see cref="ChatAttachmentLimits.FileNameOf"/> gives it: without its folders and
+    /// without characters that draw nothing.
+    /// </summary>
     public string FileName { get; } = fileName;
 
     /// <summary>Gets why the file was not attached.</summary>

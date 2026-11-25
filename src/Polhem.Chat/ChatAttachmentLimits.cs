@@ -54,6 +54,8 @@ public class ChatAttachmentLimits
         [".png"] = Png,
         [".jpg"] = Jpeg,
         [".jpeg"] = Jpeg,
+        [".jpe"] = Jpeg,
+        [".jfif"] = Jpeg,
         [".gif"] = Gif,
         [".webp"] = WebP,
         [".pdf"] = Pdf,
@@ -120,7 +122,7 @@ public class ChatAttachmentLimits
     public ChatAttachmentCheck Check(string fileName, ReadOnlySpan<byte> content, IReadOnlyCollection<DataContent> pending)
     {
         ArgumentNullException.ThrowIfNull(fileName);
-        var name = NameOnly(fileName);
+        var name = FileNameOf(fileName);
         if (name.Length == 0)
         {
             return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.Unreadable);
@@ -136,8 +138,9 @@ public class ChatAttachmentLimits
 
         var extension = Path.GetExtension(name);
         var named = s_extensions.GetValueOrDefault(extension);
-        // A name with an extension this package does not know says a type it cannot check, such as photo.png.exe.
-        if (named is null && extension.Length > 0)
+        // A name with an extension this package does not know says a type it cannot check, such as photo.png.exe. A
+        // part after the last dot with no letter in it, as in "Scan 2026.11.25", is not an extension.
+        if (named is null && extension.Any(char.IsLetter))
         {
             return ChatAttachmentCheck.Rejected(name, ChatAttachmentProblem.TypeNotAllowed);
         }
@@ -170,16 +173,24 @@ public class ChatAttachmentLimits
         return ChatAttachmentCheck.Allowed(name, new DataContent(content.ToArray(), mediaType) { Name = name });
     }
 
-    // NOTE: Both separators, whatever the platform: a name from another system, or one written to look like a path,
-    // must not carry its folders to the model. Characters that draw nothing or reorder the text, which a name could use
-    // to pass for another, are left out of the name the model reads.
-    private static string NameOnly(string fileName)
+    /// <summary>
+    /// Returns the name a file is sent under: without the folders of its path, whichever separator it uses, without
+    /// characters that draw nothing or reorder the text, and without trailing dots and spaces.
+    /// </summary>
+    /// <param name="path">A file name or path.</param>
+    /// <returns>The name; empty when nothing is left.</returns>
+    /// <remarks>
+    /// A name from another system, or one written to look like a path, must not carry its folders to the model, and a
+    /// name must not use hidden characters or a trailing dot (<c>photo.png.exe.</c>) to pass for another.
+    /// </remarks>
+    public static string FileNameOf(string path)
     {
-        var name = fileName[(fileName.LastIndexOfAny(['/', '\\']) + 1)..];
+        ArgumentNullException.ThrowIfNull(path);
+        var name = path[(path.LastIndexOfAny(['/', '\\']) + 1)..];
         return string.Concat(name.EnumerateRunes()
             .Where(rune => Rune.GetUnicodeCategory(rune) is not (UnicodeCategory.Control or UnicodeCategory.Format
                 or UnicodeCategory.LineSeparator or UnicodeCategory.ParagraphSeparator))
-            .Select(rune => rune.ToString())).Trim();
+            .Select(rune => rune.ToString())).Trim().TrimEnd('.', ' ');
     }
 
     private static string? Sniff(ReadOnlySpan<byte> content)

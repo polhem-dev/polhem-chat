@@ -48,3 +48,4 @@ Polhem.Chat.ChatRunner.SendAsync(string! text, System.Collections.Generic.IReadO
 Polhem.Chat.MessageSendingEventArgs.Attachments.get -> System.Collections.Generic.IList<Microsoft.Extensions.AI.DataContent!>!
 Polhem.Chat.UserPromptEntry.Attachments.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>!
 Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
+static Polhem.Chat.ChatAttachmentLimits.FileNameOf(string! path) -> string!
