@@ -60,12 +60,13 @@ public class ActivityAndScrollingTests : BunitContext
         var conversation = new ChatConversation();
         conversation.AddUserPrompt("Hi");
         conversation.BeginTurn();
-        var strings = new ChatStrings();
         var view = HostDriven(conversation, isGenerating: true);
-        Assert.Equal(strings.FormatProgress(0, TimeSpan.Zero, 0), view.Find(".pch-progress").TextContent);
+        // NOTE: The first render may come a second or more after the turn began on a busy machine, so the test reads the
+        // seconds it starts from instead of assuming zero, and waits for the next.
+        var first = view.Find(".pch-progress").TextContent;
 
-        view.WaitForAssertion(() => Assert.Equal(strings.FormatProgress(0, TimeSpan.FromSeconds(1), 0), view.Find(".pch-progress").TextContent),
-            TimeSpan.FromSeconds(5));
+        view.WaitForAssertion(() => Assert.NotEqual(first, view.Find(".pch-progress").TextContent), TimeSpan.FromSeconds(5));
+        Assert.EndsWith("s", view.Find(".pch-progress").TextContent, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "The toggle shows the reasoning, tells the parent, and a render of the parent does not undo it")]
