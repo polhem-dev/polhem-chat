@@ -159,6 +159,22 @@ public class RewindViewTests(HeadlessSession session)
         Assert.False(view.RegenerateCommand.CanExecute(null));
     });
 
+    [Fact(DisplayName = "Rewinding a prompt whose entry the application removed lets the view offer the previous one at once")]
+    public Task Rewind_RemovedEntry_UpdatesTheButtons() => session.RunAsync(async () =>
+    {
+        var (view, runner, window) = await TwoTurns();
+        var prompts = runner.Conversation.Entries.OfType<UserPromptEntry>().ToList();
+        runner.Conversation.Entries.Remove(prompts[1]);
+        Settle(window);
+        var changed = 0;
+        view.EditLastPromptCommand.CanExecuteChanged += (_, _) => changed++;
+
+        runner.Conversation.RewindLastPrompt();
+
+        Assert.True(changed > 0);
+        Assert.True(view.EditLastPromptCommand.CanExecute(prompts[0]));
+    });
+
     [Fact(DisplayName = "After a canceled edit goes back in the box, canceling the edit still gives back the draft from before")]
     public Task Edit_CanceledThenEsc_RestoresTheDraft() => session.RunAsync(async () =>
     {

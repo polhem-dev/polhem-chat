@@ -62,6 +62,10 @@ public partial class ChatView
         {
             WatchTurn(_shown?.CurrentTurn);
         }
+        else if (e.PropertyName == nameof(ChatConversation.LastPrompt))
+        {
+            UpdateRewind();
+        }
     }
 
     private void OnTurnPropertyChanged(object? sender, PropertyChangedEventArgs e)
