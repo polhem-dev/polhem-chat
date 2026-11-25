@@ -9,23 +9,11 @@ internal static class AttachmentPreview
 {
     public const int ThumbnailWidth = 96;
 
-    /// <summary>
-    /// The most pixels a picture may have to get a preview: 4096 × 4096, 64 MB decoded. A picture is decoded at full size
-    /// before it is scaled down unless its format can decode smaller, which PNG and GIF cannot.
-    /// </summary>
-    public const long MaxPixels = 4096L * 4096;
-
-    /// <summary>
-    /// The most one side of a picture may be longer than the other to get a preview. A long strip is cheap to store
-    /// and still decodes at full size first.
-    /// </summary>
-    public const int MaxAspectRatio = 20;
-
     private static readonly ConditionalWeakTable<DataContent, Bitmap?> s_cache = [];
 
     /// <summary>
     /// Returns a small picture of an attachment, or <see langword="null"/> for one that is not a PNG, JPEG, GIF or WebP
-    /// picture, has more than <see cref="MaxPixels"/> pixels, or does not decode. Each attachment is decoded once.
+    /// picture, is larger than <see cref="ChatPicturePreview"/> allows, or does not decode. Each attachment is decoded once.
     /// </summary>
     /// <remarks>
     /// WARNING: The size is read from the picture's header before anything is decoded. A file of a few kilobytes can
@@ -43,13 +31,12 @@ internal static class AttachmentPreview
 
     private static Bitmap? Decode(DataContent attachment)
     {
-        if (attachment.MediaType is not (ChatAttachmentLimits.Png or ChatAttachmentLimits.Jpeg or ChatAttachmentLimits.Gif or ChatAttachmentLimits.WebP)
-            || ImageHeader.ReadSize(attachment.Data.Span) is not { } size
-            || (long)size.Width * size.Height > MaxPixels
-            || Math.Max(size.Width, size.Height) > (long)MaxAspectRatio * Math.Min(size.Width, size.Height))
+        if (!ChatPicturePreview.CanPreview(attachment)
+            || !ChatPicturePreview.TryReadSize(attachment.Data.Span, out var pictureWidth, out var pictureHeight))
         {
             return null;
         }
+        var size = (Width: pictureWidth, Height: pictureHeight);
         // The longer side gets the preview's size: a tall picture decoded to a small width would keep all its rows.
         var width = size.Width >= size.Height
             ? Math.Min(ThumbnailWidth, size.Width)

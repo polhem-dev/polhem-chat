@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace Polhem.Chat.Avalonia;
+namespace Polhem.Chat;
 
 /// <summary>Reads the size of a PNG, GIF, JPEG or WebP picture from its first bytes, without decoding it.</summary>
 internal static class ImageHeader

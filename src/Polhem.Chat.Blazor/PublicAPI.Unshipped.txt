@@ -1,1 +1,20 @@
 #nullable enable
+Polhem.Chat.Blazor.ChatView
+Polhem.Chat.Blazor.ChatView.AdditionalAttributes.get -> System.Collections.Generic.IReadOnlyDictionary<string!, object!>?
+Polhem.Chat.Blazor.ChatView.AdditionalAttributes.set -> void
+Polhem.Chat.Blazor.ChatView.ChatView() -> void
+Polhem.Chat.Blazor.ChatView.Class.get -> string?
+Polhem.Chat.Blazor.ChatView.Class.set -> void
+Polhem.Chat.Blazor.ChatView.Conversation.get -> Polhem.Chat.ChatConversation?
+Polhem.Chat.Blazor.ChatView.Conversation.set -> void
+Polhem.Chat.Blazor.ChatView.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Polhem.Chat.Blazor.ChatView.IsGenerating.get -> bool
+Polhem.Chat.Blazor.ChatView.IsGenerating.set -> void
+Polhem.Chat.Blazor.ChatView.MarkdownOptions.get -> Polhem.Markdown.MarkdownOptions?
+Polhem.Chat.Blazor.ChatView.MarkdownOptions.set -> void
+Polhem.Chat.Blazor.ChatView.Runner.get -> Polhem.Chat.ChatRunner?
+Polhem.Chat.Blazor.ChatView.Runner.set -> void
+Polhem.Chat.Blazor.ChatView.ShowsActivity.get -> bool
+Polhem.Chat.Blazor.ChatView.ShowsActivity.set -> void
+Polhem.Chat.Blazor.ChatView.Strings.get -> Polhem.Chat.ChatStrings?
+Polhem.Chat.Blazor.ChatView.Strings.set -> void
