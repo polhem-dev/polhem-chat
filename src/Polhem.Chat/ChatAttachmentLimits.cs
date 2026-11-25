@@ -66,7 +66,7 @@ public class ChatAttachmentLimits
         [".json"] = Json,
     };
 
-    private static readonly HashSet<string> s_textTypes = new(StringComparer.Ordinal) { PlainText, Markdown, Csv, Json };
+    private static readonly HashSet<string> s_textTypes = [PlainText, Markdown, Csv, Json];
 
     /// <summary>Gets or sets the largest file, in bytes. The default is 10 MB.</summary>
     /// <remarks>
