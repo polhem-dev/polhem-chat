@@ -296,13 +296,17 @@ public class ChatViewTests : BunitContext
         view.WaitForAssertion(() => Assert.Equal("Again", view.Find(".pch-prompt-text").TextContent));
     }
 
-    [Fact(DisplayName = "A view disposed after its circuit went away does not fail")]
+    [Fact(DisplayName = "A view disposed after its circuit went away does not fail, and still leaves no handler behind")]
     public async Task Dispose_AfterDisconnect()
     {
         _module.SetupVoid("unwatch", _ => true).SetException(new Microsoft.JSInterop.JSDisconnectedException("The circuit is gone."));
-        HostDriven(new ChatConversation());
+        var conversation = new ChatConversation();
+        HostDriven(conversation);
 
         await DisposeComponentsAsync();
+
+        _module.VerifyInvoke("unwatch");
+        Assert.Empty(Handlers(conversation.Entries, "CollectionChanged"));
     }
 
     private sealed class NoteEntry : ChatEntry;
