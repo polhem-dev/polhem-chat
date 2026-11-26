@@ -91,51 +91,67 @@
                 <button type="button" class="pch-button pch-cancel-edit" @onclick="_composer.CancelEdit">@S.CancelEdit</button>
             </div>
         }
-        @if (_composer.PendingAttachments.Count > 0)
-        {
-            <div class="pch-pending">
-                @foreach (var attachment in _composer.PendingAttachments)
-                {
-                    <span class="pch-pending-file" @key="attachment">
-                        @if (ChatPicturePreview.CanPreview(attachment))
-                        {
-                            <img class="pch-pending-thumbnail" src="@attachment.Uri" alt="" />
-                        }
-                        else
-                        {
-                            <svg class="pch-pending-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5z" /></svg>
-                        }
-                        <span class="pch-pending-text">
-                            <span class="pch-file-name">@VisibleText.Escape(attachment.Name)</span>
-                            <span class="pch-pending-size">@S.FormatFileSize(attachment.Data.Length)</span>
+        @* One rounded card in the conversation holds the attached files, the prompt box and its buttons. *@
+        <div class="pch-composer-card">
+            @if (_composer.PendingAttachments.Count > 0)
+            {
+                <div class="pch-pending">
+                    @foreach (var attachment in _composer.PendingAttachments)
+                    {
+                        <span class="pch-pending-file" @key="attachment">
+                            @if (ChatPicturePreview.CanPreview(attachment))
+                            {
+                                <img class="pch-pending-thumbnail" src="@attachment.Uri" alt="" />
+                            }
+                            else
+                            {
+                                <svg class="pch-pending-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5z" /></svg>
+                            }
+                            <span class="pch-pending-text">
+                                <span class="pch-file-name">@VisibleText.Escape(attachment.Name)</span>
+                                <span class="pch-pending-size">@S.FormatFileSize(attachment.Data.Length)</span>
+                            </span>
+                            <button type="button" class="pch-icon-button pch-remove-attachment" title="@S.RemoveAttachment"
+                                    aria-label="@($"{S.RemoveAttachment}: {VisibleText.Escape(attachment.Name)}")"
+                                    @onclick="() => _composer.RemoveAttachment(attachment)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.4 4 4 5.4 10.6 12 4 18.6 5.4 20l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L20 5.4 18.6 4 12 10.6z" /></svg>
+                            </button>
                         </span>
-                        <button type="button" class="pch-icon-button pch-remove-attachment" title="@S.RemoveAttachment"
-                                aria-label="@($"{S.RemoveAttachment}: {VisibleText.Escape(attachment.Name)}")"
-                                @onclick="() => _composer.RemoveAttachment(attachment)">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.4 4 4 5.4 10.6 12 4 18.6 5.4 20l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L20 5.4 18.6 4 12 10.6z" /></svg>
-                        </button>
-                    </span>
+                    }
+                </div>
+            }
+            <div class="pch-input-row">
+                @if (AllowsAttachments)
+                {
+                    @* The file input itself sits in the button, visually hidden but focusable, so the browser opens its picker
+                       from the user's own click or key; a picker opened from the server would lose the user's activation.
+                       Dropped files and pasted pictures reach the same input (polhem-chat.js). *@
+                    <label class="pch-icon-button pch-attach" title="@S.Attach">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z" /></svg>
+                        <InputFile class="pch-file-input" multiple accept="@AcceptedTypes" aria-label="@S.Attach" OnChange="OnFilesPickedAsync" />
+                    </label>
+                }
+                @* Enter sends, Shift+Enter starts a new line, and an Enter that confirms an input method's composition does
+                   neither (polhem-chat.js). *@
+                <textarea @ref="_promptBox" class="pch-prompt-box" rows="1" placeholder="@S.PromptPlaceholder"
+                          aria-label="@S.PromptPlaceholder" @bind:get="_composer.Prompt" @bind:set="SetPrompt"
+                          @bind:event="oninput"></textarea>
+                @* An icon, not a word: the text is the tooltip and the accessible name. *@
+                @if (_composer.IsGenerating)
+                {
+                    <button type="button" class="pch-composer-button pch-stop" title="@S.Stop" aria-label="@S.Stop"
+                            @onclick="SendOrStopAsync">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="pch-composer-button pch-send" title="@S.Send" aria-label="@S.Send"
+                            @onclick="SendOrStopAsync">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20V7.83l-5.59 5.59L4 12l8-8 8 8-1.41 1.41L13 7.83V20z" /></svg>
+                    </button>
                 }
             </div>
-        }
-        <div class="pch-input-row">
-            @if (AllowsAttachments)
-            {
-                @* The file input itself sits in the button, visually hidden but focusable, so the browser opens its picker
-                   from the user's own click or key; a picker opened from the server would lose the user's activation.
-                   Dropped files and pasted pictures reach the same input (polhem-chat.js). *@
-                <label class="pch-icon-button pch-attach" title="@S.Attach">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z" /></svg>
-                    <InputFile class="pch-file-input" multiple accept="@AcceptedTypes" aria-label="@S.Attach" OnChange="OnFilesPickedAsync" />
-                </label>
-            }
-            @* Enter sends, Shift+Enter starts a new line, and an Enter that confirms an input method's composition does
-               neither (polhem-chat.js). *@
-            <textarea @ref="_promptBox" class="pch-prompt-box" rows="1" placeholder="@S.PromptPlaceholder"
-                      aria-label="@S.PromptPlaceholder" @bind:get="_composer.Prompt" @bind:set="SetPrompt"
-                      @bind:event="oninput"></textarea>
-            <button type="button" class="@(_composer.IsGenerating ? "pch-button pch-stop" : "pch-button pch-send")"
-                    @onclick="SendOrStopAsync">@(_composer.IsGenerating ? S.Stop : S.Send)</button>
         </div>
         @if (_composer.AttachmentError is { } attachmentError)
         {
