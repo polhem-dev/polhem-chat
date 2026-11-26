@@ -158,6 +158,7 @@ static Polhem.Chat.ChatPicturePreview.CanPreview(Microsoft.Extensions.AI.DataCon
 static Polhem.Chat.ChatPicturePreview.TryReadSize(System.ReadOnlySpan<byte> data, out int width, out int height) -> bool
 static Polhem.Chat.ChatStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.ChatStrings!
 static Polhem.Chat.VisibleText.Escape(string? text) -> string!
+static Polhem.Chat.VisibleText.EscapeBidiControls(string? text) -> string!
 static Polhem.Chat.VisibleText.FormatArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
 static Polhem.Chat.VisibleText.FormatValue(object? value) -> string!
 static Polhem.Chat.VisibleText.ListArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
