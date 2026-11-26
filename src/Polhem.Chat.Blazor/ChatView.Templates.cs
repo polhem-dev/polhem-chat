@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -28,7 +29,8 @@ namespace Polhem.Chat.Blazor;
 /// </remarks>
 public sealed partial class ChatView
 {
-    private readonly Dictionary<string, RenderFragment<ToolCallEntry>> _toolTemplates = new(StringComparer.Ordinal);
+    // The default comparer of string keys is ordinal, as tool names are compared.
+    private readonly Dictionary<string, RenderFragment<ToolCallEntry>> _toolTemplates = [];
     private RenderFragment<UserPromptEntry>? _promptTemplate;
     private RenderFragment<AssistantReplyEntry>? _replyTemplate;
     private RenderFragment<ReasoningEntry>? _reasoningTemplate;
@@ -209,7 +211,7 @@ public sealed partial class ChatView
         Take(ref _toolCallTemplate, ToolCallTemplate, ref changed);
         Take(ref _summaryTemplate, SummaryTemplate, ref changed);
         Take(ref _errorTemplate, ErrorTemplate, ref changed);
-        var tools = ToolCallTemplates ?? new Dictionary<string, RenderFragment<ToolCallEntry>>();
+        var tools = ToolCallTemplates ?? ReadOnlyDictionary<string, RenderFragment<ToolCallEntry>>.Empty;
         if (tools.Count != _toolTemplates.Count
             || tools.Any(pair => !_toolTemplates.TryGetValue(pair.Key, out var known) || !Equals(known, pair.Value)))
         {
