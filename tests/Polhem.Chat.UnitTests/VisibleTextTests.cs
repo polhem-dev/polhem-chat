@@ -30,6 +30,26 @@ public class VisibleTextTests
         Assert.Same(text, VisibleText.EscapeBidiControls(text));
     }
 
+    [Theory(DisplayName = "A numeric character reference to a bidirectional control shows as the same escape")]
+    [InlineData("&#x202E;", "\\u{202E}")]
+    [InlineData("&#X202e;", "\\u{202E}")]
+    [InlineData("&#x000202A;", "\\u{202A}")]
+    [InlineData("&#8238;", "\\u{202E}")]
+    [InlineData("&#0008294;", "\\u{2066}")]
+    [InlineData("&#8297;", "\\u{2069}")]
+    public void EscapeBidiControls_Reference_ShowsAsEscape(string reference, string escape)
+    {
+        Assert.Equal($"report{escape}fdp.exe", VisibleText.EscapeBidiControls($"report{reference}fdp.exe"));
+    }
+
+    [Theory(DisplayName = "Other references, and references without their semicolon, stay as they are")]
+    [InlineData("&#x202F; &#8239; &#x2065; &#8293; &#x200F; &amp; &#x202E")]
+    [InlineData("&#x2066x;")]
+    public void EscapeBidiControls_OtherReference_Unchanged(string text)
+    {
+        Assert.Equal(text, VisibleText.EscapeBidiControls(text));
+    }
+
     [Fact(DisplayName = "No text escapes to an empty string")]
     public void EscapeBidiControls_Null_Empty()
     {

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
@@ -10,7 +11,7 @@ namespace Polhem.Chat;
 /// Text from the model shown so that what the user reads is what a tool receives: characters that draw nothing or
 /// reorder the text around them show as escapes. A view shows tool arguments, tool results and file names through it.
 /// </summary>
-public static class VisibleText
+public static partial class VisibleText
 {
     /// <summary>
     /// Replaces control characters other than line feed and tab, format characters (zero-width characters, the
@@ -26,8 +27,8 @@ public static class VisibleText
     public static string Escape(string? text) => EscapeWhere(text, IsHidden);
 
     /// <summary>
-    /// Replaces only the bidirectional embeddings, overrides and isolates (U+202A to U+202E and U+2066 to U+2069) with
-    /// <c>\u{XXXX}</c>, for text such as a reply that is shown as Markdown.
+    /// Replaces only the bidirectional embeddings, overrides and isolates (U+202A to U+202E and U+2066 to U+2069), and
+    /// the numeric character references to them, with <c>\u{XXXX}</c>, for text such as a reply that is shown as Markdown.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -41,13 +42,25 @@ public static class VisibleText
     /// several scripts depend on them, which is why <see cref="Escape"/> does too much for a reply.
     /// </para>
     /// <para>
+    /// IMPORTANT: Markdown and the HTML in it decode a reference such as <c>&amp;#x202E;</c> or <c>&amp;#8238;</c> to
+    /// the character itself after this runs, so the references are escaped too. In plain text, where nothing decodes
+    /// them, such a reference shows as the same escape. <c>EscapeBidiControls_Reference_ShowsAsEscape</c> checks the
+    /// forms the viewers decode.
+    /// </para>
+    /// <para>
     /// The escape is plain text in Markdown, so it shows the same in a paragraph, in inline code and in a code block;
     /// <c>Reply_BidiOverride_ShowsAsEscape</c> and <c>BidiOverride_Reply_ShowsAsEscape</c> check it in each view.
     /// </para>
     /// </remarks>
     /// <param name="text">The text to show.</param>
     /// <returns>The text with those characters escaped; an empty string for <see langword="null"/>.</returns>
-    public static string EscapeBidiControls(string? text) => EscapeWhere(text, IsBidiControl);
+    public static string EscapeBidiControls(string? text)
+    {
+        var escaped = EscapeWhere(text, IsBidiControl);
+        return escaped.Contains("&#", StringComparison.Ordinal)
+            ? BidiControlReference().Replace(escaped, match => FormatEscape(ParseReference(match)))
+            : escaped;
+    }
 
     private static string EscapeWhere(string? text, Func<Rune, bool> escapes)
     {
@@ -60,7 +73,7 @@ public static class VisibleText
         {
             if (escapes(rune))
             {
-                builder.Append(CultureInfo.InvariantCulture, $"\\u{{{rune.Value:X4}}}");
+                builder.Append(FormatEscape(rune.Value));
             }
             else
             {
@@ -162,6 +175,16 @@ public static class VisibleText
             writer.WriteStringValue(Convert.ToString(value, CultureInfo.InvariantCulture));
         }
     }
+
+    private static string FormatEscape(int value) => string.Create(CultureInfo.InvariantCulture, $"\\u{{{value:X4}}}");
+
+    private static int ParseReference(Match match) => match.Groups["hex"].Success
+        ? int.Parse(match.Groups["hex"].ValueSpan, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture)
+        : int.Parse(match.Groups["dec"].ValueSpan, NumberStyles.None, CultureInfo.InvariantCulture);
+
+    // Leading zeros are allowed: Markdown and HTML decoders accept them.
+    [GeneratedRegex(@"&#(?:[xX]0*(?<hex>202[A-Ea-e]|206[6-9])|0*(?<dec>823[4-8]|829[4-7]));", RegexOptions.CultureInvariant)]
+    private static partial Regex BidiControlReference();
 
     private static bool IsBidiControl(Rune rune) => rune.Value is (>= 0x202A and <= 0x202E) or (>= 0x2066 and <= 0x2069);
 

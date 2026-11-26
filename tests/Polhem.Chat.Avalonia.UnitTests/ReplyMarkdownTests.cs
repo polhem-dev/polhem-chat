@@ -160,6 +160,34 @@ public class ReplyMarkdownTests(HeadlessSession session)
         Assert.DoesNotContain("\u202D", text, StringComparison.Ordinal);
     });
 
+    [Fact(DisplayName = "A character reference to a bidirectional override in a reply, in text or in HTML, shows as an escape")]
+    public Task BidiReference_Reply_ShowsAsEscape() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new AssistantReplyEntry("Deleted report&#x202E;fdp.exe and <span>memo&#8238;txt.exe</span>"));
+        var view = new ChatView { Conversation = conversation };
+        Show(view);
+
+        var text = ShownText(Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0))));
+
+        Assert.Contains("report\\u{202E}fdp.exe", text, StringComparison.Ordinal);
+        Assert.Contains("memo\\u{202E}txt.exe", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202E", text, StringComparison.Ordinal);
+    });
+
+    [Fact(DisplayName = "A bidirectional override in the reasoning shows as an escape")]
+    public Task BidiOverride_Reasoning_ShowsAsEscape() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new ReasoningEntry("Open report\u202Efdp.exe"));
+        var view = new ChatView { Conversation = conversation, ShowsActivity = true };
+        var window = Show(view);
+        Assert.Single(Descendants<Expander>(EntryView(view, 0))).IsExpanded = true;
+        Settle(window);
+
+        Assert.Contains(Descendants<TextBlock>(EntryView(view, 0)), block => block.Text == "Open report\\u{202E}fdp.exe");
+    });
+
     [Fact(DisplayName = "A streamed reply escapes a bidirectional override as it arrives")]
     public Task BidiOverride_StreamedReply_ShowsAsEscape() => session.RunAsync(() =>
     {

@@ -224,7 +224,7 @@
     private RenderFragment RenderReasoning(ReasoningEntry reasoning) =>
         @<details class="pch-card pch-reasoning">
             <summary>@(reasoning.IsStreaming ? S.Thinking : S.Reasoning)</summary>
-            <div class="pch-card-body pch-text">@reasoning.Text</div>
+            <div class="pch-card-body pch-text">@VisibleText.EscapeBidiControls(reasoning.Text)</div>
         </details>;
 
     private RenderFragment RenderToolCall(ToolCallEntry call) =>

@@ -166,6 +166,34 @@ public class ChatViewTests : BunitContext
         Assert.DoesNotContain("\u202D", text, StringComparison.Ordinal);
     }
 
+    [Fact(DisplayName = "A character reference to a bidirectional override in a reply, in text or in HTML, shows as an escape")]
+    public void Reply_BidiReference_ShowsAsEscape()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var turn = conversation.BeginTurn();
+        turn.Apply(Update(new TextContent("Deleted report&#x202E;fdp.exe and <span>memo&#8238;txt.exe</span>")));
+        turn.Complete();
+
+        var text = HostDriven(conversation).Find(".pch-reply .pmd").TextContent;
+
+        Assert.Contains("report\\u{202E}fdp.exe", text, StringComparison.Ordinal);
+        Assert.Contains("memo\\u{202E}txt.exe", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202E", text, StringComparison.Ordinal);
+    }
+
+    [Fact(DisplayName = "A bidirectional override in the reasoning shows as an escape")]
+    public void Reasoning_BidiOverride_ShowsAsEscape()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var turn = conversation.BeginTurn();
+        turn.Apply(Update(new TextReasoningContent("Open report\u202Efdp.exe")));
+        turn.Complete();
+
+        Assert.Equal("Open report\\u{202E}fdp.exe", HostDriven(conversation, showsActivity: true).Find(".pch-reasoning .pch-card-body").TextContent);
+    }
+
     [Fact(DisplayName = "Rejecting a call that waits for approval rejects it")]
     public void Approval_Rejects()
     {
