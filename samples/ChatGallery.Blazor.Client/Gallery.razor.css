@@ -33,28 +33,11 @@
     overflow: hidden;
 }
 
-.header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px 16px;
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--pch-card-border, color-mix(in srgb, currentColor 14%, transparent));
-}
-
 .title {
     margin: 0;
+    padding: 10px 16px;
     font-size: 16px;
-}
-
-.model {
-    font-size: 13px;
-}
-
-.model select {
-    margin-left: 6px;
-    font: inherit;
+    border-bottom: 1px solid var(--pch-card-border, color-mix(in srgb, currentColor 14%, transparent));
 }
 
 .where {
