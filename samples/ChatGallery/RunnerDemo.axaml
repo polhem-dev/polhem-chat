@@ -25,6 +25,10 @@
 
     <!-- Files can be attached with the button or by dropping them on the view; pictures and PDF by default. -->
     <chat:ChatView Name="Chat"
+                   Margin="12"
+                   BorderThickness="1"
+                   BorderBrush="{DynamicResource PolhemChatCardBorderBrush}"
+                   CornerRadius="8"
                    AllowsAttachments="True"
                    CjkFontFamily="PingFang TC, Microsoft JhengHei UI, Noto Sans CJK TC">
       <!-- The places for the application's own content, above and below the prompt box. -->

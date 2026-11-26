@@ -1,9 +1,11 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Headless;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
+using Avalonia.VisualTree;
 using Semi.Avalonia;
 using static Polhem.Chat.Avalonia.UnitTests.ViewHost;
 
@@ -53,5 +55,25 @@ public class ThemeTests(HeadlessSession session)
         Assert.Equal(expected, Assert.IsType<ISolidColorBrush>(prompt.Background, exactMatch: false).Color);
 
         Assert.NotNull(window.CaptureRenderedFrame());
+    });
+
+    [Fact(DisplayName = "The view draws no frame by default, and draws the border and corners it is given around its content")]
+    public Task Frame_SetOnView_DrawsAroundContent() => session.RunAsync(() =>
+    {
+        UseTheme(new FluentTheme());
+        var plain = new ChatView();
+        Show(plain);
+        var plainFrame = Assert.IsType<Border>(plain.GetVisualChildren().Single());
+        Assert.Equal(default, plainFrame.BorderThickness);
+
+        var brush = new SolidColorBrush(Colors.Red);
+        var view = new ChatView { BorderBrush = brush, BorderThickness = new Thickness(2), CornerRadius = new CornerRadius(8) };
+        Show(view);
+        var frame = Assert.IsType<Border>(view.GetVisualChildren().Single());
+        Assert.Same(brush, frame.BorderBrush);
+        Assert.Equal(new Thickness(2), frame.BorderThickness);
+        Assert.Equal(new CornerRadius(8), frame.CornerRadius);
+        Assert.True(frame.ClipToBounds);
+        Assert.Contains(frame, Part<ScrollViewer>(view, "PART_ScrollViewer").GetVisualAncestors());
     });
 }
