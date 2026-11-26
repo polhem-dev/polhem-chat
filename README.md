@@ -110,6 +110,13 @@ dotnet build samples/ChatGallery.iOS -c Release -t:Run -p:RuntimeIdentifier=ioss
 If the build says the iOS workload needs another Xcode version, point `DEVELOPER_DIR` at that version for the build, and
 delete the head's `bin` and `obj` folders before building again.
 
+The Android head is not in the solution either, because it needs the Android workload, the Android SDK and JDK 17. With
+`ANDROID_HOME` and `JAVA_HOME` set and an emulator running, build it, install it and start it:
+
+```bash
+dotnet build samples/ChatGallery.Android -c Release -t:Run
+```
+
 `samples/ChatGallery.Blazor` shows the Blazor component with the same scripted replies, in a Blazor Web App: the first
 page runs on the server (Interactive Server), the second in the browser (WebAssembly). Both pages use one component,
 whose header says where it runs.
