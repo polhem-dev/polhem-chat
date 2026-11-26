@@ -5,6 +5,7 @@
     <!-- Bindings are resolved when the XAML compiles, not by reflection at run time, so they survive trimming on iOS,
          Android and WebAssembly. A binding whose path does not exist fails the build. -->
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <PackageTags>$(PackageTags);avalonia</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

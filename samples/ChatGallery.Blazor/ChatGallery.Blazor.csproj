@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    The Blazor gallery: the chat view in a Blazor Web App, on a page that runs on the server (Interactive Server) and one
+    that runs in the browser (Interactive WebAssembly). The pages live in ChatGallery.Blazor.Client, so both modes run
+    the same component. It answers with the scripted client of ChatGallery, so it runs without a key. It uses the
+    ASP.NET Core version applications use, newer than the component's minimum.
+  -->
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChatGallery.Blazor.Client\ChatGallery.Blazor.Client.csproj" />
+  </ItemGroup>
+
+</Project>

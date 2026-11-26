@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <title>Polhem.Chat.Blazor gallery</title>
+    <ResourcePreloader />
+    @* The replies are drawn by Polhem.Markdown.Blazor, whose stylesheet the page links. *@
+    <link rel="stylesheet" href="@Assets["_content/Polhem.Markdown.Blazor/polhem-markdown.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["ChatGallery.Blazor.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

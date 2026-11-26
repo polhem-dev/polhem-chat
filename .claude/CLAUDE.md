@@ -10,7 +10,7 @@
 
 ## Project overview
 
-An AI chat control for Avalonia, and a Blazor component in progress, on top of any `Microsoft.Extensions.AI`
+An AI chat control for Avalonia, and a component for Blazor, on top of any `Microsoft.Extensions.AI`
 `IChatClient`. What each release shipped is in
 `CHANGELOG.md`; planned work is tracked in the repository's GitHub issues.
 
@@ -18,8 +18,7 @@ An AI chat control for Avalonia, and a Blazor component in progress, on top of a
   contents into entries, and the runner that sends a turn, streams it, stops it and measures it. It also holds what
   every front end shares: `ChatComposer` (what the user does with a view) and `ChatStrings` (the texts). It has no UI.
 - `Polhem.Chat.Avalonia` is the control that shows that model.
-- `Polhem.Chat.Blazor` is the Blazor component that shows it. It is not packed yet (`IsPackable` is false in its
-  project) until it is complete.
+- `Polhem.Chat.Blazor` is the Blazor component that shows it, for Interactive Server and WebAssembly.
 
 Rules that hold across the repository:
 

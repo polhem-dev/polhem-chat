@@ -1,13 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <Description>An AI chat component for Blazor: streamed replies rendered as Markdown, reasoning, tool calls, per-turn usage, stop and copy, on top of any Microsoft.Extensions.AI IChatClient.</Description>
+    <Description>An AI chat component for Blazor, Server and WebAssembly: streamed replies rendered as Markdown, reasoning, tool calls and their approval, per-turn usage, stop, copy and attachments, on top of any Microsoft.Extensions.AI IChatClient.</Description>
     <!-- The component runs on WebAssembly, where the application is trimmed. The trim and AOT analyzers turn every
          incompatible call into a build error. -->
     <IsAotCompatible>true</IsAotCompatible>
-    <!-- IMPORTANT: Not packed until the component is complete. A release packs every packable project of the solution,
-         and would otherwise publish this package empty. -->
-    <IsPackable>false</IsPackable>
+    <PackageTags>$(PackageTags);blazor</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

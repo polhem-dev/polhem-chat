@@ -7,6 +7,8 @@
   <Folder Name="/samples/">
     <Project Path="samples/ChatGallery/ChatGallery.csproj" />
     <Project Path="samples/ChatGallery.Desktop/ChatGallery.Desktop.csproj" />
+    <Project Path="samples/ChatGallery.Blazor/ChatGallery.Blazor.csproj" />
+    <Project Path="samples/ChatGallery.Blazor.Client/ChatGallery.Blazor.Client.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Polhem.Chat.Avalonia.UnitTests/Polhem.Chat.Avalonia.UnitTests.csproj" />

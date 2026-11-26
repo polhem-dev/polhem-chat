@@ -1,10 +1,64 @@
 # Polhem.Chat.Blazor
 
 An AI chat component for Blazor on top of any
-[Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/microsoft-extensions-ai) `IChatClient`. It shows the
-conversation model of `Polhem.Chat` and uses the same `ChatComposer` and `ChatStrings` as `Polhem.Chat.Avalonia`.
+[Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/microsoft-extensions-ai) `IChatClient`: streamed replies
+rendered as Markdown with `Polhem.Markdown.Blazor`, reasoning, tool calls and their approval, per-turn usage, stop,
+copy, regenerate and edit, and attachments. It is bound to no component library, and runs in Interactive Server and
+Interactive WebAssembly (and so Auto). The conversation model is in `Polhem.Chat`, shared with `Polhem.Chat.Avalonia`.
 
-The component is under development and not published yet. See the [repository](https://github.com/polhem-dev/polhem-chat).
+## Getting started
+
+The component needs .NET 10. Link the Markdown viewer's stylesheet in the page's `<head>`:
+
+```html
+<link rel="stylesheet" href="_content/Polhem.Markdown.Blazor/polhem-markdown.css" />
+```
+
+Register your `IChatClient` with the services, for example with `builder.Services.AddChatClient(...)` from
+`Microsoft.Extensions.AI`. Then give a `ChatView` a runner for it, in a component with an interactive render mode. The
+view fills the height of its container, so give the container one:
+
+```razor
+@using Microsoft.Extensions.AI
+@using Polhem.Chat
+@using Polhem.Chat.Blazor
+
+<div style="height: 600px">
+    <ChatView Runner="runner" />
+</div>
+
+@code {
+    private ChatRunner runner = null!;
+
+    [Inject]
+    private IChatClient ChatClient { get; set; } = null!;
+
+    protected override void OnInitialized() => runner = new ChatRunner(ChatClient);
+}
+```
+
+Enter sends, Shift+Enter starts a new line, and Esc or the stop button stops the reply.
+
+## Server or WebAssembly
+
+On WebAssembly the component runs in the browser, and so does a `ChatRunner` you create there. **Never put a model API
+key in a WebAssembly app**: anyone can read it from the downloaded files. Keep the model client on the server: render
+the view with Interactive Server, or have the browser's `IChatClient` call an endpoint of your own server that calls the
+model.
+
+The view works either way; the repository's `ChatGallery.Blazor` sample shows both modes with the same component.
+
+## Running your own loop
+
+An application with its own tool loop sets `Conversation` instead of `Runner`, handles `PromptSubmitted` and
+`StopRequested`, and sets `IsGenerating` while it streams into the conversation with `ChatConversation.BeginTurn`.
+
+## Images in replies
+
+A reply is the model's text, so it is not trusted. A prompt injection can have the model write an image whose address
+carries data from the conversation, and loading the image would send that data to the image's server. Replies
+therefore show no images, only their alternative text. Set `MarkdownOptions` to options of your own to allow them; a
+new `MarkdownOptions` allows images over `https`.
 
 ## Attachments on Blazor Server
 
@@ -74,3 +128,5 @@ The texts come from `ChatStrings`, in the UI culture the view is created in (`Cu
 English and Traditional Chinese included. Give the view a `ChatStrings` of your own to choose the language or change a
 text. On WebAssembly, the app loads the satellite assembly of the culture it starts with, so set the culture before the
 app starts, as the ASP.NET Core globalization guide describes.
+
+The packages are at 0.x: a minor version may still change the API. See the [repository](https://github.com/polhem-dev/polhem-chat).
