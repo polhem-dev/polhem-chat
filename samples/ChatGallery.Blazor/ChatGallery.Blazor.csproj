@@ -3,7 +3,8 @@
   <!--
     The Blazor gallery: the chat view in a Blazor Web App, on a page that runs on the server (Interactive Server) and one
     that runs in the browser (Interactive WebAssembly). The pages live in ChatGallery.Blazor.Client, so both modes run
-    the same component. It answers with the scripted client of ChatGallery, so it runs without a key. It uses the
+    the same component. It answers with the scripted client of ChatGallery, so it runs without a key; started with
+    OPENAI_API_KEY set, its server page can use a real model instead. It uses the
     ASP.NET Core version applications use, newer than the component's minimum.
   -->
   <PropertyGroup>
@@ -12,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="11.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -118,6 +118,9 @@ dotnet build samples/ChatGallery.Android -c Release -t:Run
 dotnet run --project samples/ChatGallery.Blazor
 ```
 
+啟動前設定 `OPENAI_API_KEY`，伺服器頁就會在腳本化回覆之外提供該模型；`OPENAI_MODEL` 與 `OPENAI_ENDPOINT` 可改用其他模型或
+相容 OpenAI 的端點。金鑰只留在伺服器上，WebAssembly 頁仍使用腳本化回覆。
+
 ![ChatGallery.Blazor 範例在伺服器上的一輪對話：模型呼叫天氣工具、串流出 Markdown 回覆，並顯示花費的時間與 token](docs/images/chat-demo-blazor.gif)
 
 ## 建置

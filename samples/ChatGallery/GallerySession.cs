@@ -26,6 +26,14 @@ public sealed class GallerySession
     /// <summary>Gets or sets what the Runner tab shows about the model in use.</summary>
     public string ModelDescription { get; set; } = "Scripted replies.";
 
+    /// <summary>Gets or sets whether the Runner tab answers with the scripted replies rather than a real model.</summary>
+    public bool UsesScriptedReplies { get; set; } = true;
+
+    /// <summary>Gets the note under the Runner tab's prompt box, which says where the replies come from.</summary>
+    public string PromptNote => UsesScriptedReplies
+        ? "The replies here are scripted. A real model can be wrong; check what matters."
+        : "A real model answers here. It can be wrong; check what matters.";
+
     /// <summary>Gets the conversation of the Host-driven tab and the loop that drives it.</summary>
     public HostSession Host { get; } = new();
 
