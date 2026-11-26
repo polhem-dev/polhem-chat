@@ -141,6 +141,40 @@ public class ReplyMarkdownTests(HeadlessSession session)
         Assert.Equal(family, viewer.CjkFontFamily);
     });
 
+    [Fact(DisplayName = "A bidirectional override in a reply shows as an escape in text, inline code and code blocks, and Hebrew shows as it is")]
+    public Task BidiOverride_Reply_ShowsAsEscape() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        conversation.Entries.Add(new AssistantReplyEntry("Deleted report\u202Efdp.exe and `inline\u2067code`.\n\n```\nblock\u202Dcode\n```\n\nשלום עולם"));
+        var view = new ChatView { Conversation = conversation };
+        Show(view);
+
+        var text = ShownText(Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0))));
+
+        Assert.Contains("report\\u{202E}fdp.exe", text, StringComparison.Ordinal);
+        Assert.Contains("inline\\u{2067}code", text, StringComparison.Ordinal);
+        Assert.Contains("block\\u{202D}code", text, StringComparison.Ordinal);
+        Assert.Contains("שלום עולם", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202E", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u2067", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202D", text, StringComparison.Ordinal);
+    });
+
+    [Fact(DisplayName = "A streamed reply escapes a bidirectional override as it arrives")]
+    public Task BidiOverride_StreamedReply_ShowsAsEscape() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        var reply = new AssistantReplyEntry(string.Empty) { IsStreaming = true };
+        conversation.Entries.Add(reply);
+        var view = new ChatView { Conversation = conversation };
+        var window = Show(view);
+
+        reply.Text = "report\u202Efdp.exe";
+        Settle(window);
+
+        Assert.Contains("report\\u{202E}fdp.exe", ShownText(Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0)))), StringComparison.Ordinal);
+    });
+
     /// <summary>A reply with an image in Markdown and one in HTML, both from the listener.</summary>
     private static string Reply(ConnectionCounter listener) => $"""
         Look: ![markdown pen](https://127.0.0.1:{listener.Port}/pen.png)

@@ -23,16 +23,42 @@ public static class VisibleText
     /// </remarks>
     /// <param name="text">The text to show.</param>
     /// <returns>The text with those characters escaped; an empty string for <see langword="null"/>.</returns>
-    public static string Escape(string? text)
+    public static string Escape(string? text) => EscapeWhere(text, IsHidden);
+
+    /// <summary>
+    /// Replaces only the bidirectional embeddings, overrides and isolates (U+202A to U+202E and U+2066 to U+2069) with
+    /// <c>\u{XXXX}</c>, for text such as a reply that is shown as Markdown.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// WARNING: These characters make text read differently from what it holds: a file name ending in <c>fdp.exe</c>
+    /// after a right-to-left override reads as one ending in <c>.pdf</c>. A reply quotes tool results and other text the
+    /// model was given, so none of them may be drawn as they are.
+    /// </para>
+    /// <para>
+    /// Arabic, Hebrew and other right-to-left text needs none of them and shows as it is, as do the marks (U+200E,
+    /// U+200F, U+061C), which only place the punctuation next to them. The joiners stay too, since emoji sequences and
+    /// several scripts depend on them, which is why <see cref="Escape"/> does too much for a reply.
+    /// </para>
+    /// <para>
+    /// The escape is plain text in Markdown, so it shows the same in a paragraph, in inline code and in a code block;
+    /// <c>Reply_BidiOverride_ShowsAsEscape</c> and <c>BidiOverride_Reply_ShowsAsEscape</c> check it in each view.
+    /// </para>
+    /// </remarks>
+    /// <param name="text">The text to show.</param>
+    /// <returns>The text with those characters escaped; an empty string for <see langword="null"/>.</returns>
+    public static string EscapeBidiControls(string? text) => EscapeWhere(text, IsBidiControl);
+
+    private static string EscapeWhere(string? text, Func<Rune, bool> escapes)
     {
-        if (string.IsNullOrEmpty(text) || !NeedsEscape(text))
+        if (string.IsNullOrEmpty(text) || !text.EnumerateRunes().Any(escapes))
         {
             return text ?? string.Empty;
         }
         var builder = new StringBuilder(text.Length + 16);
         foreach (var rune in text.EnumerateRunes())
         {
-            if (IsHidden(rune))
+            if (escapes(rune))
             {
                 builder.Append(CultureInfo.InvariantCulture, $"\\u{{{rune.Value:X4}}}");
             }
@@ -137,7 +163,7 @@ public static class VisibleText
         }
     }
 
-    private static bool NeedsEscape(string text) => text.EnumerateRunes().Any(IsHidden);
+    private static bool IsBidiControl(Rune rune) => rune.Value is (>= 0x202A and <= 0x202E) or (>= 0x2066 and <= 0x2069);
 
     private static bool IsHidden(Rune rune) =>
         Rune.GetUnicodeCategory(rune) switch

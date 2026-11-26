@@ -145,6 +145,27 @@ public class ChatViewTests : BunitContext
         Assert.Equal("https://evil.example/p?secret=42", view.Find(".pch-reply img").GetAttribute("src"));
     }
 
+    [Fact(DisplayName = "A bidirectional override in a reply shows as an escape in text, inline code and code blocks, and Hebrew shows as it is")]
+    public void Reply_BidiOverride_ShowsAsEscape()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Hi");
+        var turn = conversation.BeginTurn();
+        turn.Apply(Update(new TextContent("Deleted report\u202Efdp.exe and `inline\u2067code`.\n\n```\nblock\u202Dcode\n```\n\nשלום עולם")));
+        turn.Complete();
+
+        var view = HostDriven(conversation);
+        var text = view.Find(".pch-reply .pmd").TextContent;
+
+        Assert.Contains("report\\u{202E}fdp.exe", text, StringComparison.Ordinal);
+        Assert.Contains("inline\\u{2067}code", view.Find(".pch-reply code").TextContent, StringComparison.Ordinal);
+        Assert.Contains("block\\u{202D}code", view.Find(".pch-reply pre").TextContent, StringComparison.Ordinal);
+        Assert.Contains("שלום עולם", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202E", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u2067", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("\u202D", text, StringComparison.Ordinal);
+    }
+
     [Fact(DisplayName = "Rejecting a call that waits for approval rejects it")]
     public void Approval_Rejects()
     {

@@ -19,6 +19,9 @@ internal static class EntryConverters
     /// <summary>Converts text from the model to text whose hidden characters show as escapes.</summary>
     public static IValueConverter Visible { get; } = new FuncValueConverter<string?, string>(VisibleText.Escape);
 
+    /// <summary>Converts a reply to Markdown whose bidirectional controls show as escapes.</summary>
+    public static IValueConverter Reply { get; } = new FuncValueConverter<string?, string>(VisibleText.EscapeBidiControls);
+
     /// <summary>Converts the arguments of a tool call to indented JSON in full, for the user to approve.</summary>
     public static IValueConverter ApprovalArguments { get; } =
         new FuncValueConverter<IDictionary<string, object?>?, string>(VisibleText.FormatArguments);

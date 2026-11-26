@@ -15,6 +15,7 @@ Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.
 - `ChatComposer` in `Polhem.Chat` holds what the user does with a chat view apart from drawing it (the prompt box, files, submitting, stopping, regenerating, editing, approving), for views on any UI framework; `ChatView` uses it, and its tests pass unchanged.
 - `ChatPicturePreview` in `Polhem.Chat` tells whether an attached picture is small enough to preview, from its header and without decoding it; the views use it before they show a picture.
 - `ChatStrings.ShowActivity` names the toggle that shows the reasoning and the tool calls; the Avalonia view's toggle now has it as its tooltip and accessible name.
+- **Security:** Bidirectional embeddings, overrides and isolates in a reply show as escapes (`\u{202E}`) in both views, so a reply reads as what it holds; right-to-left text shows as before. `VisibleText.EscapeBidiControls` does it for a reply template of the application's own.
 - **Security:** A GIF whose frames reach past its declared size, or a picture of more than 5 MB, no longer gets a preview.
 - **Changed:** `PromptSubmittedEventArgs` and `ChatAttachmentRejectedEventArgs` moved to `Polhem.Chat`.
 - **Changed:** `ChatViewStrings` is now `ChatStrings` in `Polhem.Chat`, shared by the views of every UI framework, with `DescribeTurn` and `DescribeToolStatus`; `VisibleText` is public there.
