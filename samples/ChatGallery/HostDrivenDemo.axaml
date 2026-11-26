@@ -8,6 +8,10 @@
   <!-- The host runs the turns itself and the view only shows the conversation and reports what the user does. -->
   <DockPanel>
     <chat:ChatView Name="Chat"
+                   Margin="12"
+                   BorderThickness="1"
+                   BorderBrush="{DynamicResource PolhemChatCardBorderBrush}"
+                   CornerRadius="8"
                    CjkFontFamily="PingFang TC, Microsoft JhengHei UI, Noto Sans CJK TC"
                    Conversation="{Binding Conversation}"
                    IsGenerating="{Binding IsGenerating}">
