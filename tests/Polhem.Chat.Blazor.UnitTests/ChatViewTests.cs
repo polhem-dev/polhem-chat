@@ -189,10 +189,12 @@ public class ChatViewTests : BunitContext
         turn.Apply(Update(new TextContent("Hello **world**")));
         turn.Complete();
         var view = HostDriven(conversation);
+        // The view copies through its script, which is ready once it has started following the conversation.
+        view.WaitForAssertion(() => _module.VerifyInvoke("follow"));
 
         view.Find(".pch-copy").Click();
 
-        _module.VerifyInvoke("copyText");
+        view.WaitForAssertion(() => _module.VerifyInvoke("copyText"));
     }
 
     [Fact(DisplayName = "New texts apply to the entries already shown")]
