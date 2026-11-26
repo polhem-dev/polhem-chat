@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
+  <!-- The gallery can talk to an OpenAI-compatible endpoint instead of its scripted replies. -->
+  <uses-permission android:name="android.permission.INTERNET" />
+  <application android:label="Chat Gallery" />
+</manifest>
