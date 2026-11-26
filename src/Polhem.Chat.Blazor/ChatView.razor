@@ -5,6 +5,10 @@
 @* The script handles Esc only while there is something for it to stop or end, and leaves it to the page otherwise. *@
 <div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes" data-generating="@(_composer.IsGenerating ? "" : null)"
      data-editing="@(_composer.IsEditingPrompt ? "" : null)">
+    @if (HeaderContent is not null)
+    {
+        <div class="pch-header">@HeaderContent</div>
+    }
     <div class="pch-main">
         @* Focusable, so the keyboard scrolls the conversation (WCAG 2.1.1). *@
         <div class="pch-scroller" tabindex="0" @ref="_scroller">
@@ -13,7 +17,14 @@
                 {
                     @* While the conversation is empty: a title, and prompts that send themselves when clicked. *@
                     <div class="pch-empty">
-                        <div class="pch-empty-title">@S.EmptyTitle</div>
+                        @if (EmptyContent is not null)
+                        {
+                            @EmptyContent
+                        }
+                        else
+                        {
+                            <div class="pch-empty-title">@S.EmptyTitle</div>
+                        }
                         @if (Suggestions is not null)
                         {
                             <div class="pch-suggestions">
@@ -71,6 +82,7 @@
         }
     </div>
     <div class="pch-composer">
+        @PromptHeaderContent
         @if (_composer.IsEditingPrompt)
         {
             @* While the box holds the last prompt to change: sending replaces it and everything after it. *@
@@ -129,20 +141,15 @@
         {
             <div class="pch-attachment-error" role="alert">@attachmentError</div>
         }
+        @PromptFooterContent
     </div>
 </div>
 
 @code {
-    private RenderFragment RenderEntry(ChatEntry entry) => entry switch
-    {
-        UserPromptEntry prompt => RenderPrompt(prompt),
-        AssistantReplyEntry reply => RenderReply(reply),
-        ReasoningEntry reasoning => RenderReasoning(reasoning),
-        ToolCallEntry call => RenderToolCall(call),
-        TurnSummaryEntry summary => @<div class="pch-summary">@S.DescribeTurn(summary)</div>,
-        ErrorEntry error => @<div class="pch-error" role="alert">@error.Message</div>,
-        _ => static _ => { },
-    };
+    // The default templates; the application's own come first (ChatView.Templates.cs).
+    private RenderFragment RenderSummary(TurnSummaryEntry summary) => @<div class="pch-summary">@S.DescribeTurn(summary)</div>;
+
+    private static RenderFragment RenderError(ErrorEntry error) => @<div class="pch-error" role="alert">@error.Message</div>;
 
     private RenderFragment RenderPrompt(UserPromptEntry prompt) =>
         @<div class="pch-prompt">
@@ -252,6 +259,13 @@
                long ones scroll, with a note that there is more to read (polhem-chat.js marks the card). VisibleText
                escapes control and format characters, which include the ones that reorder text, and line and paragraph
                separators. Nothing approves by default; only the button does. *@
+            @RenderApproval(call)
+        </div>;
+
+    // Shown under every call that waits for the user's approval, whether the default card or the application's template
+    // draws the call, so the user always sees what the tool will receive and decides with the same buttons.
+    private RenderFragment RenderApproval(ToolCallEntry call) =>
+        @<text>
             @if (call.Status == ToolCallStatus.AwaitingApproval)
             {
                 <div class="pch-approval">
@@ -269,5 +283,12 @@
                     </div>
                 </div>
             }
+        </text>;
+
+    // The application's template of a call, and under it the approval while the call waits for one.
+    private RenderFragment RenderToolTemplate(RenderFragment<ToolCallEntry> template, ToolCallEntry call) =>
+        @<div class="pch-tool-template">
+            @template(call)
+            @RenderApproval(call)
         </div>;
 }

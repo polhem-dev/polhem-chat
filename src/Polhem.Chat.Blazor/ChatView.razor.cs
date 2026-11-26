@@ -68,8 +68,8 @@ public sealed partial class ChatView : IAsyncDisposable
 
     /// <summary>
     /// Gets or sets a value indicating whether the model's reasoning and its tool calls show as entries. By default they
-    /// do not, except a tool call that waits for the user's approval: hiding it would leave the turn waiting for a decision
-    /// nobody can make. The user turns it on and off with the toggle on the activity line, which raises
+    /// do not, except a tool call that waits for the user's approval, as hiding it would leave the turn waiting for a
+    /// decision nobody can make, and the calls of a tool with a template of its own in <see cref="ToolCallTemplates"/>. The user turns it on and off with the toggle on the activity line, which raises
     /// <see cref="ShowsActivityChanged"/>, so it binds two-way with <c>@bind-ShowsActivity</c>.
     /// </summary>
     [Parameter]
@@ -187,7 +187,8 @@ public sealed partial class ChatView : IAsyncDisposable
             _showsActivityParameter = ShowsActivity;
             _showsActivity = ShowsActivity;
         }
-        if (!ReferenceEquals(Strings, _strings) || !ReferenceEquals(MarkdownOptions, _markdownOptions))
+        var templatesChanged = ApplyTemplates();
+        if (templatesChanged || !ReferenceEquals(Strings, _strings) || !ReferenceEquals(MarkdownOptions, _markdownOptions))
         {
             _strings = Strings;
             _markdownOptions = MarkdownOptions;
@@ -279,15 +280,9 @@ public sealed partial class ChatView : IAsyncDisposable
 
     // NOTE: Hidden entries stay in the conversation and its history; only the view leaves them out.
     private bool IsShown(ChatEntry entry) =>
-        _showsActivity || entry is not (ReasoningEntry or ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval });
+        _showsActivity || entry is not (ReasoningEntry or ToolCallEntry { Status: not ToolCallStatus.AwaitingApproval })
+        || (entry is ToolCallEntry call && HasToolTemplate(call));
 
-    private async Task CopyAsync(string text)
-    {
-        if (_module is not null)
-        {
-            await _module.InvokeAsync<bool>("copyText", text);
-        }
-    }
 
     private void Show(ChatConversation? conversation)
     {
