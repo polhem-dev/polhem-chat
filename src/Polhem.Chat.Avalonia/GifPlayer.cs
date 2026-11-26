@@ -119,8 +119,10 @@ internal sealed class GifPlayer : Control
 
     private static WriteableBitmap CreateBitmap(GifAnimation animation, GifFrame frame)
     {
+        // NOTE: The frames are RGBA because, with Avalonia 12.1.6, a `Bgra8888` bitmap drew as a solid black square on
+        // Android, while an `Rgba8888` one drew correctly there and on iOS. GifDecoderTests checks the colors on Skia.
         var bitmap = new WriteableBitmap(new PixelSize(animation.Width, animation.Height), new Vector(96, 96),
-            PixelFormat.Bgra8888, AlphaFormat.Premul);
+            PixelFormat.Rgba8888, AlphaFormat.Premul);
         using var buffer = bitmap.Lock();
         var rowLength = animation.Width * 4;
         for (var row = 0; row < animation.Height; row++)

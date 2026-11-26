@@ -20,6 +20,7 @@ Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.
 - **Changed:** `PromptSubmittedEventArgs` and `ChatAttachmentRejectedEventArgs` moved to `Polhem.Chat`.
 - **Changed:** `ChatViewStrings` is now `ChatStrings` in `Polhem.Chat`, shared by the views of every UI framework, with `DescribeTurn` and `DescribeToolStatus`; `VisibleText` is public there.
 - **Changed:** The prompt box, its attached files and its attach, send and stop buttons sit in one rounded card in the conversation, with no line above it; send and stop are icons, with their text as the tooltip and accessible name.
+- **Fixed:** On Android, the activity icon drew as a black square while a reply was in progress; it now plays.
 
 ## [0.2.1] - 2026-11-25
 
