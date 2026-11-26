@@ -1,8 +1,12 @@
+@using System.Globalization
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.Extensions.AI
+@inject IServiceProvider Services
 
 @* The chat view with a runner over the scripted client: attachments on, suggestions, the activity toggle bound, and the
    application's own content in the header and under the prompt box. The same component runs on the server and in the
-   browser; the header says where it runs now. *@
+   browser; the header says where it runs now. On the server page, a real model can replace the scripted replies when
+   the server was started with a key. *@
 <div class="gallery">
     <nav class="modes">
         <NavLink href="" Match="NavLinkMatch.All">Interactive Server</NavLink>
@@ -11,10 +15,31 @@
     <div class="frame">
         <ChatView Runner="_runner" AllowsAttachments="true" Suggestions="s_suggestions" @bind-ShowsActivity="_showsActivity">
             <HeaderContent>
-                <h1 class="title">Polhem.Chat.Blazor <span class="where">running on @Where</span></h1>
+                <div class="header">
+                    <h1 class="title">Polhem.Chat.Blazor <span class="where">running on @Where</span></h1>
+                    @if (RendererInfo.IsInteractive)
+                    {
+                        <div class="model">
+                            @if (_serverModel is not null)
+                            {
+                                <label>
+                                    Model
+                                    <select @onchange="ChooseModel">
+                                        <option value="scripted" selected="@(!_usesServerModel)">Scripted replies</option>
+                                        <option value="server" selected="@_usesServerModel">@_serverModel.Description</option>
+                                    </select>
+                                </label>
+                            }
+                            else
+                            {
+                                <span class="note">@ModelHint</span>
+                            }
+                        </div>
+                    }
+                </div>
             </HeaderContent>
             <PromptFooterContent>
-                <small class="note">Scripted replies: no model is called and nothing leaves the page.</small>
+                <small class="note">@PromptNote</small>
             </PromptFooterContent>
         </ChatView>
     </div>
@@ -24,8 +49,17 @@
     private static readonly string[] s_suggestions =
         ["Plan three days in Kyoto", "Give me a long reply", "Show me an error", "Delete my old notes", "規劃京都三日遊"];
 
+    // The tool the real model can call besides deleting notes, as in the Avalonia gallery. On the server page it reads
+    // the server's clock.
+    private static readonly AIFunction s_currentTime = AIFunctionFactory.Create(
+        () => DateTimeOffset.Now.ToString("F", CultureInfo.InvariantCulture),
+        ToolTitles.CurrentTimeTool,
+        "Returns the current local date and time.");
+
     private readonly ChatRunner _runner = CreateRunner();
     private bool _showsActivity;
+    private ServerModel? _serverModel;
+    private bool _usesServerModel;
 
     // Static while the page prerenders, then Server or WebAssembly.
     private string Where => RendererInfo.Name switch
@@ -34,6 +68,40 @@
         "WebAssembly" => "WebAssembly, in the browser",
         _ => "the server, prerendered",
     };
+
+    private string ModelHint => RendererInfo.Name == "WebAssembly"
+        ? "Scripted replies. A real model runs on the server page only, so its key never reaches the browser."
+        : "Scripted replies. Start the server with OPENAI_API_KEY set to try a real model.";
+
+    private string PromptNote => _usesServerModel
+        ? "A real model answers on the server. It can be wrong; check what matters."
+        : "Scripted replies: no model is called and nothing leaves the page.";
+
+    protected override void OnInitialized()
+    {
+        // NOTE: Only the server page takes the model. The WebAssembly page also prerenders on the server, where the
+        // service exists, but then runs in the browser, where it must not.
+        if (RendererInfo.Name == "Server")
+        {
+            _serverModel = Services.GetService<ServerModel>();
+        }
+    }
+
+    private void ChooseModel(ChangeEventArgs e)
+    {
+        // The runner reads the client when a turn starts, so a turn in progress finishes on the previous one.
+        _usesServerModel = _serverModel is not null && (string?)e.Value == "server";
+        if (_usesServerModel)
+        {
+            _runner.Client = _serverModel!.Client.AsBuilder().UseFunctionInvocation().Build();
+            _runner.Options = new ChatOptions { Tools = [s_currentTime, DemoTools.DeleteNotes] };
+        }
+        else
+        {
+            _runner.Client = DemoTools.WithTools(new DemoChatClient());
+            _runner.Options = DemoTools.Options;
+        }
+    }
 
     // NOTE: A real application keeps its model client on the server; see the README. The scripted client needs no key,
     // so this gallery may run it in the browser too.

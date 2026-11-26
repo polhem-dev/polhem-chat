@@ -42,7 +42,7 @@
         </Border>
       </chat:ChatView.PromptHeaderContent>
       <chat:ChatView.PromptFooterContent>
-        <TextBlock Text="The replies here are scripted. A real model can be wrong; check what matters."
+        <TextBlock Name="PromptNote"
                    FontSize="12"
                    Opacity="0.6"
                    TextWrapping="Wrap" />

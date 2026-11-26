@@ -27,6 +27,7 @@ public sealed partial class RunnerDemo : UserControl
         _session = session;
         InitializeComponent();
         ModelStatus.Text = session.ModelDescription;
+        PromptNote.Text = session.PromptNote;
 
         // The short way: one line gives the view a runner, which sends, streams and stops.
         Chat.Runner = session.Runner;
@@ -43,7 +44,7 @@ public sealed partial class RunnerDemo : UserControl
     {
         if (!endpoint)
         {
-            Replace(DemoTools.WithTools(new DemoChatClient()), DemoTools.Options, "Scripted replies.");
+            Replace(DemoTools.WithTools(new DemoChatClient()), DemoTools.Options, "Scripted replies.", scripted: true);
             return;
         }
 
@@ -67,15 +68,17 @@ public sealed partial class RunnerDemo : UserControl
             () => DateTimeOffset.Now.ToString("F", CultureInfo.InvariantCulture),
             ToolTitles.CurrentTimeTool,
             "Returns the current local date and time.");
-        Replace(client, new ChatOptions { Tools = [tool, DemoTools.DeleteNotes] }, model + " at " + uri.Host + ".");
+        Replace(client, new ChatOptions { Tools = [tool, DemoTools.DeleteNotes] }, model + " at " + uri.Host + ".", scripted: false);
     }
 
-    private void Replace(IChatClient client, ChatOptions? options, string description)
+    private void Replace(IChatClient client, ChatOptions? options, string description, bool scripted)
     {
         // The runner reads the client when a turn starts, so a turn in progress finishes on the previous one.
         _session.Runner.Client = client;
         _session.Runner.Options = options;
         _session.ModelDescription = description;
+        _session.UsesScriptedReplies = scripted;
         ModelStatus.Text = description;
+        PromptNote.Text = _session.PromptNote;
     }
 }
