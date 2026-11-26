@@ -37,6 +37,11 @@ public class VisibleTextTests
     [InlineData("&#8238;", "\\u{202E}")]
     [InlineData("&#0008294;", "\\u{2066}")]
     [InlineData("&#8297;", "\\u{2069}")]
+    [InlineData("&#+8238;", "\\u{202E}")]
+    [InlineData("&# 8238;", "\\u{202E}")]
+    [InlineData("&#8238 ;", "\\u{202E}")]
+    [InlineData("&#\n8238;", "\\u{202E}")]
+    [InlineData("&#x00000000000000000000000000000000000000000202E;", "\\u{202E}")]
     public void EscapeBidiControls_Reference_ShowsAsEscape(string reference, string escape)
     {
         Assert.Equal($"report{escape}fdp.exe", VisibleText.EscapeBidiControls($"report{reference}fdp.exe"));
@@ -45,6 +50,7 @@ public class VisibleTextTests
     [Theory(DisplayName = "Other references, and references without their semicolon, stay as they are")]
     [InlineData("&#x202F; &#8239; &#x2065; &#8293; &#x200F; &amp; &#x202E")]
     [InlineData("&#x2066x;")]
+    [InlineData("&#x 202E; &#x+202E; &#rlo; &#;")]
     public void EscapeBidiControls_OtherReference_Unchanged(string text)
     {
         Assert.Equal(text, VisibleText.EscapeBidiControls(text));

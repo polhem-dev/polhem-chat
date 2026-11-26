@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -58,7 +59,7 @@ public static partial class VisibleText
     {
         var escaped = EscapeWhere(text, IsBidiControl);
         return escaped.Contains("&#", StringComparison.Ordinal)
-            ? BidiControlReference().Replace(escaped, match => FormatEscape(ParseReference(match)))
+            ? CharacterReference().Replace(escaped, match => EscapeReference(match.Value))
             : escaped;
     }
 
@@ -178,13 +179,15 @@ public static partial class VisibleText
 
     private static string FormatEscape(int value) => string.Create(CultureInfo.InvariantCulture, $"\\u{{{value:X4}}}");
 
-    private static int ParseReference(Match match) => match.Groups["hex"].Success
-        ? int.Parse(match.Groups["hex"].ValueSpan, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture)
-        : int.Parse(match.Groups["dec"].ValueSpan, NumberStyles.None, CultureInfo.InvariantCulture);
+    // IMPORTANT: The reference is decoded by the decoder the Markdown viewer uses for its HTML, which accepts more forms
+    // than Markdown does (a sign, spaces, any number of leading zeros), rather than matched against a pattern of its own.
+    private static string EscapeReference(string reference) =>
+        WebUtility.HtmlDecode(reference) is [var character] && IsBidiControl(new Rune(character))
+            ? FormatEscape(character)
+            : reference;
 
-    // Leading zeros are allowed: Markdown and HTML decoders accept them.
-    [GeneratedRegex(@"&#(?:[xX]0*(?<hex>202[A-Ea-e]|206[6-9])|0*(?<dec>823[4-8]|829[4-7]));", RegexOptions.CultureInvariant)]
-    private static partial Regex BidiControlReference();
+    [GeneratedRegex("&#[^&;<]+;", RegexOptions.CultureInvariant)]
+    private static partial Regex CharacterReference();
 
     private static bool IsBidiControl(Rune rune) => rune.Value is (>= 0x202A and <= 0x202E) or (>= 0x2066 and <= 0x2069);
 
