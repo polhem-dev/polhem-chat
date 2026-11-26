@@ -125,10 +125,6 @@ whose header says where it runs.
 dotnet run --project samples/ChatGallery.Blazor
 ```
 
-Started with `OPENAI_API_KEY` set, the server page offers that model next to the scripted replies; `OPENAI_MODEL` and
-`OPENAI_ENDPOINT` choose another model or an OpenAI-compatible endpoint. The key stays on the server: the WebAssembly page
-keeps the scripted replies.
-
 ![One turn in the ChatGallery.Blazor sample on the server: the model calls a weather tool, streams a Markdown reply and shows the time and tokens it used](docs/images/chat-demo-blazor.gif)
 
 ## Building
