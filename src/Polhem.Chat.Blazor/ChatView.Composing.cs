@@ -231,15 +231,6 @@ public sealed partial class ChatView
         }
     }));
 
-    private async Task EditLastPromptAsync(UserPromptEntry prompt)
-    {
-        _composer.EditLastPrompt(prompt);
-        if (_composer.IsEditingPrompt)
-        {
-            await _promptBox.FocusAsync();
-        }
-    }
-
     // NOTE: All the files are asked for, so a long list is not refused as a whole; the composer refuses each file past
     // the count of the limits, with a message that names it. One batch is read after the other, so a client that sends
     // many batches at once holds one file in memory at a time, not one per batch.
