@@ -20,6 +20,12 @@
           <SolidColorBrush x:Key="PolhemChatErrorBackground" Color="#14DC2626" />
           <SolidColorBrush x:Key="PolhemChatErrorBorderBrush" Color="#66DC2626" />
           <SolidColorBrush x:Key="PolhemChatErrorForeground" Color="#B91C1C" />
+          <!-- The composer card lifts a little off the conversation. -->
+          <SolidColorBrush x:Key="PolhemChatComposerBackground" Color="#CCFFFFFF" />
+          <SolidColorBrush x:Key="PolhemChatComposerFocusBorderBrush" Color="#803B82F6" />
+          <SolidColorBrush x:Key="PolhemChatSendBackground" Color="#E6000000" />
+          <SolidColorBrush x:Key="PolhemChatSendForeground" Color="#FFFFFFFF" />
+          <SolidColorBrush x:Key="PolhemChatComposerButtonHoverBackground" Color="#14000000" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
           <SolidColorBrush x:Key="PolhemChatPromptBackground" Color="#4D3B82F6" />
@@ -30,6 +36,11 @@
           <SolidColorBrush x:Key="PolhemChatErrorBackground" Color="#29F87171" />
           <SolidColorBrush x:Key="PolhemChatErrorBorderBrush" Color="#80F87171" />
           <SolidColorBrush x:Key="PolhemChatErrorForeground" Color="#FCA5A5" />
+          <SolidColorBrush x:Key="PolhemChatComposerBackground" Color="#14FFFFFF" />
+          <SolidColorBrush x:Key="PolhemChatComposerFocusBorderBrush" Color="#993B82F6" />
+          <SolidColorBrush x:Key="PolhemChatSendBackground" Color="#F2FFFFFF" />
+          <SolidColorBrush x:Key="PolhemChatSendForeground" Color="#FF1F1F1F" />
+          <SolidColorBrush x:Key="PolhemChatComposerButtonHoverBackground" Color="#1FFFFFFF" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
 
@@ -171,139 +182,167 @@
                 </Panel>
               </Button>
 
-              <Border Grid.Row="2"
-                      Padding="12"
-                      BorderThickness="0,1,0,0"
-                      BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
-                <StackPanel Spacing="8">
-                  <!-- The application's own content above and below the prompt box (ChatView.PromptHeaderContent and
-                       PromptFooterContent). -->
-                  <!-- While the box holds the last prompt to change (ChatView.IsEditingPrompt). -->
-                  <Border Name="PART_EditBanner"
-                          Classes="polhemChatEditBanner"
-                          Padding="8,4"
-                          CornerRadius="6"
-                          IsVisible="False"
-                          Background="{DynamicResource PolhemChatPromptBackground}">
-                    <Grid ColumnDefinitions="*,Auto">
-                      <TextBlock VerticalAlignment="Center"
-                                 FontSize="12"
-                                 Text="{Binding $parent[local:ChatView].Strings.EditingPrompt}" />
-                      <Button Grid.Column="1"
-                              Classes="polhemChatCancelEdit"
-                              Padding="6,2"
-                              FontSize="12"
-                              Content="{Binding $parent[local:ChatView].Strings.CancelEdit}"
-                              Command="{Binding $parent[local:ChatView].CancelEditCommand}" />
-                    </Grid>
-                  </Border>
-                  <ContentPresenter Name="PART_PromptHeader"
-                                    Content="{TemplateBinding PromptHeaderContent}"
-                                    ContentTemplate="{TemplateBinding PromptHeaderContentTemplate}"
-                                    IsVisible="{TemplateBinding PromptHeaderContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                  <!-- The files attached to the prompt (ChatView.PendingAttachments): a picture or a document icon, the
-                       name with hidden characters escaped, the size, and a button that removes it. -->
-                  <ItemsControl Name="PART_Attachments"
-                                ItemsSource="{Binding $parent[local:ChatView].PendingAttachments}"
-                                IsVisible="{Binding $parent[local:ChatView].PendingAttachments.Count, Converter={x:Static local:EntryConverters.IsPositive}}">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate>
-                        <WrapPanel ItemSpacing="6" LineSpacing="6" />
-                      </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate x:DataType="ai:DataContent">
-                        <Border Classes="polhemChatAttachment"
-                                Padding="4,4,2,4"
-                                CornerRadius="6"
-                                BorderThickness="1"
-                                Background="{DynamicResource PolhemChatCardBackground}"
-                                BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
-                          <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Image Width="28"
-                                   Height="28"
-                                   Stretch="UniformToFill"
-                                   Source="{Binding Converter={x:Static local:EntryConverters.Thumbnail}}"
-                                   IsVisible="{Binding $self.Source, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                            <PathIcon Width="16"
-                                      Height="16"
-                                      Margin="6,0"
-                                      IsVisible="{Binding Converter={x:Static local:EntryConverters.IsDocument}}"
-                                      Data="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5z" />
-                            <StackPanel VerticalAlignment="Center">
-                              <TextBlock Text="{Binding Name, Converter={x:Static local:EntryConverters.Visible}}"
-                                         MaxWidth="180"
-                                         TextTrimming="CharacterEllipsis"
-                                         FontSize="12" />
-                              <TextBlock FontSize="11" Opacity="0.6">
-                                <TextBlock.Text>
-                                  <MultiBinding Converter="{x:Static local:EntryConverters.FileSize}">
-                                    <Binding />
-                                    <Binding Path="$parent[local:ChatView].Strings" />
-                                  </MultiBinding>
-                                </TextBlock.Text>
-                              </TextBlock>
-                            </StackPanel>
-                            <Button Classes="polhemChatRemoveAttachment"
-                                    Padding="4"
-                                    VerticalAlignment="Center"
-                                    Background="Transparent"
-                                    ToolTip.Tip="{Binding $parent[local:ChatView].Strings.RemoveAttachment}"
-                                    AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.RemoveAttachment}"
-                                    Command="{Binding $parent[local:ChatView].RemoveAttachmentCommand}"
-                                    CommandParameter="{Binding}">
-                              <PathIcon Width="10" Height="10" Data="M4 4l16 16M20 4L4 20" />
-                            </Button>
-                          </StackPanel>
-                        </Border>
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
-                  <Grid ColumnDefinitions="Auto,*,Auto">
-                    <Button Name="PART_AttachButton"
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Bottom"
-                            IsVisible="{Binding $parent[local:ChatView].AllowsAttachments}"
-                            ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Attach}"
-                            AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Attach}"
-                            Command="{Binding $parent[local:ChatView].AttachCommand}">
-                      <PathIcon Width="14"
-                                Height="14"
-                                Data="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6h-1.5z" />
-                    </Button>
-                    <local:ChatPromptBox Name="PART_PromptBox"
-                                         Grid.Column="1"
-                                         MaxHeight="160"
-                                         VerticalContentAlignment="Center"
-                                         Text="{TemplateBinding Prompt, Mode=TwoWay}"
-                                         PlaceholderText="{Binding $parent[local:ChatView].Strings.PromptPlaceholder}" />
-                    <Panel Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Bottom">
-                      <Button Name="PART_SendButton"
-                              Content="{Binding $parent[local:ChatView].Strings.Send}"
-                              Command="{Binding $parent[local:ChatView].SubmitCommand}" />
-                      <Button Name="PART_StopButton"
-                              IsVisible="False"
-                              Content="{Binding $parent[local:ChatView].Strings.Stop}"
-                              Command="{Binding $parent[local:ChatView].StopCommand}" />
-                    </Panel>
+              <!-- The composer sits in the conversation, with no line between them: one rounded card holds the attached
+                   files, the prompt box and its buttons. What the application adds, the edit banner and errors stay
+                   outside the card. -->
+              <StackPanel Grid.Row="2" Margin="16,4,16,12" Spacing="6">
+                <!-- The application's own content above and below the prompt box (ChatView.PromptHeaderContent and
+                     PromptFooterContent). -->
+                <!-- While the box holds the last prompt to change (ChatView.IsEditingPrompt). -->
+                <Border Name="PART_EditBanner"
+                        Classes="polhemChatEditBanner"
+                        Padding="8,4"
+                        CornerRadius="6"
+                        IsVisible="False"
+                        Background="{DynamicResource PolhemChatPromptBackground}">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="12"
+                               Text="{Binding $parent[local:ChatView].Strings.EditingPrompt}" />
+                    <Button Grid.Column="1"
+                            Classes="polhemChatCancelEdit"
+                            Padding="6,2"
+                            FontSize="12"
+                            Content="{Binding $parent[local:ChatView].Strings.CancelEdit}"
+                            Command="{Binding $parent[local:ChatView].CancelEditCommand}" />
                   </Grid>
-                  <!-- Why the last file was not attached; the view fills and clears it. -->
-                  <TextBlock Name="PART_AttachmentError"
-                             Classes="polhemChatAttachmentError"
-                             FontSize="12"
-                             TextWrapping="Wrap"
-                             IsVisible="False"
-                             Foreground="{DynamicResource PolhemChatErrorForeground}" />
-                  <ContentPresenter Name="PART_PromptFooter"
-                                    Content="{TemplateBinding PromptFooterContent}"
-                                    ContentTemplate="{TemplateBinding PromptFooterContentTemplate}"
-                                    IsVisible="{TemplateBinding PromptFooterContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                </StackPanel>
-              </Border>
+                </Border>
+                <ContentPresenter Name="PART_PromptHeader"
+                                  Content="{TemplateBinding PromptHeaderContent}"
+                                  ContentTemplate="{TemplateBinding PromptHeaderContentTemplate}"
+                                  IsVisible="{TemplateBinding PromptHeaderContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Border Name="PART_Composer"
+                        Classes="polhemChatComposer"
+                        Padding="6"
+                        CornerRadius="14"
+                        BorderThickness="1"
+                        Background="{DynamicResource PolhemChatComposerBackground}"
+                        BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
+                  <StackPanel Spacing="6">
+                    <!-- The files attached to the prompt (ChatView.PendingAttachments): a picture or a document icon, the
+                         name with hidden characters escaped, the size, and a button that removes it. -->
+                    <ItemsControl Name="PART_Attachments"
+                                  Margin="4,2,4,0"
+                                  ItemsSource="{Binding $parent[local:ChatView].PendingAttachments}"
+                                  IsVisible="{Binding $parent[local:ChatView].PendingAttachments.Count, Converter={x:Static local:EntryConverters.IsPositive}}">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="ai:DataContent">
+                          <Border Classes="polhemChatAttachment"
+                                  Padding="4,4,2,4"
+                                  CornerRadius="8"
+                                  BorderThickness="1"
+                                  Background="{DynamicResource PolhemChatCardBackground}"
+                                  BorderBrush="{DynamicResource PolhemChatCardBorderBrush}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                              <Image Width="28"
+                                     Height="28"
+                                     Stretch="UniformToFill"
+                                     Source="{Binding Converter={x:Static local:EntryConverters.Thumbnail}}"
+                                     IsVisible="{Binding $self.Source, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                              <PathIcon Width="16"
+                                        Height="16"
+                                        Margin="6,0"
+                                        IsVisible="{Binding Converter={x:Static local:EntryConverters.IsDocument}}"
+                                        Data="M6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm7 1.5V9h5.5L13 3.5z" />
+                              <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name, Converter={x:Static local:EntryConverters.Visible}}"
+                                           MaxWidth="180"
+                                           TextTrimming="CharacterEllipsis"
+                                           FontSize="12" />
+                                <TextBlock FontSize="11" Opacity="0.6">
+                                  <TextBlock.Text>
+                                    <MultiBinding Converter="{x:Static local:EntryConverters.FileSize}">
+                                      <Binding />
+                                      <Binding Path="$parent[local:ChatView].Strings" />
+                                    </MultiBinding>
+                                  </TextBlock.Text>
+                                </TextBlock>
+                              </StackPanel>
+                              <Button Classes="polhemChatRemoveAttachment"
+                                      Padding="4"
+                                      VerticalAlignment="Center"
+                                      Background="Transparent"
+                                      ToolTip.Tip="{Binding $parent[local:ChatView].Strings.RemoveAttachment}"
+                                      AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.RemoveAttachment}"
+                                      Command="{Binding $parent[local:ChatView].RemoveAttachmentCommand}"
+                                      CommandParameter="{Binding}">
+                                <PathIcon Width="10" Height="10" Data="M4 4l16 16M20 4L4 20" />
+                              </Button>
+                            </StackPanel>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                      <Button Name="PART_AttachButton"
+                              Classes="polhemChatComposerButton"
+                              Margin="0,0,4,0"
+                              VerticalAlignment="Bottom"
+                              IsVisible="{Binding $parent[local:ChatView].AllowsAttachments}"
+                              ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Attach}"
+                              AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Attach}"
+                              Command="{Binding $parent[local:ChatView].AttachCommand}">
+                        <PathIcon Width="14" Height="14" Data="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z" />
+                      </Button>
+                      <local:ChatPromptBox Name="PART_PromptBox"
+                                           Classes="polhemChatComposerInput"
+                                           Grid.Column="1"
+                                           MinHeight="32"
+                                           MaxHeight="160"
+                                           VerticalContentAlignment="Center"
+                                           Text="{TemplateBinding Prompt, Mode=TwoWay}"
+                                           PlaceholderText="{Binding $parent[local:ChatView].Strings.PromptPlaceholder}" />
+                      <!-- Icons, not words: the text is the tooltip and what a screen reader says. -->
+                      <Panel Grid.Column="2" Margin="4,0,0,0" VerticalAlignment="Bottom">
+                        <Button Name="PART_SendButton"
+                                Classes="polhemChatComposerButton polhemChatSend"
+                                ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Send}"
+                                AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Send}"
+                                Command="{Binding $parent[local:ChatView].SubmitCommand}">
+                          <PathIcon Width="14" Height="14" Data="M11 20V7.83l-5.59 5.59L4 12l8-8 8 8-1.41 1.41L13 7.83V20z" />
+                        </Button>
+                        <Button Name="PART_StopButton"
+                                Classes="polhemChatComposerButton polhemChatStop"
+                                IsVisible="False"
+                                ToolTip.Tip="{Binding $parent[local:ChatView].Strings.Stop}"
+                                AutomationProperties.Name="{Binding $parent[local:ChatView].Strings.Stop}"
+                                Command="{Binding $parent[local:ChatView].StopCommand}">
+                          <Rectangle Width="12" Height="12" RadiusX="2" RadiusY="2" Fill="{Binding $parent[Button].Foreground}" />
+                        </Button>
+                      </Panel>
+                    </Grid>
+                  </StackPanel>
+                </Border>
+                <!-- Why the last file was not attached; the view fills and clears it. -->
+                <TextBlock Name="PART_AttachmentError"
+                           Classes="polhemChatAttachmentError"
+                           Margin="4,0"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           IsVisible="False"
+                           Foreground="{DynamicResource PolhemChatErrorForeground}" />
+                <ContentPresenter Name="PART_PromptFooter"
+                                  Content="{TemplateBinding PromptFooterContent}"
+                                  ContentTemplate="{TemplateBinding PromptFooterContentTemplate}"
+                                  IsVisible="{TemplateBinding PromptFooterContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </StackPanel>
             </Grid>
           </ControlTemplate>
         </Setter>
 
+        <Style Selector="^ /template/ Border#PART_Composer">
+          <Setter Property="Effect">
+            <DropShadowEffect OffsetX="0" OffsetY="1" BlurRadius="6" Opacity="0.08" />
+          </Setter>
+        </Style>
+        <Style Selector="^ /template/ Border#PART_Composer:focus-within">
+          <Setter Property="BorderBrush" Value="{DynamicResource PolhemChatComposerFocusBorderBrush}" />
+        </Style>
         <Style Selector="^:editing /template/ Border#PART_EditBanner">
           <Setter Property="IsVisible" Value="True" />
         </Style>
@@ -411,6 +450,51 @@
       </ControlTheme>
     </ResourceDictionary>
   </Styles.Resources>
+
+  <!-- NOTE: The prompt box and the composer's buttons keep the base theme's templates; these styles only clear the
+       parts of them that would draw a second frame inside the card. Styles outrank a control theme's own setters,
+       including its :focus and :pointerover ones, so the box stays flat in every state. -->
+  <!-- NOTE: The prompt box styles as a TextBox (its StyleKeyOverride), so a selector names TextBox, not ChatPromptBox. -->
+  <Style Selector="TextBox.polhemChatComposerInput">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="6,6" />
+  </Style>
+  <Style Selector="TextBox.polhemChatComposerInput /template/ Border">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Button.polhemChatComposerButton">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.polhemChatComposerButton /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector="Button.polhemChatComposerButton:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PolhemChatComposerButtonHoverBackground}" />
+  </Style>
+  <!-- The base theme colors the presenter in each state, disabled included, so the arrow takes its color itself. -->
+  <Style Selector="Button.polhemChatSend PathIcon">
+    <Setter Property="Foreground" Value="{DynamicResource PolhemChatSendForeground}" />
+  </Style>
+  <Style Selector="Button.polhemChatSend /template/ ContentPresenter, Button.polhemChatSend:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource PolhemChatSendBackground}" />
+  </Style>
+  <Style Selector="Button.polhemChatSend:pointerover">
+    <Setter Property="Opacity" Value="0.85" />
+  </Style>
+  <Style Selector="Button.polhemChatSend:disabled">
+    <Setter Property="Opacity" Value="0.35" />
+  </Style>
 
   <!-- The copy button of a reply is an icon that fades in while the pointer is over the reply, or it has the keyboard
        focus; it keeps its place, so the conversation does not move. -->

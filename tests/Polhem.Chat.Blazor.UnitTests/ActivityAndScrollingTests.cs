@@ -181,7 +181,9 @@ public class ActivityAndScrollingTests : BunitContext
         var conversation = new ChatConversation();
         conversation.AddUserPrompt("Hi");
         var turn = conversation.BeginTurn();
-        HostDriven(conversation, isGenerating: true);
+        var view = HostDriven(conversation, isGenerating: true);
+        // The view calls its script once the script has loaded; the last call it makes then is to watch the prompt box.
+        view.WaitForAssertion(() => _module.VerifyInvoke("watchPrompt"));
 
         await DisposeComponentsAsync();
 

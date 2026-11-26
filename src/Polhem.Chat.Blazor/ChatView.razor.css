@@ -25,6 +25,10 @@
     --_pch-jump-background: var(--pch-jump-background, color-mix(in srgb, Canvas 94%, transparent));
     --_pch-jump-dot: var(--pch-jump-dot, #d97757);
     --_pch-shadow: var(--pch-shadow, 0 2px 8px rgb(0 0 0 / 18%));
+    --_pch-composer-background: var(--pch-composer-background, color-mix(in srgb, Canvas 80%, transparent));
+    --_pch-composer-radius: var(--pch-composer-radius, 14px);
+    --_pch-send-background: var(--pch-send-background, currentColor);
+    --_pch-send-text: var(--pch-send-text, Canvas);
     position: relative;
     height: 100%;
     display: flex;
@@ -422,14 +426,29 @@
     animation-delay: 0.4s;
 }
 
-/* The prompt box and what goes with it, under the conversation. */
+/* The prompt box and what goes with it, under the conversation and with no line between them. */
 .pch-composer {
     flex: none;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-    border-top: 1px solid var(--_pch-card-border);
+    gap: 6px;
+    padding: 4px 16px 12px;
+}
+
+/* The attached files, the prompt box and its buttons share one rounded card, which shows the focus as a whole. */
+.pch-composer-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid var(--_pch-card-border);
+    border-radius: var(--_pch-composer-radius);
+    background: var(--_pch-composer-background);
+    box-shadow: 0 1px 6px rgb(0 0 0 / 8%);
+}
+
+.pch-composer-card:focus-within {
+    border-color: color-mix(in srgb, var(--_pch-accent) 50%, transparent);
 }
 
 .pch-edit-banner {
@@ -452,6 +471,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    padding: 2px 4px 0;
 }
 
 .pch-pending-file {
@@ -504,12 +524,11 @@
 .pch-prompt-box {
     flex: 1 1 auto;
     min-width: 0;
-    min-height: 34px;
+    min-height: 32px;
     max-height: 160px;
     box-sizing: border-box;
-    padding: 6px 10px;
-    border: 1px solid var(--_pch-card-border);
-    border-radius: var(--_pch-card-radius);
+    padding: 6px;
+    border: none;
     background: transparent;
     color: inherit;
     font: inherit;
@@ -518,15 +537,58 @@
     field-sizing: content;
 }
 
+/* The card shows the focus, so the box itself draws no ring. */
 .pch-prompt-box:focus {
-    outline: 2px solid var(--_pch-accent);
-    outline-offset: -1px;
+    outline: none;
 }
 
+.pch-composer-button {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.pch-composer-button svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.pch-composer-button:focus-visible {
+    outline: 2px solid var(--_pch-accent);
+    outline-offset: 1px;
+}
+
+/* NOTE: The button keeps the inherited text color, so the default fill, currentColor, resolves to the page's text color;
+   the arrow takes the page's background color. */
 .pch-send {
-    border-color: var(--_pch-accent);
-    background: var(--_pch-accent);
-    color: var(--_pch-accent-text);
+    background: var(--_pch-send-background);
+    color: inherit;
+}
+
+.pch-send svg {
+    fill: var(--_pch-send-text);
+}
+
+.pch-send:hover {
+    opacity: 0.85;
+}
+
+.pch-stop {
+    background: transparent;
+    color: inherit;
+}
+
+.pch-stop:hover,
+.pch-attach:hover {
+    background: var(--_pch-prompt-background);
 }
 
 /* The file input fills the button, transparent: a click or a key on it opens the browser's picker from the user's own
@@ -534,8 +596,9 @@
 .pch-attach {
     position: relative;
     flex: none;
-    height: 34px;
-    width: 34px;
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
 }
 
 .pch-attach ::deep .pch-file-input {
@@ -552,6 +615,7 @@
 }
 
 .pch-attachment-error {
+    padding: 0 4px;
     font-size: var(--_pch-small-font-size);
     color: var(--_pch-error);
 }
