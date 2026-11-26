@@ -323,7 +323,9 @@ public class ComposingTests : BunitContext
     [Fact(DisplayName = "A disposed view stops watching the keys of its box")]
     public async Task Dispose_StopsWatchingTheBox()
     {
-        Render<ChatView>(parameters => parameters.Add(v => v.Conversation, new ChatConversation()));
+        var view = Render<ChatView>(parameters => parameters.Add(v => v.Conversation, new ChatConversation()));
+        // The view calls its script once the script has loaded; the last call it makes then is to watch the prompt box.
+        view.WaitForAssertion(() => _module.VerifyInvoke("watchPrompt"));
 
         await DisposeComponentsAsync();
 

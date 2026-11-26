@@ -193,6 +193,8 @@ public class TemplatesTests : BunitContext
         _module.Setup<bool>("copyText", "Hello").SetResult(true);
         var view = Render<ChatView>(parameters => parameters.Add(v => v.Conversation, new ChatConversation()));
         var instance = view.Instance;
+        // The view calls its script once the script has loaded; the last call it makes then is to watch the prompt box.
+        view.WaitForAssertion(() => _module.VerifyInvoke("watchPrompt"));
 
         Assert.True(await view.InvokeAsync(() => instance.CopyAsync("Hello")));
 
