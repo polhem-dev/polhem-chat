@@ -405,7 +405,7 @@ public class ComposingTests : BunitContext
         view.Render(parameters => parameters.Add(v => v.IsGenerating, true));
 
         Assert.Empty(view.FindAll("button.pch-send"));
-        Assert.Equal(new ChatStrings().Stop, view.Find("button.pch-stop").TextContent);
+        Assert.Equal(new ChatStrings().Stop, view.Find("button.pch-stop").GetAttribute("aria-label"));
         view.Find("button.pch-stop").Click();
         Assert.Equal(1, stops);
     }

@@ -17,6 +17,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - **安全性：** frame 超出宣告尺寸的 GIF，以及超過 5 MB 的圖片，不再顯示預覽。
 - **變更：** `PromptSubmittedEventArgs` 與 `ChatAttachmentRejectedEventArgs` 移到 `Polhem.Chat`。
 - **變更：** `ChatViewStrings` 改名為 `ChatStrings` 並移到 `Polhem.Chat`，由各 UI 框架的 view 共用，新增 `DescribeTurn` 與 `DescribeToolStatus`；`VisibleText` 在那裡改為公開。
+- **變更：** 輸入框、附加的檔案，以及附加、送出、停止鈕合成一張位於對話中的圓角卡片，上方不再有分隔線；送出與停止改為圖示，文字成為 tooltip 與無障礙名稱。
 
 ## [0.2.1] - 2026-11-25
 

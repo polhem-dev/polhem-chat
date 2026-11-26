@@ -81,9 +81,11 @@ CSS variables on the view (its `Class` parameter) or on any ancestor. The font i
 | `--pch-padding`, `--pch-gap` | The space around the conversation and between entries. |
 | `--pch-radius`, `--pch-card-radius` | The corners of the prompt bubbles, and of cards and boxes. |
 | `--pch-prompt-background` | The user's prompts and the edit banner. |
-| `--pch-card-background`, `--pch-card-border` | Reasoning and tool call cards and attached files; the border also of buttons and the prompt box. |
+| `--pch-card-background`, `--pch-card-border` | Reasoning and tool call cards and attached files; the border also of buttons and the composer card. |
+| `--pch-composer-background`, `--pch-composer-radius` | The card that holds the prompt box, its attached files and its buttons. |
+| `--pch-send-background`, `--pch-send-text` | The round send button. |
 | `--pch-muted` | Secondary text. |
-| `--pch-accent`, `--pch-accent-text` | The send and approve buttons, and the focus ring. |
+| `--pch-accent`, `--pch-accent-text` | The approve button and the focus ring. |
 | `--pch-error`, `--pch-error-background` | Errors. |
 | `--pch-jump-background`, `--pch-jump-dot`, `--pch-shadow` | The jump-to-latest button and the activity spinner. |
 
