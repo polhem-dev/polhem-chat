@@ -14,7 +14,7 @@ internal static class GifDecoder
 
     /// <summary>Decodes a GIF.</summary>
     /// <param name="data">The file's bytes.</param>
-    /// <returns>The frames, as BGRA pixels with premultiplied alpha, in order.</returns>
+    /// <returns>The frames, as RGBA pixels with premultiplied alpha, in order.</returns>
     /// <exception cref="InvalidDataException">The data is not a GIF this decoder can read.</exception>
     public static GifAnimation Decode(byte[] data)
     {
@@ -104,7 +104,7 @@ internal static class GifDecoder
                     }
                 }
             }
-            frames.Add(new GifFrame(ToPremultipliedBgra(canvas), TimeSpan.FromMilliseconds(delay > 0 ? delay : 100)));
+            frames.Add(new GifFrame(ToPremultipliedRgba(canvas), TimeSpan.FromMilliseconds(delay > 0 ? delay : 100)));
 
             if (disposal == 2)
             {
@@ -258,16 +258,16 @@ internal static class GifDecoder
         return output;
     }
 
-    private static byte[] ToPremultipliedBgra(uint[] canvas)
+    private static byte[] ToPremultipliedRgba(uint[] canvas)
     {
         // Every pixel is opaque or fully transparent, so premultiplying leaves the colors as they are.
         var pixels = new byte[canvas.Length * 4];
         for (var index = 0; index < canvas.Length; index++)
         {
             var color = canvas[index];
-            pixels[index * 4] = (byte)color;
+            pixels[index * 4] = (byte)(color >> 16);
             pixels[index * 4 + 1] = (byte)(color >> 8);
-            pixels[index * 4 + 2] = (byte)(color >> 16);
+            pixels[index * 4 + 2] = (byte)color;
             pixels[index * 4 + 3] = (byte)(color >> 24);
         }
         return pixels;
