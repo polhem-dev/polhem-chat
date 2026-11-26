@@ -104,6 +104,13 @@ dotnet build samples/ChatGallery.iOS -c Release -t:Run -p:RuntimeIdentifier=ioss
 如果建置訊息說 iOS workload 需要另一版 Xcode，建置時把 `DEVELOPER_DIR` 指向那一版，並先刪除該 head 的 `bin` 與 `obj`
 資料夾再重新建置。
 
+Android head 需要 Android workload、Android SDK 與 JDK 17，所以也不在方案裡。設定好 `ANDROID_HOME` 與 `JAVA_HOME`
+並啟動模擬器後，建置、安裝並啟動：
+
+```bash
+dotnet build samples/ChatGallery.Android -c Release -t:Run
+```
+
 `samples/ChatGallery.Blazor` 用同樣的腳本化回覆示範 Blazor 元件，是一個 Blazor Web App：第一頁在伺服器上執行
 （Interactive Server），第二頁在瀏覽器裡執行（WebAssembly）。兩頁用同一個元件，標題會顯示目前在哪裡執行。
 
