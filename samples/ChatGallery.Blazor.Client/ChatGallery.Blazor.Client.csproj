@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!--
+    The pages of the Blazor gallery, which run on the server or in the browser. The scripted client and its tool are
+    the ones of ChatGallery, linked rather than referenced: that project is an Avalonia app.
+  -->
+  <PropertyGroup>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- The linked files' documentation refers to the Avalonia pages of ChatGallery, which this project does not have. -->
+    <NoWarn>$(NoWarn);CS1574</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="11.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polhem.Chat.Blazor\Polhem.Chat.Blazor.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ChatGallery\ChoiceEntry.cs" Link="Shared\ChoiceEntry.cs" />
+    <Compile Include="..\ChatGallery\DemoChatClient.cs" Link="Shared\DemoChatClient.cs" />
+    <Compile Include="..\ChatGallery\DemoReplies.cs" Link="Shared\DemoReplies.cs" />
+    <Compile Include="..\ChatGallery\DemoTools.cs" Link="Shared\DemoTools.cs" />
+    <Compile Include="..\ChatGallery\ToolTitles.cs" Link="Shared\ToolTitles.cs" />
+  </ItemGroup>
+
+</Project>

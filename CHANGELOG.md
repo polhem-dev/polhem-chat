@@ -11,6 +11,7 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.3.0.md)
 
+- **New package:** `Polhem.Chat.Blazor`, the chat component for Blazor (Interactive Server and WebAssembly): the conversation with streamed Markdown, the activity line, tool approval, the prompt box with attachments, regenerate and edit, slots, entry templates and theme variables. The `ChatGallery.Blazor` sample shows both modes.
 - `ChatComposer` in `Polhem.Chat` holds what the user does with a chat view apart from drawing it (the prompt box, files, submitting, stopping, regenerating, editing, approving), for views on any UI framework; `ChatView` uses it, and its tests pass unchanged.
 - `ChatPicturePreview` in `Polhem.Chat` tells whether an attached picture is small enough to preview, from its header and without decoding it; the views use it before they show a picture.
 - `ChatStrings.ShowActivity` names the toggle that shows the reasoning and the tool calls; the Avalonia view's toggle now has it as its tooltip and accessible name.

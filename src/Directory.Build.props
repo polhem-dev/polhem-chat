@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <!-- The single source of the package version. Only the projects under src/ are packed, and the two packages are
+    <!-- The single source of the package version. Only the projects under src/ are packed, and the packages are
          always released together under this one version. -->
     <Version>0.2.1</Version>
 

@@ -10,6 +10,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.3.0.md](docs/zh-TW/changelogs/0.3.0.md)
 
+- **新套件：** `Polhem.Chat.Blazor`，Blazor 的聊天元件（Interactive Server 與 WebAssembly）：串流 Markdown 的對話、活動列、工具核准、含附件的輸入框、重新生成與編輯、slot、項目樣板與主題變數。`ChatGallery.Blazor` 範例示範兩種模式。
 - `Polhem.Chat` 新增 `ChatComposer`，承接使用者對 chat view 除了畫面以外的操作（輸入框、檔案、送出、停止、重新生成、編輯、核准），供各 UI 框架的 view 共用；`ChatView` 改用它，原有測試不需修改即全部通過。
 - `Polhem.Chat` 新增 `ChatPicturePreview`，不解碼、只讀圖片標頭來判斷附加的圖片是否小到可以預覽；各 view 顯示圖片前都會先用它檢查。
 - 新增 `ChatStrings.ShowActivity`，作為顯示推理與工具呼叫的切換鈕名稱；Avalonia view 的切換鈕現在以它作為提示與無障礙名稱。

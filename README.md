@@ -9,7 +9,7 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=polhem-dev_polhem-chat&metric=code_smells)](https://sonarcloud.io/project/overview?id=polhem-dev_polhem-chat)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=polhem-dev_polhem-chat&metric=coverage)](https://sonarcloud.io/project/overview?id=polhem-dev_polhem-chat)
 
-An AI chat control for [Avalonia](https://avaloniaui.net/), on top of any
+An AI chat control for [Avalonia](https://avaloniaui.net/) and a chat component for Blazor, on top of any
 [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/microsoft-extensions-ai) `IChatClient`: streamed replies
 rendered as Markdown, a live line that shows what the model is doing (reasoning, tool calls, time and tokens), per-turn usage, stop and copy. It does not depend on any model provider;
 bring the `IChatClient` you already use.
@@ -22,12 +22,17 @@ bring the `IChatClient` you already use.
 |---------|-----|
 | `Polhem.Chat` | The conversation model: streamed updates turned into conversation entries, a runner for each turn, and what the user does with a view (`ChatComposer`). No UI |
 | `Polhem.Chat.Avalonia` | The chat control for Avalonia, rendering Markdown with [Polhem.Markdown.Avalonia](https://github.com/polhem-dev/polhem-markdown) |
+| `Polhem.Chat.Blazor` | The chat component for Blazor, Interactive Server and WebAssembly, rendering Markdown with [Polhem.Markdown.Blazor](https://github.com/polhem-dev/polhem-markdown); bound to no component library |
 
 The packages are published on [nuget.org](https://www.nuget.org/packages?q=Polhem.Chat); the changes of each release
 are in the [CHANGELOG](CHANGELOG.md). They are at 0.x: a minor version may still change the API, and the CHANGELOG says
 when it does.
 
 ## Getting started
+
+This section sets up the Avalonia control. For Blazor, see the
+[Blazor package README](src/Polhem.Chat.Blazor/README.md): add `Polhem.Chat.Blazor`, link the Markdown stylesheet and put
+a `ChatView` with a runner in an interactive component. On WebAssembly, keep the model client and its key on the server.
 
 The control needs Avalonia 12 or later. Start from an Avalonia application, for example one made with
 `dotnet new avalonia.app`, and add the control and a client for your model. Any `IChatClient` works; this example uses
@@ -105,11 +110,20 @@ dotnet build samples/ChatGallery.iOS -c Release -t:Run -p:RuntimeIdentifier=ioss
 If the build says the iOS workload needs another Xcode version, point `DEVELOPER_DIR` at that version for the build, and
 delete the head's `bin` and `obj` folders before building again.
 
+`samples/ChatGallery.Blazor` shows the Blazor component with the same scripted replies, in a Blazor Web App: the first
+page runs on the server (Interactive Server), the second in the browser (WebAssembly). Both pages use one component,
+whose header says where it runs.
+
+```bash
+dotnet run --project samples/ChatGallery.Blazor
+```
+
 ## Building
 
 ```bash
 dotnet build Polhem.Chat.slnx --configuration Release
 dotnet test Polhem.Chat.slnx --configuration Release --no-build
+node --test tests/Polhem.Chat.Blazor.ScriptTests/polhem-chat.test.mjs
 ```
 
 ## License
