@@ -82,8 +82,9 @@
         </TextBlock.IsVisible>
       </TextBlock>
       <!-- A reply is the model's text, so its images load only when the application chose options that allow them
-           (ChatView.MarkdownOptions). ReplyMarkdownViewer applies them itself: a binding would come too late. -->
-      <local:ReplyMarkdownViewer Markdown="{Binding Text}"
+           (ChatView.MarkdownOptions). ReplyMarkdownViewer applies them itself: a binding would come too late.
+           Its bidirectional controls show as escapes, so it reads as what it holds. -->
+      <local:ReplyMarkdownViewer Markdown="{Binding Text, Converter={x:Static local:EntryConverters.BidiControls}}"
                                  CjkFontFamily="{Binding $parent[local:ChatView].CjkFontFamily}"
                                  CopyCodeLabel="{Binding $parent[local:ChatView].Strings.CopyCode}"
                                  IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
@@ -138,7 +139,7 @@
             <TextBlock Text="{Binding $parent[local:ChatView].Strings.Reasoning}" IsVisible="{Binding !IsStreaming}" />
           </Panel>
         </Expander.Header>
-        <SelectableTextBlock Text="{Binding Text}" TextWrapping="Wrap" Opacity="0.8" />
+        <SelectableTextBlock Text="{Binding Text, Converter={x:Static local:EntryConverters.BidiControls}}" TextWrapping="Wrap" Opacity="0.8" />
       </Expander>
     </Border>
   </DataTemplate>

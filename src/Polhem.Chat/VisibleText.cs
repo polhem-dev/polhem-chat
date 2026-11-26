@@ -1,7 +1,9 @@
 using System.Globalization;
+using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.AI;
 
 namespace Polhem.Chat;
@@ -10,7 +12,7 @@ namespace Polhem.Chat;
 /// Text from the model shown so that what the user reads is what a tool receives: characters that draw nothing or
 /// reorder the text around them show as escapes. A view shows tool arguments, tool results and file names through it.
 /// </summary>
-public static class VisibleText
+public static partial class VisibleText
 {
     /// <summary>
     /// Replaces control characters other than line feed and tab, format characters (zero-width characters, the
@@ -23,18 +25,56 @@ public static class VisibleText
     /// </remarks>
     /// <param name="text">The text to show.</param>
     /// <returns>The text with those characters escaped; an empty string for <see langword="null"/>.</returns>
-    public static string Escape(string? text)
+    public static string Escape(string? text) => EscapeWhere(text, IsHidden);
+
+    /// <summary>
+    /// Replaces only the bidirectional embeddings, overrides and isolates (U+202A to U+202E and U+2066 to U+2069), and
+    /// the numeric character references to them, with <c>\u{XXXX}</c>, for text such as a reply that is shown as Markdown.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// WARNING: These characters make text read differently from what it holds: a file name ending in <c>fdp.exe</c>
+    /// after a right-to-left override reads as one ending in <c>.pdf</c>. A reply quotes tool results and other text the
+    /// model was given, so none of them may be drawn as they are.
+    /// </para>
+    /// <para>
+    /// Arabic, Hebrew and other right-to-left text needs none of them and shows as it is, as do the marks (U+200E,
+    /// U+200F, U+061C), which only place the punctuation next to them. The joiners stay too, since emoji sequences and
+    /// several scripts depend on them, which is why <see cref="Escape"/> does too much for a reply.
+    /// </para>
+    /// <para>
+    /// IMPORTANT: Markdown and the HTML in it decode a reference such as <c>&amp;#x202E;</c> or <c>&amp;#8238;</c> to
+    /// the character itself after this runs, so the references are escaped too. In plain text, where nothing decodes
+    /// them, such a reference shows as the same escape. <c>EscapeBidiControls_Reference_ShowsAsEscape</c> checks the
+    /// forms the viewers decode.
+    /// </para>
+    /// <para>
+    /// The escape is plain text in Markdown, so it shows the same in a paragraph, in inline code and in a code block;
+    /// <c>Reply_BidiOverride_ShowsAsEscape</c> and <c>BidiOverride_Reply_ShowsAsEscape</c> check it in each view.
+    /// </para>
+    /// </remarks>
+    /// <param name="text">The text to show.</param>
+    /// <returns>The text with those characters escaped; an empty string for <see langword="null"/>.</returns>
+    public static string EscapeBidiControls(string? text)
     {
-        if (string.IsNullOrEmpty(text) || !NeedsEscape(text))
+        var escaped = EscapeWhere(text, IsBidiControl);
+        return escaped.Contains("&#", StringComparison.Ordinal)
+            ? CharacterReference().Replace(escaped, match => EscapeReference(match.Value))
+            : escaped;
+    }
+
+    private static string EscapeWhere(string? text, Func<Rune, bool> escapes)
+    {
+        if (string.IsNullOrEmpty(text) || !text.EnumerateRunes().Any(escapes))
         {
             return text ?? string.Empty;
         }
         var builder = new StringBuilder(text.Length + 16);
         foreach (var rune in text.EnumerateRunes())
         {
-            if (IsHidden(rune))
+            if (escapes(rune))
             {
-                builder.Append(CultureInfo.InvariantCulture, $"\\u{{{rune.Value:X4}}}");
+                builder.Append(FormatEscape(rune.Value));
             }
             else
             {
@@ -137,7 +177,19 @@ public static class VisibleText
         }
     }
 
-    private static bool NeedsEscape(string text) => text.EnumerateRunes().Any(IsHidden);
+    private static string FormatEscape(int value) => string.Create(CultureInfo.InvariantCulture, $"\\u{{{value:X4}}}");
+
+    // IMPORTANT: The reference is decoded by the decoder the Markdown viewer uses for its HTML, which accepts more forms
+    // than Markdown does (a sign, spaces, any number of leading zeros), rather than matched against a pattern of its own.
+    private static string EscapeReference(string reference) =>
+        WebUtility.HtmlDecode(reference) is [var character] && IsBidiControl(new Rune(character))
+            ? FormatEscape(character)
+            : reference;
+
+    [GeneratedRegex("&#[^&;<]+;", RegexOptions.CultureInvariant)]
+    private static partial Regex CharacterReference();
+
+    private static bool IsBidiControl(Rune rune) => rune.Value is (>= 0x202A and <= 0x202E) or (>= 0x2066 and <= 0x2069);
 
     private static bool IsHidden(Rune rune) =>
         Rune.GetUnicodeCategory(rune) switch
