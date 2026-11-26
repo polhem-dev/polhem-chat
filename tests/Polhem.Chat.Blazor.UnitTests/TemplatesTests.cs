@@ -211,8 +211,8 @@ public class TemplatesTests : BunitContext
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("zh-TW");
             var view = Render<ChatView>(parameters => parameters.Add(v => v.Conversation, new ChatConversation()));
 
-            Assert.Equal(ChatStrings.ForCulture(CultureInfo.GetCultureInfo("zh-TW")).Send, view.Find(".pch-send").TextContent);
-            Assert.NotEqual(ChatStrings.ForCulture(CultureInfo.InvariantCulture).Send, view.Find(".pch-send").TextContent);
+            Assert.Equal(ChatStrings.ForCulture(CultureInfo.GetCultureInfo("zh-TW")).Send, view.Find(".pch-send").GetAttribute("aria-label"));
+            Assert.NotEqual(ChatStrings.ForCulture(CultureInfo.InvariantCulture).Send, view.Find(".pch-send").GetAttribute("aria-label"));
         }
         finally
         {

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using static Polhem.Chat.Avalonia.UnitTests.ViewHost;
 
@@ -19,7 +20,7 @@ public class ViewStringsTests(HeadlessSession session)
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
             Show(view);
 
-            Assert.Equal("送出", Part<Button>(view, "PART_SendButton").Content);
+            Assert.Equal("送出", AutomationProperties.GetName(Part<Button>(view, "PART_SendButton")));
         }
         finally
         {
@@ -33,12 +34,12 @@ public class ViewStringsTests(HeadlessSession session)
         var view = new ChatView { Strings = new ChatStrings { Send = "Ask", PromptPlaceholder = "Your question" } };
         var window = Show(view);
 
-        Assert.Equal("Ask", Part<Button>(view, "PART_SendButton").Content);
+        Assert.Equal("Ask", AutomationProperties.GetName(Part<Button>(view, "PART_SendButton")));
         Assert.Equal("Your question", Part<ChatPromptBox>(view, "PART_PromptBox").PlaceholderText);
 
         view.Strings = null!;
         Settle(window);
-        Assert.Equal(ChatStrings.ForCulture(CultureInfo.CurrentUICulture).Send, Part<Button>(view, "PART_SendButton").Content);
+        Assert.Equal(ChatStrings.ForCulture(CultureInfo.CurrentUICulture).Send, AutomationProperties.GetName(Part<Button>(view, "PART_SendButton")));
         Assert.NotNull(view.Strings);
     });
 }
