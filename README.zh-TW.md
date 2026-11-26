@@ -29,7 +29,7 @@
 
 ## 開始使用
 
-本節說明 Avalonia 控制項的設定。Blazor 請見 [Blazor 套件的 README](src/Polhem.Chat.Blazor/README.md)（英文）：
+本節說明 Avalonia 控制項的設定。Blazor 請見 [Blazor 指南](docs/zh-TW/blazor.md)：
 加入 `Polhem.Chat.Blazor`、連結 Markdown 樣式表，在具互動 render mode 的元件裡放一個帶執行器的 `ChatView`。
 WebAssembly 模式下，模型 client 與金鑰要留在伺服器端。
 
@@ -78,7 +78,7 @@ Chat.Runner = new ChatRunner(client);
 以 `UseFunctionInvocation()` 包住 client，並把工具放進 runner 的 `Options`。
 
 自己跑迴圈的應用程式改設 `Conversation`，並處理 `PromptSubmitted` 與 `StopRequested`。樣板、文字與顏色的自訂方式見
-[套件 README](src/Polhem.Chat.Avalonia/README.md)（英文）。
+[Avalonia 指南](docs/zh-TW/avalonia.md)。
 
 回覆預設不顯示圖片：回覆是模型寫的內容，其中的圖片網址可能把對話裡的資料帶到圖片的伺服器。要顯示圖片，設定
 `MarkdownOptions`。回覆含中文或日文時，設定 `CjkFontFamily`，粗體的中日文字才會以粗體顯示。
@@ -117,6 +117,8 @@ dotnet build samples/ChatGallery.Android -c Release -t:Run
 ```bash
 dotnet run --project samples/ChatGallery.Blazor
 ```
+
+![ChatGallery.Blazor 範例在伺服器上的一輪對話：模型呼叫天氣工具、串流出 Markdown 回覆，並顯示花費的時間與 token](docs/images/chat-demo-blazor.gif)
 
 ## 建置
 

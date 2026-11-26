@@ -31,7 +31,7 @@ when it does.
 ## Getting started
 
 This section sets up the Avalonia control. For Blazor, see the
-[Blazor package README](src/Polhem.Chat.Blazor/README.md): add `Polhem.Chat.Blazor`, link the Markdown stylesheet and put
+[Blazor guide](docs/en/blazor.md): add `Polhem.Chat.Blazor`, link the Markdown stylesheet and put
 a `ChatView` with a runner in an interactive component. On WebAssembly, keep the model client and its key on the server.
 
 The control needs Avalonia 12 or later. Start from an Avalonia application, for example one made with
@@ -81,7 +81,7 @@ stops the reply. For tool calls, wrap the client with `UseFunctionInvocation()` 
 `Options`.
 
 An application that runs its own loop sets `Conversation` instead and handles `PromptSubmitted` and `StopRequested`.
-The [package README](src/Polhem.Chat.Avalonia/README.md) covers templates, texts and colors.
+The [Avalonia guide](docs/en/avalonia.md) covers templates, texts and colors.
 
 Replies show no images: a reply is the model's text, and an image address in it could carry data from the conversation
 to the image's server. Set `MarkdownOptions` to allow them. For Chinese or Japanese replies, set `CjkFontFamily` so
@@ -124,6 +124,8 @@ whose header says where it runs.
 ```bash
 dotnet run --project samples/ChatGallery.Blazor
 ```
+
+![One turn in the ChatGallery.Blazor sample on the server: the model calls a weather tool, streams a Markdown reply and shows the time and tokens it used](docs/images/chat-demo-blazor.gif)
 
 ## Building
 
