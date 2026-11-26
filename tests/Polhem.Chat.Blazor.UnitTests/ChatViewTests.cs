@@ -303,7 +303,9 @@ public class ChatViewTests : BunitContext
     {
         _module.SetupVoid("unwatch", _ => true).SetException(new Microsoft.JSInterop.JSDisconnectedException("The circuit is gone."));
         var conversation = new ChatConversation();
-        HostDriven(conversation);
+        var view = HostDriven(conversation);
+        // The view calls its script once the script has loaded; the last call it makes then is to watch the prompt box.
+        view.WaitForAssertion(() => _module.VerifyInvoke("watchPrompt"));
 
         await DisposeComponentsAsync();
 
