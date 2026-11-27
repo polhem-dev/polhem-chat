@@ -26,6 +26,14 @@ public sealed class MessageSendingEventArgs : CancelEventArgs
     public IList<DataContent> Attachments { get; } = [];
 
     /// <summary>
+    /// Gets the text that will be sent with the prompt without being shown as the prompt's text, such as the selected text
+    /// of a document. A view shows each item's label on the prompt. When <see cref="ReplacesLastPrompt"/> is
+    /// <see langword="true"/>, it already holds the context the last prompt was sent with, which a handler may keep,
+    /// remove or replace.
+    /// </summary>
+    public IList<PromptContext> Context { get; } = [];
+
+    /// <summary>
     /// Gets a value indicating whether the prompt replaces the last one, as <see cref="ChatRunner.RegenerateAsync"/> and
     /// <see cref="ChatRunner.EditLastPromptAsync"/> send it. Its text is then the prompt as it was sent before, after
     /// the handlers of that time changed it, so a handler that adds to the text should not add again.

@@ -1,1 +1,9 @@
 #nullable enable
+Polhem.Chat.ChatConversation.AddUserPrompt(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptContext!>! context) -> Polhem.Chat.UserPromptEntry!
+Polhem.Chat.MessageSendingEventArgs.Context.get -> System.Collections.Generic.IList<Polhem.Chat.PromptContext!>!
+Polhem.Chat.PromptContext
+Polhem.Chat.PromptContext.Label.get -> string!
+Polhem.Chat.PromptContext.PromptContext(string! label, string! text) -> void
+Polhem.Chat.PromptContext.Text.get -> string!
+Polhem.Chat.UserPromptEntry.Context.get -> System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptContext!>!
+Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptContext!>! context) -> void

@@ -131,6 +131,20 @@ public class AttachmentViewTests(HeadlessSession session)
         Assert.IsType<DataContent>(client.Requests[0][0].Contents.Single());
     });
 
+    [Fact(DisplayName = "A prompt's context shows as its label, never as its text")]
+    public Task Prompt_WithContext_ShowsTheLabelOnly() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Shorten it", [], [new PromptContext("notes\u202Emd.exe", "The whole document")]);
+        var view = new ChatView { Conversation = conversation };
+        Show(view);
+
+        var texts = Descendants<TextBlock>(EntryView(view, 0)).Select(block => block.Text).ToList();
+        Assert.Contains("notes\\u{202E}md.exe", texts);
+        Assert.Contains("Shorten it", texts);
+        Assert.DoesNotContain(texts, text => text?.Contains("whole document", StringComparison.Ordinal) == true);
+    });
+
     [Fact(DisplayName = "A prompt the runner's sending handler cancels gives its text and attachments back to the box")]
     public Task Submit_Canceled_KeepsAttachments() => session.RunAsync(async () =>
     {

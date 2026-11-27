@@ -169,9 +169,17 @@
 
     private RenderFragment RenderPrompt(UserPromptEntry prompt) =>
         @<div class="pch-prompt">
-            @if (prompt.Attachments.Count > 0)
+            @if (prompt.Attachments.Count > 0 || prompt.Context.Count > 0)
             {
                 <div class="pch-attachments">
+                    @* The context sent with the prompt shows as its label only, never its text. *@
+                    @foreach (var context in prompt.Context)
+                    {
+                        <span class="pch-file pch-context">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z" /></svg>
+                            <span class="pch-file-name">@VisibleText.Escape(context.Label)</span>
+                        </span>
+                    }
                     @foreach (var attachment in prompt.Attachments)
                     {
                         @* WARNING: Only a picture whose declared size ChatPicturePreview allows is handed to the browser to

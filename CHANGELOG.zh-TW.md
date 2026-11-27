@@ -8,6 +8,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 ## [Unreleased]
 
+- `PromptContext` 讓提問帶著使用者沒有打的文字一起送出，例如文件中選取的文字：由 `MessageSending` 的處理常式加進 `MessageSendingEventArgs.Context`。模型會在同一個文字區塊、提問之前收到它；兩個 view 都只在提問上顯示它的標籤，就像檔案一樣。`SaveHistory` 與 `LoadHistory` 會保存它，重新生成或編輯上一則提問時會再送一次。沒有加 context 的應用程式行為不變。
+
 ## [0.3.0] - 2026-11-27
 
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.3.0.md](docs/zh-TW/changelogs/0.3.0.md)

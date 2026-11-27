@@ -17,6 +17,29 @@
             CornerRadius="12"
             Background="{DynamicResource PolhemChatPromptBackground}">
       <StackPanel Spacing="6">
+        <!-- The context sent with the prompt (PromptContext): its label only, never its text. -->
+        <ItemsControl ItemsSource="{Binding Context}"
+                      IsVisible="{Binding Context.Count, Converter={x:Static local:EntryConverters.IsPositive}}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel ItemSpacing="6" LineSpacing="6" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="chat:PromptContext">
+              <StackPanel Classes="polhemChatPromptContext" Orientation="Horizontal" Spacing="6">
+                <PathIcon Width="14"
+                          Height="14"
+                          Data="M4 5h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z" />
+                <TextBlock Text="{Binding Label, Converter={x:Static local:EntryConverters.Visible}}"
+                           VerticalAlignment="Center"
+                           FontSize="12"
+                           MaxWidth="200"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
         <!-- The files sent with the prompt: pictures as small previews, other files as an icon and their name. -->
         <ItemsControl ItemsSource="{Binding Attachments}"
                       IsVisible="{Binding Attachments.Count, Converter={x:Static local:EntryConverters.IsPositive}}">
