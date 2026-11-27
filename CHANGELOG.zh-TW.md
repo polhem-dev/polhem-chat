@@ -8,6 +8,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-27
+
 詳細內容與遷移步驟：[docs/zh-TW/changelogs/0.3.0.md](docs/zh-TW/changelogs/0.3.0.md)
 
 - **新套件：** `Polhem.Chat.Blazor`，Blazor 的聊天元件（Interactive Server 與 WebAssembly）：串流 Markdown 的對話、活動列、工具核准、含附件的輸入框、重新生成與編輯、slot、項目樣板與主題變數。`ChatGallery.Blazor` 範例示範兩種模式。
@@ -73,7 +75,8 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - 輸入框按 Enter 送出，輸入法確認組字的 Enter 不會送出。
 - 內建英文與繁體中文字串，主題支援 Fluent 與 Semi 的淺色、深色。
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2

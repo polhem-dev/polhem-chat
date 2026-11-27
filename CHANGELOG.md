@@ -9,6 +9,8 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-27
+
 Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.3.0.md)
 
 - **New package:** `Polhem.Chat.Blazor`, the chat component for Blazor (Interactive Server and WebAssembly): the conversation with streamed Markdown, the activity line, tool approval, the prompt box with attachments, regenerate and edit, slots, entry templates and theme variables. The `ChatGallery.Blazor` sample shows both modes.
@@ -74,7 +76,8 @@ Details: [docs/en/changelogs/0.1.0.md](docs/en/changelogs/0.1.0.md)
 - The prompt box sends on Enter and ignores the Enter that confirms an input method's composition.
 - English and Traditional Chinese texts, and a theme for Fluent and Semi, light and dark.
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.1...v0.1.2
