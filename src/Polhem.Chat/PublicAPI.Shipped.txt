@@ -31,6 +31,53 @@ Polhem.Chat.ChatAttachmentProblem.TooMany = 2 -> Polhem.Chat.ChatAttachmentProbl
 Polhem.Chat.ChatAttachmentProblem.TotalTooLarge = 1 -> Polhem.Chat.ChatAttachmentProblem
 Polhem.Chat.ChatAttachmentProblem.TypeNotAllowed = 3 -> Polhem.Chat.ChatAttachmentProblem
 Polhem.Chat.ChatAttachmentProblem.Unreadable = 5 -> Polhem.Chat.ChatAttachmentProblem
+Polhem.Chat.ChatAttachmentRejectedEventArgs
+Polhem.Chat.ChatAttachmentRejectedEventArgs.ChatAttachmentRejectedEventArgs(string! fileName, Polhem.Chat.ChatAttachmentProblem problem) -> void
+Polhem.Chat.ChatAttachmentRejectedEventArgs.FileName.get -> string!
+Polhem.Chat.ChatAttachmentRejectedEventArgs.Problem.get -> Polhem.Chat.ChatAttachmentProblem
+Polhem.Chat.ChatComposer
+Polhem.Chat.ChatComposer.AddAttachmentAsync(string! fileName, System.Func<System.Threading.Tasks.Task<long?>!>! readSize, System.Func<System.Threading.Tasks.Task<System.IO.Stream!>!>! open) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!
+Polhem.Chat.ChatComposer.AddAttachmentAsync(string! fileName, System.IO.Stream! content) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!
+Polhem.Chat.ChatComposer.AddAttachmentAsync(string! fileName, long? size, System.Func<System.Threading.Tasks.Task<System.IO.Stream!>!>! open) -> System.Threading.Tasks.Task<Polhem.Chat.ChatAttachmentProblem?>!
+Polhem.Chat.ChatComposer.AllowsRewind.get -> bool?
+Polhem.Chat.ChatComposer.AllowsRewind.set -> void
+Polhem.Chat.ChatComposer.Approve(Polhem.Chat.ToolCallEntry! entry) -> void
+Polhem.Chat.ChatComposer.AttachmentError.get -> string?
+Polhem.Chat.ChatComposer.AttachmentLimits.get -> Polhem.Chat.ChatAttachmentLimits!
+Polhem.Chat.ChatComposer.AttachmentLimits.set -> void
+Polhem.Chat.ChatComposer.AttachmentRejected -> System.EventHandler<Polhem.Chat.ChatAttachmentRejectedEventArgs!>?
+Polhem.Chat.ChatComposer.CanDecide(Polhem.Chat.ToolCallEntry? entry) -> bool
+Polhem.Chat.ChatComposer.CanEditLastPrompt(Polhem.Chat.UserPromptEntry? entry) -> bool
+Polhem.Chat.ChatComposer.CanRegenerate(Polhem.Chat.AssistantReplyEntry? reply = null) -> bool
+Polhem.Chat.ChatComposer.CanRewind.get -> bool
+Polhem.Chat.ChatComposer.CancelEdit() -> void
+Polhem.Chat.ChatComposer.ChatComposer() -> void
+Polhem.Chat.ChatComposer.Connect() -> void
+Polhem.Chat.ChatComposer.Conversation.get -> Polhem.Chat.ChatConversation?
+Polhem.Chat.ChatComposer.Conversation.set -> void
+Polhem.Chat.ChatComposer.DescribeActivity(bool showsActivity) -> string?
+Polhem.Chat.ChatComposer.Disconnect() -> void
+Polhem.Chat.ChatComposer.EditLastPrompt(Polhem.Chat.UserPromptEntry! entry) -> void
+Polhem.Chat.ChatComposer.IsEditingPrompt.get -> bool
+Polhem.Chat.ChatComposer.IsGenerating.get -> bool
+Polhem.Chat.ChatComposer.IsGenerating.set -> void
+Polhem.Chat.ChatComposer.PendingAttachments.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<Microsoft.Extensions.AI.DataContent!>!
+Polhem.Chat.ChatComposer.Prompt.get -> string?
+Polhem.Chat.ChatComposer.Prompt.set -> void
+Polhem.Chat.ChatComposer.PromptSubmitted -> System.EventHandler<Polhem.Chat.PromptSubmittedEventArgs!>?
+Polhem.Chat.ChatComposer.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+Polhem.Chat.ChatComposer.Regenerate() -> void
+Polhem.Chat.ChatComposer.RegenerateRequested -> System.EventHandler?
+Polhem.Chat.ChatComposer.Reject(Polhem.Chat.ToolCallEntry! entry) -> void
+Polhem.Chat.ChatComposer.RemoveAttachment(Microsoft.Extensions.AI.DataContent! attachment) -> bool
+Polhem.Chat.ChatComposer.Runner.get -> Polhem.Chat.ChatRunner?
+Polhem.Chat.ChatComposer.Runner.set -> void
+Polhem.Chat.ChatComposer.ShownConversation.get -> Polhem.Chat.ChatConversation?
+Polhem.Chat.ChatComposer.Stop() -> void
+Polhem.Chat.ChatComposer.StopRequested -> System.EventHandler?
+Polhem.Chat.ChatComposer.Strings.get -> Polhem.Chat.ChatStrings!
+Polhem.Chat.ChatComposer.Strings.set -> void
+Polhem.Chat.ChatComposer.SubmitAsync(string? text = null) -> System.Threading.Tasks.Task!
 Polhem.Chat.ChatConversation
 Polhem.Chat.ChatConversation.AddUserPrompt(string! text) -> Polhem.Chat.UserPromptEntry!
 Polhem.Chat.ChatConversation.AddUserPrompt(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> Polhem.Chat.UserPromptEntry!
@@ -53,6 +100,7 @@ Polhem.Chat.ChatEntry.ChatEntry() -> void
 Polhem.Chat.ChatEntry.OnPropertyChanged(string? propertyName = null) -> void
 Polhem.Chat.ChatEntry.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 Polhem.Chat.ChatEntry.SetProperty<T>(ref T field, T value, string? propertyName = null) -> bool
+Polhem.Chat.ChatPicturePreview
 Polhem.Chat.ChatRunner
 Polhem.Chat.ChatRunner.ChatRunner(Microsoft.Extensions.AI.IChatClient! client) -> void
 Polhem.Chat.ChatRunner.ChatRunner(Microsoft.Extensions.AI.IChatClient! client, Polhem.Chat.ChatConversation! conversation) -> void
@@ -70,6 +118,102 @@ Polhem.Chat.ChatRunner.ResponseReceived -> System.EventHandler<Polhem.Chat.Respo
 Polhem.Chat.ChatRunner.SendAsync(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
 Polhem.Chat.ChatRunner.SendAsync(string! text, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Polhem.Chat.ChatTurnResult?>!
 Polhem.Chat.ChatRunner.Stop() -> void
+Polhem.Chat.ChatStrings
+Polhem.Chat.ChatStrings.Approve.get -> string!
+Polhem.Chat.ChatStrings.Approve.set -> void
+Polhem.Chat.ChatStrings.Attach.get -> string!
+Polhem.Chat.ChatStrings.Attach.set -> void
+Polhem.Chat.ChatStrings.AttachmentContentMismatchFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentContentMismatchFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTooLargeFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTooLargeFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTooManyFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTooManyFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTotalTooLargeFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTotalTooLargeFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentTypeNotAllowedFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentTypeNotAllowedFormat.set -> void
+Polhem.Chat.ChatStrings.AttachmentUnreadableFormat.get -> string!
+Polhem.Chat.ChatStrings.AttachmentUnreadableFormat.set -> void
+Polhem.Chat.ChatStrings.AwaitingApproval.get -> string!
+Polhem.Chat.ChatStrings.AwaitingApproval.set -> void
+Polhem.Chat.ChatStrings.CachedTokensFormat.get -> string!
+Polhem.Chat.ChatStrings.CachedTokensFormat.set -> void
+Polhem.Chat.ChatStrings.CallFormat.get -> string!
+Polhem.Chat.ChatStrings.CallFormat.set -> void
+Polhem.Chat.ChatStrings.CallsFormat.get -> string!
+Polhem.Chat.ChatStrings.CallsFormat.set -> void
+Polhem.Chat.ChatStrings.CancelEdit.get -> string!
+Polhem.Chat.ChatStrings.CancelEdit.set -> void
+Polhem.Chat.ChatStrings.ChatStrings() -> void
+Polhem.Chat.ChatStrings.Copy.get -> string!
+Polhem.Chat.ChatStrings.Copy.set -> void
+Polhem.Chat.ChatStrings.CopyCode.get -> string!
+Polhem.Chat.ChatStrings.CopyCode.set -> void
+Polhem.Chat.ChatStrings.Culture.get -> System.Globalization.CultureInfo!
+Polhem.Chat.ChatStrings.Culture.set -> void
+Polhem.Chat.ChatStrings.EditPrompt.get -> string!
+Polhem.Chat.ChatStrings.EditPrompt.set -> void
+Polhem.Chat.ChatStrings.EditingPrompt.get -> string!
+Polhem.Chat.ChatStrings.EditingPrompt.set -> void
+Polhem.Chat.ChatStrings.ElapsedFormat.get -> string!
+Polhem.Chat.ChatStrings.ElapsedFormat.set -> void
+Polhem.Chat.ChatStrings.EmptyTitle.get -> string!
+Polhem.Chat.ChatStrings.EmptyTitle.set -> void
+Polhem.Chat.ChatStrings.JumpToLatest.get -> string!
+Polhem.Chat.ChatStrings.JumpToLatest.set -> void
+Polhem.Chat.ChatStrings.KilobytesFormat.get -> string!
+Polhem.Chat.ChatStrings.KilobytesFormat.set -> void
+Polhem.Chat.ChatStrings.MegabytesFormat.get -> string!
+Polhem.Chat.ChatStrings.MegabytesFormat.set -> void
+Polhem.Chat.ChatStrings.MinutesFormat.get -> string!
+Polhem.Chat.ChatStrings.MinutesFormat.set -> void
+Polhem.Chat.ChatStrings.OutputTokensFormat.get -> string!
+Polhem.Chat.ChatStrings.OutputTokensFormat.set -> void
+Polhem.Chat.ChatStrings.PromptPlaceholder.get -> string!
+Polhem.Chat.ChatStrings.PromptPlaceholder.set -> void
+Polhem.Chat.ChatStrings.Reasoning.get -> string!
+Polhem.Chat.ChatStrings.Reasoning.set -> void
+Polhem.Chat.ChatStrings.Regenerate.get -> string!
+Polhem.Chat.ChatStrings.Regenerate.set -> void
+Polhem.Chat.ChatStrings.Reject.get -> string!
+Polhem.Chat.ChatStrings.Reject.set -> void
+Polhem.Chat.ChatStrings.RemoveAttachment.get -> string!
+Polhem.Chat.ChatStrings.RemoveAttachment.set -> void
+Polhem.Chat.ChatStrings.ScrollForMore.get -> string!
+Polhem.Chat.ChatStrings.ScrollForMore.set -> void
+Polhem.Chat.ChatStrings.SecondsFormat.get -> string!
+Polhem.Chat.ChatStrings.SecondsFormat.set -> void
+Polhem.Chat.ChatStrings.Send.get -> string!
+Polhem.Chat.ChatStrings.Send.set -> void
+Polhem.Chat.ChatStrings.ShowActivity.get -> string!
+Polhem.Chat.ChatStrings.ShowActivity.set -> void
+Polhem.Chat.ChatStrings.Stop.get -> string!
+Polhem.Chat.ChatStrings.Stop.set -> void
+Polhem.Chat.ChatStrings.Stopped.get -> string!
+Polhem.Chat.ChatStrings.Stopped.set -> void
+Polhem.Chat.ChatStrings.Thinking.get -> string!
+Polhem.Chat.ChatStrings.Thinking.set -> void
+Polhem.Chat.ChatStrings.TokensFormat.get -> string!
+Polhem.Chat.ChatStrings.TokensFormat.set -> void
+Polhem.Chat.ChatStrings.ToolArguments.get -> string!
+Polhem.Chat.ChatStrings.ToolArguments.set -> void
+Polhem.Chat.ChatStrings.ToolAwaitingApproval.get -> string!
+Polhem.Chat.ChatStrings.ToolAwaitingApproval.set -> void
+Polhem.Chat.ChatStrings.ToolCanceled.get -> string!
+Polhem.Chat.ChatStrings.ToolCanceled.set -> void
+Polhem.Chat.ChatStrings.ToolCompleted.get -> string!
+Polhem.Chat.ChatStrings.ToolCompleted.set -> void
+Polhem.Chat.ChatStrings.ToolFailed.get -> string!
+Polhem.Chat.ChatStrings.ToolFailed.set -> void
+Polhem.Chat.ChatStrings.ToolRejected.get -> string!
+Polhem.Chat.ChatStrings.ToolRejected.set -> void
+Polhem.Chat.ChatStrings.ToolResult.get -> string!
+Polhem.Chat.ChatStrings.ToolResult.set -> void
+Polhem.Chat.ChatStrings.ToolRunning.get -> string!
+Polhem.Chat.ChatStrings.ToolRunning.set -> void
+Polhem.Chat.ChatStrings.TurnFailed.get -> string!
+Polhem.Chat.ChatStrings.TurnFailed.set -> void
 Polhem.Chat.ChatTurn
 Polhem.Chat.ChatTurn.AddEntry(Polhem.Chat.ChatEntry! entry) -> void
 Polhem.Chat.ChatTurn.Apply(Microsoft.Extensions.AI.ChatResponseUpdate! update) -> void
@@ -104,6 +248,13 @@ Polhem.Chat.MessageSendingEventArgs.ReplacesLastPrompt.get -> bool
 Polhem.Chat.MessageSendingEventArgs.ReplacesLastPrompt.init -> void
 Polhem.Chat.MessageSendingEventArgs.Text.get -> string!
 Polhem.Chat.MessageSendingEventArgs.Text.set -> void
+Polhem.Chat.PromptSubmittedEventArgs
+Polhem.Chat.PromptSubmittedEventArgs.Attachments.get -> System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>!
+Polhem.Chat.PromptSubmittedEventArgs.IsEdit.get -> bool
+Polhem.Chat.PromptSubmittedEventArgs.IsEdit.init -> void
+Polhem.Chat.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text) -> void
+Polhem.Chat.PromptSubmittedEventArgs.PromptSubmittedEventArgs(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
+Polhem.Chat.PromptSubmittedEventArgs.Text.get -> string!
 Polhem.Chat.ReasoningEntry
 Polhem.Chat.ReasoningEntry.AppendText(string! text) -> void
 Polhem.Chat.ReasoningEntry.IsStreaming.get -> bool
@@ -156,6 +307,7 @@ Polhem.Chat.UserPromptEntry.Attachments.get -> System.Collections.Generic.IReadO
 Polhem.Chat.UserPromptEntry.Text.get -> string!
 Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text) -> void
 Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments) -> void
+Polhem.Chat.VisibleText
 const Polhem.Chat.ChatAttachmentLimits.Csv = "text/csv" -> string!
 const Polhem.Chat.ChatAttachmentLimits.Gif = "image/gif" -> string!
 const Polhem.Chat.ChatAttachmentLimits.Jpeg = "image/jpeg" -> string!
@@ -165,4 +317,24 @@ const Polhem.Chat.ChatAttachmentLimits.Pdf = "application/pdf" -> string!
 const Polhem.Chat.ChatAttachmentLimits.PlainText = "text/plain" -> string!
 const Polhem.Chat.ChatAttachmentLimits.Png = "image/png" -> string!
 const Polhem.Chat.ChatAttachmentLimits.WebP = "image/webp" -> string!
+const Polhem.Chat.ChatPicturePreview.MaxAspectRatio = 20 -> int
+const Polhem.Chat.ChatPicturePreview.MaxFileSize = 5242880 -> int
+const Polhem.Chat.ChatPicturePreview.MaxPixels = 16777216 -> long
 static Polhem.Chat.ChatAttachmentLimits.FileNameOf(string! path) -> string!
+static Polhem.Chat.ChatPicturePreview.CanPreview(Microsoft.Extensions.AI.DataContent! attachment) -> bool
+static Polhem.Chat.ChatPicturePreview.TryReadSize(System.ReadOnlySpan<byte> data, out int width, out int height) -> bool
+static Polhem.Chat.ChatStrings.ForCulture(System.Globalization.CultureInfo! culture) -> Polhem.Chat.ChatStrings!
+static Polhem.Chat.VisibleText.Escape(string? text) -> string!
+static Polhem.Chat.VisibleText.EscapeBidiControls(string? text) -> string!
+static Polhem.Chat.VisibleText.FormatArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
+static Polhem.Chat.VisibleText.FormatValue(object? value) -> string!
+static Polhem.Chat.VisibleText.ListArguments(System.Collections.Generic.IDictionary<string!, object?>? arguments) -> string!
+virtual Polhem.Chat.ChatStrings.DescribeToolStatus(Polhem.Chat.ToolCallStatus status) -> string!
+virtual Polhem.Chat.ChatStrings.DescribeTurn(Polhem.Chat.TurnSummaryEntry! summary) -> string!
+virtual Polhem.Chat.ChatStrings.FormatAttachmentProblem(string! fileName, Polhem.Chat.ChatAttachmentProblem problem, Polhem.Chat.ChatAttachmentLimits! limits) -> string!
+virtual Polhem.Chat.ChatStrings.FormatCachedTokens(long inputTokens, long cachedInputTokens, long outputTokens) -> string!
+virtual Polhem.Chat.ChatStrings.FormatCalls(int calls) -> string!
+virtual Polhem.Chat.ChatStrings.FormatElapsed(System.TimeSpan elapsed) -> string!
+virtual Polhem.Chat.ChatStrings.FormatFileSize(long bytes) -> string!
+virtual Polhem.Chat.ChatStrings.FormatProgress(int calls, System.TimeSpan elapsed, long outputTokens) -> string!
+virtual Polhem.Chat.ChatStrings.FormatTokens(long inputTokens, long outputTokens) -> string!
