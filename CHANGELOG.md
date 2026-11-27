@@ -21,7 +21,7 @@ Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.
 - **Changed:** `PromptSubmittedEventArgs` and `ChatAttachmentRejectedEventArgs` moved to `Polhem.Chat`.
 - **Changed:** `ChatViewStrings` is now `ChatStrings` in `Polhem.Chat`, shared by the views of every UI framework, with `DescribeTurn` and `DescribeToolStatus`; `VisibleText` is public there.
 - **Changed:** The prompt box, its attached files and its attach, send and stop buttons sit in one rounded card in the conversation, with no line above it; send and stop are icons, with their text as the tooltip and accessible name.
-- **Changed:** The views take `Polhem.Markdown.Avalonia` and `Polhem.Markdown.Blazor` 0.4.0, and so `Polhem.Markdown` 0.4.0. An application that references one of them itself takes 0.4.0 too.
+- **Changed:** The views take `Polhem.Markdown.Avalonia` and `Polhem.Markdown.Blazor` 0.4.1, and so `Polhem.Markdown` 0.4.1. An application that references one of them itself takes 0.4.1 too.
 - **Fixed:** On Android, the activity icon drew as a black square while a reply was in progress; it now plays.
 - **Fixed:** The Avalonia `ChatView` ignored `BorderBrush`, `BorderThickness` and `CornerRadius`; they now draw a frame around the view and round its corners. It still has none by default.
 
