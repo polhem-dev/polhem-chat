@@ -44,7 +44,8 @@ public sealed class ChatRunner : INotifyPropertyChanged
     }
 
     /// <summary>
-    /// Occurs before a prompt is added and sent. A handler may change <see cref="MessageSendingEventArgs.Text"/>, or set
+    /// Occurs before a prompt is added and sent. A handler may change <see cref="MessageSendingEventArgs.Text"/>, add
+    /// <see cref="MessageSendingEventArgs.Context"/> for the model that the view shows by its label only, or set
     /// <see cref="CancelEventArgs.Cancel"/> to send nothing.
     /// </summary>
     public event EventHandler<MessageSendingEventArgs>? MessageSending;
@@ -125,11 +126,11 @@ public sealed class ChatRunner : INotifyPropertyChanged
             throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
         }
         ThrowIfRunning();
-        return await SendCoreAsync(text, attachments, replacesLastPrompt: false, cancellationToken);
+        return await SendCoreAsync(text, attachments, [], replacesLastPrompt: false, cancellationToken);
     }
 
     /// <summary>
-    /// Sends the user's last prompt again, with its attachments, in place of it and of everything after it: the model
+    /// Sends the user's last prompt again, with its attachments and context, in place of it and of everything after it: the model
     /// answers it anew. <see cref="MessageSending"/> is raised as for any prompt, and canceling it leaves the conversation
     /// as it was.
     /// </summary>
@@ -147,12 +148,17 @@ public sealed class ChatRunner : INotifyPropertyChanged
             return Task.FromResult<ChatTurnResult?>(null);
         }
         var prompt = Conversation.History[index];
-        return SendCoreAsync(prompt.Text, [.. prompt.Contents.OfType<DataContent>()], replacesLastPrompt: true, cancellationToken);
+        return SendCoreAsync(
+            PromptContextRecord.PromptText(prompt),
+            [.. prompt.Contents.OfType<DataContent>()],
+            PromptContextRecord.ReadAll(prompt),
+            replacesLastPrompt: true,
+            cancellationToken);
     }
 
     /// <summary>
-    /// Sends a changed version of the user's last prompt in place of it and of everything after it.
-    /// <see cref="MessageSending"/> is raised as for any prompt, and canceling it leaves the conversation as it was.
+    /// Sends a changed version of the user's last prompt in place of it and of everything after it, with the context the
+    /// last prompt was sent with. <see cref="MessageSending"/> is raised as for any prompt, and canceling it leaves the conversation as it was.
     /// </summary>
     /// <param name="text">The new prompt; it may be empty when there are attachments.</param>
     /// <param name="attachments">The files to send with it.</param>
@@ -171,9 +177,11 @@ public sealed class ChatRunner : INotifyPropertyChanged
             throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
         }
         ThrowIfRunning();
-        return Conversation.LastPromptIndex() < 0
+        var index = Conversation.LastPromptIndex();
+        return index < 0
             ? Task.FromResult<ChatTurnResult?>(null)
-            : SendCoreAsync(text, attachments, replacesLastPrompt: true, cancellationToken);
+            : SendCoreAsync(
+                text, attachments, PromptContextRecord.ReadAll(Conversation.History[index]), replacesLastPrompt: true, cancellationToken);
     }
 
     private void ThrowIfRunning()
@@ -185,12 +193,20 @@ public sealed class ChatRunner : INotifyPropertyChanged
     }
 
     private async Task<ChatTurnResult?> SendCoreAsync(
-        string text, IReadOnlyList<DataContent> attachments, bool replacesLastPrompt, CancellationToken cancellationToken)
+        string text,
+        IReadOnlyList<DataContent> attachments,
+        IReadOnlyList<PromptContext> context,
+        bool replacesLastPrompt,
+        CancellationToken cancellationToken)
     {
         var sending = new MessageSendingEventArgs(text) { ReplacesLastPrompt = replacesLastPrompt };
         foreach (var attachment in attachments)
         {
             sending.Attachments.Add(attachment);
+        }
+        foreach (var item in context)
+        {
+            sending.Context.Add(item);
         }
         MessageSending?.Invoke(this, sending);
         if (sending.Cancel)
@@ -202,7 +218,7 @@ public sealed class ChatRunner : INotifyPropertyChanged
         {
             Conversation.RewindLastPrompt();
         }
-        Conversation.AddUserPrompt(sending.Text, [.. sending.Attachments]);
+        Conversation.AddUserPrompt(sending.Text, [.. sending.Attachments], [.. sending.Context]);
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _stop = stop;
         IsRunning = true;

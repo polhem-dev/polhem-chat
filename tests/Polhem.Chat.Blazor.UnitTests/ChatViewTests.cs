@@ -251,6 +251,19 @@ public class ChatViewTests : BunitContext
         Assert.Equal("huge.png", view.Find(".pch-file-name").TextContent);
     }
 
+    [Fact(DisplayName = "A prompt's context shows as its label, never as its text")]
+    public void Context_ShowsTheLabelOnly()
+    {
+        var conversation = new ChatConversation();
+        conversation.AddUserPrompt("Shorten it", [], [new PromptContext("notes\u202Emd.exe", "The whole document")]);
+
+        var view = HostDriven(conversation);
+
+        Assert.Equal("notes\\u{202E}md.exe", view.Find(".pch-context .pch-file-name").TextContent);
+        Assert.Equal("Shorten it", view.Find(".pch-prompt-text").TextContent);
+        Assert.DoesNotContain("whole document", view.Find(".pch-prompt").TextContent, StringComparison.Ordinal);
+    }
+
     [Fact(DisplayName = "The copy button of a finished reply copies its Markdown")]
     public void Copy_CopiesMarkdown()
     {

@@ -9,6 +9,8 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- `PromptContext` sends text with a prompt that the user did not type, such as the selected text of a document: a `MessageSending` handler adds it to `MessageSendingEventArgs.Context`. The model receives it before the prompt in the same text block, and both views show only its label on the prompt, like a file. `SaveHistory` and `LoadHistory` keep it, and regenerating or editing the last prompt sends it again. Nothing changes for an application that adds none.
+
 ## [0.3.0] - 2026-11-27
 
 Details and migration steps: [docs/en/changelogs/0.3.0.md](docs/en/changelogs/0.3.0.md)

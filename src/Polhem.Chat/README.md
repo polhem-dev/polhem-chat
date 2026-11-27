@@ -27,8 +27,21 @@ foreach (var entry in runner.Conversation.Entries)
 }
 ```
 
+To send text the user did not type with a prompt, such as the selected text of a document, add a `PromptContext` in
+`MessageSending`. The model receives it before the prompt; a view shows only its label:
+
+```csharp
+runner.MessageSending += (_, e) =>
+{
+    if (!e.ReplacesLastPrompt)   // regenerating and editing send the last prompt's context again
+    {
+        e.Context.Add(new PromptContext("Selection", editor.SelectedText));
+    }
+};
+```
+
 `Conversation.SaveHistory()` and `LoadHistory(...)` take the history as `Microsoft.Extensions.AI` messages, which the
-application stores however it likes.
+application stores however it likes; each prompt's context is kept with it.
 
 ## Learn more
 

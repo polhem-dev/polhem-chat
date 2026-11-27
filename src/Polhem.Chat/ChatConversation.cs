@@ -86,10 +86,24 @@ public sealed class ChatConversation : INotifyPropertyChanged
     /// <returns>The entry that shows the prompt.</returns>
     /// <exception cref="ArgumentException">Both the text and the attachments are empty.</exception>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
-    public UserPromptEntry AddUserPrompt(string text, IReadOnlyList<DataContent> attachments)
+    public UserPromptEntry AddUserPrompt(string text, IReadOnlyList<DataContent> attachments) =>
+        AddUserPrompt(text, attachments, []);
+
+    /// <summary>
+    /// Adds a prompt from the user with files attached and context to the history and to the entries. The context is kept
+    /// in the prompt's message, before its text, and is sent to the model but not shown as the prompt's text.
+    /// </summary>
+    /// <param name="text">The text of the prompt; it may be empty when there are attachments.</param>
+    /// <param name="attachments">The files, sent after the text in the same message.</param>
+    /// <param name="context">The text sent with the prompt, which a view shows by its label.</param>
+    /// <returns>The entry that shows the prompt.</returns>
+    /// <exception cref="ArgumentException">Both the text and the attachments are empty.</exception>
+    /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
+    public UserPromptEntry AddUserPrompt(string text, IReadOnlyList<DataContent> attachments, IReadOnlyList<PromptContext> context)
     {
         ArgumentNullException.ThrowIfNull(text);
         ArgumentNullException.ThrowIfNull(attachments);
+        ArgumentNullException.ThrowIfNull(context);
         // A provider may reject a text block of nothing but white space, and the files say all there is to say.
         if (attachments.Count > 0 && string.IsNullOrWhiteSpace(text))
         {
@@ -100,7 +114,8 @@ public sealed class ChatConversation : INotifyPropertyChanged
             throw new ArgumentException("A prompt needs text or attachments.", nameof(text));
         }
         ThrowIfTurnInProgress();
-        var contents = new List<AIContent>(attachments.Count + 1);
+        var contents = new List<AIContent>(context.Count + attachments.Count + 1);
+        contents.AddRange(context.Select(PromptContextRecord.Create));
         if (text.Length > 0)
         {
             contents.Add(new TextContent(text));
@@ -108,7 +123,7 @@ public sealed class ChatConversation : INotifyPropertyChanged
         contents.AddRange(attachments);
         var message = new ChatMessage(ChatRole.User, contents);
         _history.Add(message);
-        var entry = new UserPromptEntry(text, [.. attachments]);
+        var entry = new UserPromptEntry(text, [.. attachments], [.. context]);
         _prompts[message] = entry;
         _projector.AddEntry(entry);
         return entry;
@@ -165,8 +180,9 @@ public sealed class ChatConversation : INotifyPropertyChanged
     /// <summary>
     /// Returns a copy of the history for the application to store. The time and token counts of each turn travel in a
     /// <see cref="UsageContent"/> at the end of the turn, which <see cref="LoadHistory"/> turns back into a
-    /// <see cref="TurnSummaryEntry"/>. Serialize it with <see cref="AIJsonUtilities.DefaultOptions"/> to keep every
-    /// content type.
+    /// <see cref="TurnSummaryEntry"/>. A prompt's <see cref="PromptContext"/> travels as a <see cref="TextContent"/> before
+    /// the prompt's text, with its label in the content's additional properties. Serialize it with
+    /// <see cref="AIJsonUtilities.DefaultOptions"/> to keep every content type.
     /// </summary>
     /// <returns>The messages, oldest first.</returns>
     public IReadOnlyList<ChatMessage> SaveHistory() => [.. _history];
@@ -175,13 +191,18 @@ public sealed class ChatConversation : INotifyPropertyChanged
     /// Removes the user's last prompt and everything after it, from the history and from the entries, so that it can be
     /// sent again as it was or changed. Entries of the application's own after the prompt go too.
     /// </summary>
-    /// <returns>The message of the prompt that was removed, with its text and attachments, or <see langword="null"/> when
+    /// <returns>The message of the prompt that was removed, with its text, attachments and context, or <see langword="null"/> when
     /// the conversation has no prompt.</returns>
     /// <remarks>
     /// A prompt is a message added with <see cref="AddUserPrompt(string)"/> or shown from a loaded history; a user message
     /// that only answers approval requests is not one, and neither is a <see cref="UserPromptEntry"/> the application
     /// added to the entries itself. What the tools of the removed turns did is not undone; the model only stops seeing
     /// it.
+    /// <para>
+    /// The message's text includes the text of the prompt's context. To send the prompt again as it was, take
+    /// <see cref="UserPromptEntry.Text"/>, <see cref="UserPromptEntry.Attachments"/> and
+    /// <see cref="UserPromptEntry.Context"/> from <see cref="LastPrompt"/> before rewinding.
+    /// </para>
     /// </remarks>
     /// <exception cref="InvalidOperationException">A turn is in progress.</exception>
     public ChatMessage? RewindLastPrompt()
@@ -241,7 +262,7 @@ public sealed class ChatConversation : INotifyPropertyChanged
 
     /// <summary>
     /// Returns the history to send to the model: the summaries this package keeps in it are left out, and so are
-    /// messages that had nothing else.
+    /// messages that had nothing else; a prompt's context is joined with its text.
     /// </summary>
     internal List<ChatMessage> CreateRequestMessages()
     {
@@ -250,7 +271,7 @@ public sealed class ChatConversation : INotifyPropertyChanged
         {
             if (!message.Contents.Any(content => content is UsageContent))
             {
-                messages.Add(message);
+                messages.Add(message.Role == ChatRole.User ? PromptContextRecord.ToRequest(message) : message);
                 continue;
             }
             var contents = message.Contents.Where(content => content is not UsageContent).ToList();
@@ -310,11 +331,12 @@ public sealed class ChatConversation : INotifyPropertyChanged
         }
         if (message.Role == ChatRole.User)
         {
-            var text = message.Text;
+            var text = PromptContextRecord.PromptText(message);
             var attachments = message.Contents.OfType<DataContent>().ToList();
-            if (text.Length > 0 || attachments.Count > 0)
+            var context = PromptContextRecord.ReadAll(message);
+            if (text.Length > 0 || attachments.Count > 0 || context.Count > 0)
             {
-                var entry = new UserPromptEntry(text, attachments);
+                var entry = new UserPromptEntry(text, attachments, context);
                 _prompts[message] = entry;
                 _projector.AddEntry(entry);
             }
