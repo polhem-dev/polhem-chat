@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <!-- The lowest versions the component supports, not the newest: they become the minimum for every consumer.
-         Polhem.Markdown.Blazor 0.4.0 takes the same Polhem.Markdown as Polhem.Markdown.Avalonia 0.4.0, which the Avalonia
+         Polhem.Markdown.Blazor 0.4.1 takes the same Polhem.Markdown as Polhem.Markdown.Avalonia 0.4.1, which the Avalonia
          control uses: Polhem.Markdown is pinned to an exact version, so the two front ends must agree on it. -->
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.1" />
-    <PackageReference Include="Polhem.Markdown.Blazor" Version="0.4.0" />
+    <PackageReference Include="Polhem.Markdown.Blazor" Version="0.4.1" />
   </ItemGroup>
 
   <ItemGroup>
