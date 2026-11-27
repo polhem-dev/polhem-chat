@@ -19,6 +19,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - **變更：** `PromptSubmittedEventArgs` 與 `ChatAttachmentRejectedEventArgs` 移到 `Polhem.Chat`。
 - **變更：** `ChatViewStrings` 改名為 `ChatStrings` 並移到 `Polhem.Chat`，由各 UI 框架的 view 共用，新增 `DescribeTurn` 與 `DescribeToolStatus`；`VisibleText` 在那裡改為公開。
 - **變更：** 輸入框、附加的檔案，以及附加、送出、停止鈕合成一張位於對話中的圓角卡片，上方不再有分隔線；送出與停止改為圖示，文字成為 tooltip 與無障礙名稱。
+- **變更：** 兩個 view 改用 `Polhem.Markdown.Avalonia` 與 `Polhem.Markdown.Blazor` 0.4.0，連帶使用 `Polhem.Markdown` 0.4.0。自行參考這些套件的應用程式也要改用 0.4.0。
 - **修正：** Android 上回覆進行中時，活動圖示會畫成黑色方塊；現在能正常播放。
 - **修正：** Avalonia 的 `ChatView` 原本忽略 `BorderBrush`、`BorderThickness` 與 `CornerRadius`；現在它們會在 view 周圍畫出外框並讓四角變圓。預設仍然沒有外框。
 
