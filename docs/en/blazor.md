@@ -120,6 +120,8 @@ with `@ref`. Some things stay with the view:
 - A reply template that renders Markdown should pass the view's `ReplyMarkdownOptions`, which load no images by
   default: an image in a reply loads from wherever the model points it, and a prompt injection can make it point
   somewhere that receives the conversation.
+- It should also pass the entry's `IsStreaming` to the viewer's `IsStreaming`, as the view's own template does: while
+  the reply streams, the syntax its last block leaves open shows as it will once the reply is complete.
 - The view draws an entry again when the entry changes, not with every render of the page. A template that reads other
   state calls the view's `RedrawEntries` when it changes. A template that captures a loop or local variable is new with
   every render and draws all entries again; keep it in a field.

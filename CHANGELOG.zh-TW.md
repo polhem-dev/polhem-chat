@@ -14,6 +14,7 @@ Polhem.Chat 各套件的重要變更，每個版本只列幾項重點。每個�
 - `Polhem.Chat` 新增 `ChatComposer`，承接使用者對 chat view 除了畫面以外的操作（輸入框、檔案、送出、停止、重新生成、編輯、核准），供各 UI 框架的 view 共用；`ChatView` 改用它，原有測試不需修改即全部通過。
 - `Polhem.Chat` 新增 `ChatPicturePreview`，不解碼、只讀圖片標頭來判斷附加的圖片是否小到可以預覽；各 view 顯示圖片前都會先用它檢查。
 - 新增 `ChatStrings.ShowActivity`，作為顯示推理與工具呼叫的切換鈕名稱；Avalonia view 的切換鈕現在以它作為提示與無障礙名稱。
+- 回覆串流時，兩個 view 會把最後一個區塊尚未結束的語法，先照完成後的樣子顯示：強調與行內程式碼先收尾、連結在網址寫完前只顯示文字、表格的標題列先顯示成表格。
 - **安全性：** 回覆與思考過程中的雙向嵌入、覆寫與隔離字元（不論直接寫出或以 `&#x202E;` 這類參照寫成）在兩個 view 都以跳脫序列（`\u{202E}`）顯示，畫面上讀到的就是回覆實際的內容；由右至左的文字照常顯示。應用程式自己的回覆樣板可用 `VisibleText.EscapeBidiControls` 做同樣的處理。
 - **安全性：** frame 超出宣告尺寸的 GIF，以及超過 5 MB 的圖片，不再顯示預覽。
 - **變更：** `PromptSubmittedEventArgs` 與 `ChatAttachmentRejectedEventArgs` 移到 `Polhem.Chat`。
