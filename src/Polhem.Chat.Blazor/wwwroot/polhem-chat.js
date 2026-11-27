@@ -153,7 +153,9 @@ export function unwatch(root) {
 }
 
 // The keys and the files of the prompt box: Enter sends what the box holds, Shift+Enter starts a new line, and Esc
-// stops the reply or ends the edit while the view marks either (data-generating, data-editing). Files dropped on the view, or a picture pasted in the box,
+// stops the reply or ends the edit while the view marks either (data-generating, data-editing). While the view marks the
+// list of commands open (data-commands), the arrows move its selection and Esc closes it; Enter still hands over the
+// text, and the view chooses the command when the text opens the list. Files dropped on the view, or a picture pasted in the box,
 // go to the view's own file input, the one the attach button opens, so they are checked like the files the user picks.
 //
 // WARNING: An input method (Chinese, Japanese, Korean) confirms its composition with Enter and cancels it with Esc. Those
@@ -168,14 +170,25 @@ export function watchPrompt(root, box, bridge) {
         if (event.isComposing || event.keyCode === 229) {
             return;
         }
+        const plain = !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey;
+        if ('commands' in root.dataset && event.target === box && plain
+            && (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'Escape')) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.key === 'Escape') {
+                tell('CloseCommands');
+            } else {
+                tell('MoveCommand', event.key === 'ArrowUp' ? -1 : 1);
+            }
+            return;
+        }
         if (event.key === 'Escape') {
             if ('generating' in root.dataset || 'editing' in root.dataset) {
                 event.preventDefault();
                 event.stopPropagation();
                 tell('Escape');
             }
-        } else if (event.key === 'Enter' && event.target === box && !event.shiftKey && !event.ctrlKey && !event.altKey
-            && !event.metaKey) {
+        } else if (event.key === 'Enter' && event.target === box && plain) {
             event.preventDefault();
             tell('Submit', box.value);
         }
@@ -221,17 +234,27 @@ export function watchPrompt(root, box, bridge) {
             event.preventDefault();
         }
     };
+    // The selected command stays in sight in a list taller than its box, however the selection moved.
+    const reveal = new MutationObserver((records) => {
+        for (const record of records) {
+            if (record.target.getAttribute?.('aria-selected') === 'true') {
+                record.target.scrollIntoView?.({ block: 'nearest' });
+            }
+        }
+    });
+    reveal.observe(root, { subtree: true, attributes: true, attributeFilter: ['aria-selected'] });
     root.addEventListener('keydown', onKeyDown);
     root.addEventListener('dragover', onDragOver);
     root.addEventListener('dragleave', onDragLeave);
     root.addEventListener('drop', onDrop);
     box.addEventListener('paste', onPaste);
-    prompts.set(root, { box, onKeyDown, onDragOver, onDragLeave, onDrop, onPaste });
+    prompts.set(root, { box, reveal, onKeyDown, onDragOver, onDragLeave, onDrop, onPaste });
 }
 
 export function unwatchPrompt(root) {
     const prompt = root && prompts.get(root);
     if (prompt) {
+        prompt.reveal.disconnect();
         root.removeEventListener('keydown', prompt.onKeyDown);
         root.removeEventListener('dragover', prompt.onDragOver);
         root.removeEventListener('dragleave', prompt.onDragLeave);

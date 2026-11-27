@@ -542,3 +542,71 @@ test('a box is watched once, and unwatching removes every handler', () => {
     assert.ok([...root.listeners.values()].every((handlers) => handlers.length === 0));
     assert.ok([...box.listeners.values()].every((handlers) => handlers.length === 0));
 });
+
+test('while the list of commands is open, the arrows move its selection and Esc closes it, before it would stop a reply', () => {
+    const { root, box } = view();
+    const bridge = new FakeBridge();
+    script.watchPrompt(root, box, bridge);
+    root.dataset.commands = '';
+    root.dataset.generating = '';
+
+    for (const key of ['ArrowDown', 'ArrowUp', 'Escape']) {
+        const handled = press(root, box, { key });
+        assert.equal(handled.defaultPrevented, true);
+        assert.equal(handled.propagationStopped, true);
+    }
+
+    assert.deepEqual(bridge.calls, [['MoveCommand', 1], ['MoveCommand', -1], ['CloseCommands']]);
+    script.unwatchPrompt(root);
+});
+
+test('the arrows are left to the box while the list is closed, with a modifier, or while an input method composes', () => {
+    const { root, box } = view();
+    const bridge = new FakeBridge();
+    script.watchPrompt(root, box, bridge);
+
+    assert.equal(press(root, box, { key: 'ArrowDown' }).defaultPrevented, false);
+    root.dataset.commands = '';
+    assert.equal(press(root, box, { key: 'ArrowDown', shiftKey: true }).defaultPrevented, false);
+    assert.equal(press(root, box, { key: 'ArrowDown', isComposing: true }).defaultPrevented, false);
+    assert.equal(press(root, box, { key: 'Escape', keyCode: 229 }).defaultPrevented, false);
+    assert.equal(press(root, root, { key: 'ArrowDown' }).defaultPrevented, false);
+
+    assert.deepEqual(bridge.calls, []);
+    script.unwatchPrompt(root);
+});
+
+test('Enter with the list open still hands over the text, and the view chooses the command', () => {
+    const { root, box } = view();
+    const bridge = new FakeBridge();
+    script.watchPrompt(root, box, bridge);
+    root.dataset.commands = '';
+    box.value = '/sh';
+
+    assert.equal(press(root, box, { key: 'Enter' }).defaultPrevented, true);
+
+    assert.deepEqual(bridge.calls, [['Submit', '/sh']]);
+    script.unwatchPrompt(root);
+});
+
+test('the command that becomes selected is scrolled into sight', () => {
+    const { root, box } = view();
+    script.watchPrompt(root, box, new FakeBridge());
+    const option = new FakeElement({ className: 'pch-command' });
+    let revealed = null;
+    option.getAttribute = (name) => (name === 'aria-selected' ? option.selected : null);
+    option.scrollIntoView = (options) => {
+        revealed = options;
+    };
+    const reveal = mutationObservers().at(-1);
+
+    option.selected = 'false';
+    reveal.callback([{ target: option }], reveal);
+    assert.equal(revealed, null);
+    option.selected = 'true';
+    reveal.callback([{ target: option }], reveal);
+
+    assert.deepEqual(revealed, { block: 'nearest' });
+    script.unwatchPrompt(root);
+    assert.equal(reveal.disconnected, true);
+});

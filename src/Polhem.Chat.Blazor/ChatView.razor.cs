@@ -228,7 +228,7 @@ public sealed partial class ChatView : IAsyncDisposable
             {
                 return;
             }
-            _promptBridge = DotNetObjectReference.Create(new PromptBridge(SubmitFromBox, OnEscape));
+            _promptBridge = DotNetObjectReference.Create(new PromptBridge(SubmitFromBox, OnEscape, OnMoveCommand, OnCloseCommands));
             await _module.InvokeVoidAsync("watchPrompt", _root, _promptBox, _promptBridge);
         }
         if (_focusConversation && _module is not null && !_disposed)
@@ -373,7 +373,8 @@ public sealed partial class ChatView : IAsyncDisposable
                 NotifyPrompt();
                 _throttle.Request();
                 break;
-            case nameof(ChatComposer.CanRewind) or nameof(ChatComposer.IsEditingPrompt) or nameof(ChatComposer.AttachmentError):
+            case nameof(ChatComposer.CanRewind) or nameof(ChatComposer.IsEditingPrompt) or nameof(ChatComposer.AttachmentError)
+                or nameof(ChatComposer.CommandMatches) or nameof(ChatComposer.SelectedCommand):
                 _throttle.Request();
                 break;
         }

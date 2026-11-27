@@ -34,6 +34,22 @@ Enter 送出，Shift+Enter 換行，Esc 或停止鈕停止回覆。
 `ChatConversation.BeginTurn` 串流寫入對話時設定 `IsGenerating`。在每次呼叫模型前呼叫 `ChatTurn.BeginCall`，進度列與該輪摘要
 就能顯示這一輪呼叫了模型幾次。
 
+## 輸入框中的指令
+
+`Commands` 放使用者在輸入框開頭打 `/` 叫出的提示詞：輸入框上方會開啟一份清單，列出名稱符合斜線後文字的指令。方向鍵移動
+選取，Enter 或點選選定指令，Esc 關閉清單；輸入法組字時，這些按鍵仍交給輸入法。選定的指令會把它的文字填進輸入框，讓使用者
+接著寫；設定 `SendsImmediately` 的指令則會連同輸入框中的附件立刻送出。
+
+```csharp
+Chat.Commands = new ObservableCollection<PromptCommand>
+{
+    new("shorter", "Make this shorter:") { Description = "Cut the text down" },
+    new("translate", "Translate the selection to English.") { SendsImmediately = true },
+};
+```
+
+應用程式修改 observable collection 時，view 會跟著更新。沒有指令時，斜線就是一般文字。
+
 ## 活動列
 
 回覆進行中時，對話下方會有一行顯示動畫圖示、模型正在做什麼、已經過的時間、目前是第幾次呼叫，以及到目前為止的輸出 token。

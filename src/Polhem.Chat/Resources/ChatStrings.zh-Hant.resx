@@ -105,6 +105,12 @@
   <data name="ShowActivity" xml:space="preserve">
     <value>顯示推理與工具呼叫</value>
   </data>
+  <data name="Commands" xml:space="preserve">
+    <value>指令</value>
+  </data>
+  <data name="CommandFormat" xml:space="preserve">
+    <value>{0} {1}（第 {2} 項，共 {3} 項）</value>
+  </data>
   <data name="ScrollForMore" xml:space="preserve">
     <value>內容還有，請捲動看完。</value>
   </data>

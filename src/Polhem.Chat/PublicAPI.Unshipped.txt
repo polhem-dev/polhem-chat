@@ -1,9 +1,31 @@
 #nullable enable
+Polhem.Chat.ChatComposer.ChooseCommandAsync(Polhem.Chat.PromptCommand? command = null) -> System.Threading.Tasks.Task!
+Polhem.Chat.ChatComposer.CloseCommandList() -> void
+Polhem.Chat.ChatComposer.CommandMatches.get -> System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptCommand!>!
+Polhem.Chat.ChatComposer.Commands.get -> System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?
+Polhem.Chat.ChatComposer.Commands.set -> void
+Polhem.Chat.ChatComposer.DescribeSelectedCommand() -> string?
+Polhem.Chat.ChatComposer.IsCommandListOpen.get -> bool
+Polhem.Chat.ChatComposer.MoveCommandSelection(int offset) -> void
+Polhem.Chat.ChatComposer.SelectedCommand.get -> Polhem.Chat.PromptCommand?
 Polhem.Chat.ChatConversation.AddUserPrompt(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptContext!>! context) -> Polhem.Chat.UserPromptEntry!
+Polhem.Chat.ChatStrings.CommandFormat.get -> string!
+Polhem.Chat.ChatStrings.CommandFormat.set -> void
+Polhem.Chat.ChatStrings.Commands.get -> string!
+Polhem.Chat.ChatStrings.Commands.set -> void
 Polhem.Chat.MessageSendingEventArgs.Context.get -> System.Collections.Generic.IList<Polhem.Chat.PromptContext!>!
+Polhem.Chat.PromptCommand
+Polhem.Chat.PromptCommand.Description.get -> string?
+Polhem.Chat.PromptCommand.Description.init -> void
+Polhem.Chat.PromptCommand.Name.get -> string!
+Polhem.Chat.PromptCommand.PromptCommand(string! name, string! text) -> void
+Polhem.Chat.PromptCommand.SendsImmediately.get -> bool
+Polhem.Chat.PromptCommand.SendsImmediately.init -> void
+Polhem.Chat.PromptCommand.Text.get -> string!
 Polhem.Chat.PromptContext
 Polhem.Chat.PromptContext.Label.get -> string!
 Polhem.Chat.PromptContext.PromptContext(string! label, string! text) -> void
 Polhem.Chat.PromptContext.Text.get -> string!
 Polhem.Chat.UserPromptEntry.Context.get -> System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptContext!>!
 Polhem.Chat.UserPromptEntry.UserPromptEntry(string! text, System.Collections.Generic.IReadOnlyList<Microsoft.Extensions.AI.DataContent!>! attachments, System.Collections.Generic.IReadOnlyList<Polhem.Chat.PromptContext!>! context) -> void
+virtual Polhem.Chat.ChatStrings.FormatCommand(Polhem.Chat.PromptCommand! command, int position, int count) -> string!

@@ -4,7 +4,7 @@
 
 @* The script handles Esc only while there is something for it to stop or end, and leaves it to the page otherwise. *@
 <div @ref="_root" class="@RootClass" @attributes="AdditionalAttributes" data-generating="@(_composer.IsGenerating ? "" : null)"
-     data-editing="@(_composer.IsEditingPrompt ? "" : null)">
+     data-editing="@(_composer.IsEditingPrompt ? "" : null)" data-commands="@(_composer.IsCommandListOpen ? "" : null)">
     @if (HeaderContent is not null)
     {
         <div class="pch-header">@HeaderContent</div>
@@ -93,6 +93,29 @@
         }
         @* One rounded card in the conversation holds the attached files, the prompt box and its buttons. *@
         <div class="pch-composer-card">
+            @* The host's commands while the box starts with a slash. The focus stays in the box, where the arrows, Enter and
+               Esc work the list (polhem-chat.js); a click chooses without taking the focus from it. *@
+            @if (_composer.IsCommandListOpen)
+            {
+                <ul id="@_commandListId" class="pch-commands" role="listbox" aria-label="@S.Commands">
+                    @for (var index = 0; index < _composer.CommandMatches.Count; index++)
+                    {
+                        var command = _composer.CommandMatches[index];
+                        <li id="@CommandOptionId(index)" class="pch-command" role="option"
+                            aria-selected="@(ReferenceEquals(command, _composer.SelectedCommand) ? "true" : "false")"
+                            @onmousedown:preventDefault @onclick="() => ChooseCommandAsync(command)">
+                            <span class="pch-command-name">/@VisibleText.Escape(command.Name)</span>
+                            @if (!string.IsNullOrEmpty(command.Description))
+                            {
+                                <span class="pch-command-description">@VisibleText.Escape(command.Description)</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            @* What a screen reader says as the selection moves, since the focus stays in the box. It is always there, so the
+               first change is announced too. *@
+            <div class="pch-visually-hidden" aria-live="polite">@_composer.DescribeSelectedCommand()</div>
             @if (_composer.PendingAttachments.Count > 0)
             {
                 <div class="pch-pending">
@@ -135,7 +158,9 @@
                    neither (polhem-chat.js). *@
                 <textarea @ref="_promptBox" class="pch-prompt-box" rows="1" placeholder="@S.PromptPlaceholder"
                           aria-label="@S.PromptPlaceholder" @bind:get="_composer.Prompt" @bind:set="SetPrompt"
-                          @bind:event="oninput"></textarea>
+                          @bind:event="oninput" aria-autocomplete="@(Commands is null ? null : "list")"
+                          aria-controls="@(_composer.IsCommandListOpen ? _commandListId : null)"
+                          aria-activedescendant="@ActiveCommandId()"></textarea>
                 @* An icon, not a word: the text is the tooltip and the accessible name. *@
                 @if (_composer.IsGenerating)
                 {

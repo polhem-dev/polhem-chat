@@ -71,6 +71,8 @@ public class ChatStrings
         ToolRejected = Load(nameof(ToolRejected), culture);
         ScrollForMore = Load(nameof(ScrollForMore), culture);
         ShowActivity = Load(nameof(ShowActivity), culture);
+        Commands = Load(nameof(Commands), culture);
+        CommandFormat = Load(nameof(CommandFormat), culture);
     }
 
     /// <summary>Gets or sets the culture that formats numbers and times, and that the texts were loaded for.</summary>
@@ -137,6 +139,16 @@ public class ChatStrings
     /// Gets or sets the accessible name and tooltip of the toggle that shows or hides the model's reasoning and tool calls.
     /// </summary>
     public string ShowActivity { get; set; }
+
+    /// <summary>Gets or sets the accessible name of the list of commands the user opens with a slash in the prompt box.</summary>
+    public string Commands { get; set; }
+
+    /// <summary>
+    /// Gets or sets the composite format of what a screen reader says for the command selected in the list. Argument 0 is
+    /// the name with its slash, argument 1 the description or an empty string, argument 2 its position from 1 and argument
+    /// 3 the number of commands listed.
+    /// </summary>
+    public string CommandFormat { get; set; }
 
     /// <summary>
     /// Gets or sets the note under the arguments of a tool call that waits for approval when they are longer than their
@@ -356,6 +368,17 @@ public class ChatStrings
         ToolCallStatus.Rejected => ToolRejected,
         _ => ToolCanceled,
     };
+
+    /// <summary>Formats what a screen reader says for the command selected in the list, with <see cref="CommandFormat"/>.</summary>
+    /// <param name="command">The selected command.</param>
+    /// <param name="position">Its position in the list, from 1.</param>
+    /// <param name="count">The number of commands listed.</param>
+    /// <returns>The formatted text.</returns>
+    public virtual string FormatCommand(PromptCommand command, int position, int count)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        return string.Format(Culture, CommandFormat, "/" + command.Name, command.Description ?? string.Empty, position, count);
+    }
 
     /// <summary>Formats the requests a turn sent with <see cref="CallsFormat"/>.</summary>
     /// <param name="calls">The count.</param>

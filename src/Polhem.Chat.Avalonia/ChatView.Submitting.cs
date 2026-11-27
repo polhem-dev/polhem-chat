@@ -67,7 +67,11 @@ public partial class ChatView
 
     private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape && IsGenerating)
+        if (HandleCommandKey(e))
+        {
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Escape && IsGenerating)
         {
             e.Handled = true;
             Stop();
@@ -79,9 +83,15 @@ public partial class ChatView
         }
     }
 
+    // Enter chooses the selected command while the list is open, and submits the prompt otherwise.
     private void OnSubmitRequested(object? sender, RoutedEventArgs e)
     {
         e.Handled = true;
+        if (_composer.IsCommandListOpen)
+        {
+            ChooseCommand(null);
+            return;
+        }
         _ = SubmitAsync(null);
     }
 }
