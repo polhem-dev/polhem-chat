@@ -50,6 +50,26 @@ public class ReplyMarkdownTests(HeadlessSession session)
         Assert.Equal(0, listener.Count);
     });
 
+    [Fact(DisplayName = "While a reply streams, emphasis it leaves open shows closed, and once complete the text shows as written")]
+    public Task Streaming_OpenEmphasis_ShowsClosedUntilComplete() => session.RunAsync(() =>
+    {
+        var conversation = new ChatConversation();
+        var reply = new AssistantReplyEntry("Hello **wor", isStreaming: true);
+        conversation.Entries.Add(reply);
+        var view = new ChatView { Conversation = conversation };
+        var window = Show(view);
+        var viewer = Assert.Single(Descendants<MarkdownViewer>(EntryView(view, 0)));
+
+        Assert.True(viewer.IsStreaming);
+        Assert.DoesNotContain("**", ShownText(viewer), StringComparison.Ordinal);
+
+        reply.IsStreaming = false;
+        Settle(window);
+
+        Assert.False(viewer.IsStreaming);
+        Assert.Contains("**wor", ShownText(viewer), StringComparison.Ordinal);
+    });
+
     [Fact(DisplayName = "A streamed reply loads no image")]
     public Task Images_StreamedReply_MakeNoConnection() => session.RunAsync(async () =>
     {

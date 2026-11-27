@@ -212,7 +212,7 @@
             }
             @if (reply.Text.Length > 0)
             {
-                <MarkdownViewer Markdown="@VisibleText.EscapeBidiControls(reply.Text)" Options="ReplyOptions" CopyCodeLabel="@S.CopyCode" />
+                <MarkdownViewer Markdown="@VisibleText.EscapeBidiControls(reply.Text)" Options="ReplyOptions" CopyCodeLabel="@S.CopyCode" IsStreaming="reply.IsStreaming" />
             }
             <div class="pch-reply-actions">
                 @if (reply.IsStopped)

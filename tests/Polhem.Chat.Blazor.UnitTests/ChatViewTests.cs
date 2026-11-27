@@ -67,6 +67,29 @@ public class ChatViewTests : BunitContext
         });
     }
 
+    [Fact(DisplayName = "While a reply streams, emphasis it leaves open shows closed, and once complete the text shows as written")]
+    public void Streaming_OpenEmphasis_ShowsClosedUntilComplete()
+    {
+        var conversation = new ChatConversation();
+        var reply = new AssistantReplyEntry("Hello **wor", isStreaming: true);
+        conversation.Entries.Add(reply);
+        var view = HostDriven(conversation);
+
+        view.WaitForAssertion(() =>
+        {
+            Assert.Equal("wor", view.Find(".pch-reply .pmd strong").TextContent);
+            Assert.DoesNotContain("**", view.Find(".pch-reply .pmd").TextContent, StringComparison.Ordinal);
+        });
+
+        view.InvokeAsync(() => reply.IsStreaming = false);
+
+        view.WaitForAssertion(() =>
+        {
+            Assert.Empty(view.FindAll(".pch-reply .pmd strong"));
+            Assert.Contains("**wor", view.Find(".pch-reply .pmd").TextContent, StringComparison.Ordinal);
+        });
+    }
+
     [Fact(DisplayName = "Reasoning and tool calls are hidden by default and shown with ShowsActivity")]
     public void Activity_HiddenUnlessShown()
     {

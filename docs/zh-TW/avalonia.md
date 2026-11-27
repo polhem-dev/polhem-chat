@@ -64,7 +64,8 @@ Chat.MarkdownOptions = options;               // 回覆會載入 https 圖片
 ## 樣板、文字與顏色
 
 - 每種對話項目都有預設樣板。在 view 的 `DataTemplates`（或任何上層元素的）加入 `DataTemplate`，就能顯示應用程式自己的
-  項目類型，或取代預設樣板。
+  項目類型，或取代預設樣板。為 `AssistantReplyEntry` 自訂的樣板，要和預設樣板一樣把 viewer 的 `IsStreaming` 繫結到項目的
+  `IsStreaming`：回覆串流時，最後一個區塊尚未結束的語法會先照完成後的樣子顯示。
 - 介面文字內建英文與繁體中文。把 `ChatStrings.ForCulture(culture)`（可自行修改）指定給 `Strings`。
 - 顏色是主題資源中的筆刷（見 `ChatTheme`）；在你的資源中宣告相同的 key 即可更改。
 - view 預設不畫外框。在它上面設定 `BorderBrush`、`BorderThickness` 與 `CornerRadius` 就會畫出外框，內容會裁切在圓角之內。

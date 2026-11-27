@@ -68,7 +68,9 @@ language your users read, for example `PingFang TC, Microsoft JhengHei UI, Noto 
 ## Templates, texts and colors
 
 - Each entry type has a default template. Add a `DataTemplate` to the view's `DataTemplates`, or to any ancestor's, to
-  show an entry type of your own or to replace a default.
+  show an entry type of your own or to replace a default. A template of your own for `AssistantReplyEntry` binds its
+  viewer's `IsStreaming` to the entry's, as the default does: while the reply streams, the syntax its last block leaves
+  open shows as it will once the reply is complete.
 - The texts ship in English and Traditional Chinese. Assign `ChatStrings.ForCulture(culture)`, changed as you like,
   to `Strings`.
 - The colors are brushes in the theme's resources (see `ChatTheme`); declare the same key in your resources to change

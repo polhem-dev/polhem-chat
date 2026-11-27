@@ -83,8 +83,10 @@
       </TextBlock>
       <!-- A reply is the model's text, so its images load only when the application chose options that allow them
            (ChatView.MarkdownOptions). ReplyMarkdownViewer applies them itself: a binding would come too late.
-           Its bidirectional controls show as escapes, so it reads as what it holds. -->
+           Its bidirectional controls show as escapes, so it reads as what it holds. While it streams, the syntax its
+           last block leaves open shows as it will once complete. -->
       <local:ReplyMarkdownViewer Markdown="{Binding Text, Converter={x:Static local:EntryConverters.BidiControls}}"
+                                 IsStreaming="{Binding IsStreaming}"
                                  CjkFontFamily="{Binding $parent[local:ChatView].CjkFontFamily}"
                                  CopyCodeLabel="{Binding $parent[local:ChatView].Strings.CopyCode}"
                                  IsVisible="{Binding Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
