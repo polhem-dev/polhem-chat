@@ -32,7 +32,10 @@ namespace Polhem.Chat.Avalonia;
 /// </remarks>
 [TemplatePart(ScrollViewerPart, typeof(ScrollViewer))]
 [TemplatePart(EntriesPart, typeof(ItemsControl))]
-[PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass, WaitingPseudoClass, EditingPseudoClass)]
+[TemplatePart(CommandListPart, typeof(ListBox))]
+[TemplatePart(PromptBoxPart, typeof(ChatPromptBox))]
+[PseudoClasses(EmptyPseudoClass, GeneratingPseudoClass, ScrolledUpPseudoClass, WaitingPseudoClass, EditingPseudoClass,
+    CommandsPseudoClass)]
 public partial class ChatView : TemplatedControl
 {
     /// <summary>Defines the <see cref="Runner"/> property.</summary>
@@ -259,6 +262,7 @@ public partial class ChatView : TemplatedControl
         }
         _progressText = e.NameScope.Find<TextBlock>(ProgressPart);
         TakeAttachmentError(e.NameScope);
+        TakeCommandList(e.NameScope);
         if (_entries is not null)
         {
             _entries.ItemTemplate = new ChatEntryTemplate(this);
@@ -321,6 +325,10 @@ public partial class ChatView : TemplatedControl
         else if (change.Property == AllowsRewindProperty)
         {
             _composer.AllowsRewind = change.GetNewValue<bool?>();
+        }
+        else if (change.Property == CommandsProperty)
+        {
+            _composer.Commands = change.GetNewValue<IEnumerable<PromptCommand>?>();
         }
         else if (change.Property == AttachmentLimitsProperty)
         {
@@ -428,6 +436,9 @@ public partial class ChatView : TemplatedControl
                 break;
             case nameof(ChatComposer.AttachmentError):
                 ShowAttachmentError(_composer.AttachmentError);
+                break;
+            case nameof(ChatComposer.CommandMatches) or nameof(ChatComposer.SelectedCommand):
+                UpdateCommandList();
                 break;
         }
     }

@@ -14,6 +14,8 @@ namespace Polhem.Chat.Blazor;
 /// </summary>
 public sealed partial class ChatView
 {
+    // A fresh id for each view, so two views on a page do not point their prompt boxes at each other's list.
+    private readonly string _commandListId = "pch-commands-" + Guid.NewGuid().ToString("N");
     private ElementReference _promptBox;
     private string? _promptParameter;
     private bool _applyingPrompt;
@@ -38,6 +40,14 @@ public sealed partial class ChatView
     /// </summary>
     [Parameter]
     public IEnumerable<string>? Suggestions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the commands offered in the prompt box. Typing <c>/</c> at the start of the box opens a list of those
+    /// whose name matches what follows; the arrow keys move in it, Enter or a click chooses a command and Esc closes it.
+    /// The view follows an observable collection as the host changes it. Without commands, a slash is plain text.
+    /// </summary>
+    [Parameter]
+    public IEnumerable<PromptCommand>? Commands { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the user can send the last prompt again or change it. By default,
@@ -94,6 +104,9 @@ public sealed partial class ChatView
     [Parameter]
     public EventCallback<ChatAttachmentRejectedEventArgs> AttachmentRejected { get; set; }
 
+    /// <summary>Gets a value indicating whether the list of commands is open under the user's typing.</summary>
+    public bool IsCommandListOpen => _composer.IsCommandListOpen;
+
     /// <summary>Gets a value indicating whether the prompt box holds the last prompt for the user to change.</summary>
     public bool IsEditingPrompt => _composer.IsEditingPrompt;
 
@@ -142,6 +155,7 @@ public sealed partial class ChatView
     private void ApplyComposingParameters()
     {
         _composer.AllowsRewind = AllowsRewind;
+        _composer.Commands = Commands;
         if (!ReferenceEquals(AttachmentLimits, _limitsParameter))
         {
             _limitsParameter = AttachmentLimits;
@@ -203,7 +217,8 @@ public sealed partial class ChatView
     }
 
     // NOTE: The script hands over the text the box holds as the user presses Enter, which may be ahead of the last input
-    // event the view received.
+    // event the view received. That text decides whether the list of commands is open, so an Enter pressed before the
+    // list was drawn still chooses the command rather than sending the slash.
     private void SubmitFromBox(string text) => Observe(InvokeAsync(async () =>
     {
         if (_disposed)
@@ -211,8 +226,49 @@ public sealed partial class ChatView
             return;
         }
         _composer.Prompt = text;
+        if (_composer.IsCommandListOpen)
+        {
+            await _composer.ChooseCommandAsync();
+            return;
+        }
         await _composer.SubmitAsync();
     }));
+
+    private void OnMoveCommand(int offset) => Observe(InvokeAsync(() =>
+    {
+        if (!_disposed)
+        {
+            _composer.MoveCommandSelection(Math.Sign(offset));
+        }
+    }));
+
+    private void OnCloseCommands() => Observe(InvokeAsync(() =>
+    {
+        if (!_disposed)
+        {
+            _composer.CloseCommandList();
+        }
+    }));
+
+    private Task ChooseCommandAsync(PromptCommand command) => _composer.ChooseCommandAsync(command);
+
+    private string CommandOptionId(int index) => $"{_commandListId}-{index}";
+
+    private string? ActiveCommandId()
+    {
+        if (_composer.SelectedCommand is not { } selected)
+        {
+            return null;
+        }
+        for (var index = 0; index < _composer.CommandMatches.Count; index++)
+        {
+            if (ReferenceEquals(_composer.CommandMatches[index], selected))
+            {
+                return CommandOptionId(index);
+            }
+        }
+        return null;
+    }
 
     // Esc stops the reply in progress, or else ends the edit, as in the Avalonia view.
     private void OnEscape() => Observe(InvokeAsync(() =>

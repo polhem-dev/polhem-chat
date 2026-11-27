@@ -9,6 +9,7 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- Both views take `Commands`, prompts the host offers in the prompt box: typing `/` at the start of the box lists the `PromptCommand` items whose name matches, the arrow keys and Enter choose one with the keyboard alone, and a screen reader announces the selected one. A command fills the box for the user to finish, or sends at once with `SendsImmediately`. The host can change the list at any time; nothing changes for a host that provides none.
 - `PromptContext` sends text with a prompt that the user did not type, such as the selected text of a document: a `MessageSending` handler adds it to `MessageSendingEventArgs.Context`. The model receives it before the prompt in the same text block, and both views show only its label on the prompt, like a file. `SaveHistory` and `LoadHistory` keep it, and regenerating or editing the last prompt sends it again. Nothing changes for an application that adds none.
 
 ## [0.3.0] - 2026-11-27

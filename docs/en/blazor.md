@@ -53,6 +53,27 @@ The view works either way; the repository's `ChatGallery.Blazor` sample shows bo
 An application with its own tool loop sets `Conversation` instead of `Runner`, handles `PromptSubmitted` and
 `StopRequested`, and sets `IsGenerating` while it streams into the conversation with `ChatConversation.BeginTurn`.
 
+## Commands in the prompt box
+
+`Commands` takes prompts the user reaches by typing `/` at the start of the prompt box: a list of those whose name
+matches what follows opens above the box. The arrow keys move in it, Enter or a click chooses a command and Esc closes
+it; while an input method composes, those keys stay with it. A command puts its text in the box for the user to finish,
+or, with `SendsImmediately`, sends it at once with the files attached to the box.
+
+```razor
+<ChatView Runner="_runner" Commands="_commands" />
+
+@code {
+    private readonly List<PromptCommand> _commands =
+    [
+        new("shorter", "Make this shorter:") { Description = "Cut the text down" },
+        new("translate", "Translate the selection to English.") { SendsImmediately = true },
+    ];
+}
+```
+
+The view follows an observable collection as the application changes it. Without commands, a slash is plain text.
+
 ## Images in replies
 
 A reply is the model's text, so it is not trusted. A prompt injection can have the model write an image whose address

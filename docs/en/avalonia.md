@@ -35,6 +35,23 @@ An application with its own tool loop sets `Conversation` instead of `Runner`, h
 Calling `ChatTurn.BeginCall` before each request to the model lets the progress line and the turn summary show how
 many requests the turn took.
 
+## Commands in the prompt box
+
+`Commands` takes prompts the user reaches by typing `/` at the start of the prompt box: a list of those whose name
+matches what follows opens above the box. The arrow keys move in it, Enter or a click chooses a command and Esc closes
+it; while an input method composes, those keys stay with it. A command puts its text in the box for the user to finish,
+or, with `SendsImmediately`, sends it at once with the files attached to the box.
+
+```csharp
+Chat.Commands = new ObservableCollection<PromptCommand>
+{
+    new("shorter", "Make this shorter:") { Description = "Cut the text down" },
+    new("translate", "Translate the selection to English.") { SendsImmediately = true },
+};
+```
+
+The view follows an observable collection as the application changes it. Without commands, a slash is plain text.
+
 ## The activity line
 
 While a reply is in progress, one line under the conversation shows an animated icon, what the model is doing, the

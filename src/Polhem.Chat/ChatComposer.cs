@@ -130,7 +130,11 @@ public sealed partial class ChatComposer : INotifyPropertyChanged
     public string? Prompt
     {
         get => _prompt;
-        set => SetField(ref _prompt, value);
+        set
+        {
+            SetField(ref _prompt, value);
+            UpdateCommands();
+        }
     }
 
     /// <summary>
@@ -172,6 +176,7 @@ public sealed partial class ChatComposer : INotifyPropertyChanged
             IsGenerating = _runner.IsRunning;
         }
         UpdateRewind();
+        UpdateCommands();
     }
 
     /// <summary>Stops following the runner and the conversation, so that they no longer refer to the composer.</summary>
@@ -196,6 +201,7 @@ public sealed partial class ChatComposer : INotifyPropertyChanged
             _shown.PropertyChanged += OnConversationPropertyChanged;
             _shown.Entries.CollectionChanged += OnEntriesChanged;
         }
+        WatchCommands();
     }
 
     private void Unsubscribe()
@@ -209,6 +215,7 @@ public sealed partial class ChatComposer : INotifyPropertyChanged
             _shown.PropertyChanged -= OnConversationPropertyChanged;
             _shown.Entries.CollectionChanged -= OnEntriesChanged;
         }
+        UnwatchCommands();
     }
 
     private void OnRunnerPropertyChanged(object? sender, PropertyChangedEventArgs e)

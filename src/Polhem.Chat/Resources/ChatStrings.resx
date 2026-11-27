@@ -105,6 +105,12 @@
   <data name="ShowActivity" xml:space="preserve">
     <value>Show reasoning and tool calls</value>
   </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Commands</value>
+  </data>
+  <data name="CommandFormat" xml:space="preserve">
+    <value>{0} {1} ({2} of {3})</value>
+  </data>
   <data name="ScrollForMore" xml:space="preserve">
     <value>There is more: scroll to read all of it.</value>
   </data>
