@@ -1,4 +1,1 @@
 #nullable enable
-Polhem.Chat.Blazor.ChatView.Commands.get -> System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?
-Polhem.Chat.Blazor.ChatView.Commands.set -> void
-Polhem.Chat.Blazor.ChatView.IsCommandListOpen.get -> bool

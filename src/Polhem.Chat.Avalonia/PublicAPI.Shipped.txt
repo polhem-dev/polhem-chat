@@ -23,6 +23,8 @@ Polhem.Chat.Avalonia.ChatView.CancelEditCommand.get -> System.Windows.Input.ICom
 Polhem.Chat.Avalonia.ChatView.ChatView() -> void
 Polhem.Chat.Avalonia.ChatView.CjkFontFamily.get -> Avalonia.Media.FontFamily?
 Polhem.Chat.Avalonia.ChatView.CjkFontFamily.set -> void
+Polhem.Chat.Avalonia.ChatView.Commands.get -> System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?
+Polhem.Chat.Avalonia.ChatView.Commands.set -> void
 Polhem.Chat.Avalonia.ChatView.Conversation.get -> Polhem.Chat.ChatConversation?
 Polhem.Chat.Avalonia.ChatView.Conversation.set -> void
 Polhem.Chat.Avalonia.ChatView.CopyCommand.get -> System.Windows.Input.ICommand!
@@ -36,6 +38,7 @@ Polhem.Chat.Avalonia.ChatView.HeaderContent.get -> object?
 Polhem.Chat.Avalonia.ChatView.HeaderContent.set -> void
 Polhem.Chat.Avalonia.ChatView.HeaderContentTemplate.get -> Avalonia.Controls.Templates.IDataTemplate?
 Polhem.Chat.Avalonia.ChatView.HeaderContentTemplate.set -> void
+Polhem.Chat.Avalonia.ChatView.IsCommandListOpen.get -> bool
 Polhem.Chat.Avalonia.ChatView.IsEditingPrompt.get -> bool
 Polhem.Chat.Avalonia.ChatView.IsGenerating.get -> bool
 Polhem.Chat.Avalonia.ChatView.IsGenerating.set -> void
@@ -90,6 +93,7 @@ static readonly Polhem.Chat.Avalonia.ChatView.AllowsAttachmentsProperty -> Avalo
 static readonly Polhem.Chat.Avalonia.ChatView.AllowsRewindProperty -> Avalonia.StyledProperty<bool?>!
 static readonly Polhem.Chat.Avalonia.ChatView.AttachmentLimitsProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatAttachmentLimits!>!
 static readonly Polhem.Chat.Avalonia.ChatView.CjkFontFamilyProperty -> Avalonia.StyledProperty<Avalonia.Media.FontFamily?>!
+static readonly Polhem.Chat.Avalonia.ChatView.CommandsProperty -> Avalonia.StyledProperty<System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?>!
 static readonly Polhem.Chat.Avalonia.ChatView.ConversationProperty -> Avalonia.StyledProperty<Polhem.Chat.ChatConversation?>!
 static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentProperty -> Avalonia.StyledProperty<object?>!
 static readonly Polhem.Chat.Avalonia.ChatView.EmptyContentTemplateProperty -> Avalonia.StyledProperty<Avalonia.Controls.Templates.IDataTemplate?>!

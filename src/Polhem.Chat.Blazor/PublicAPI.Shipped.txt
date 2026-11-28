@@ -20,6 +20,8 @@ Polhem.Chat.Blazor.ChatView.CancelEdit() -> void
 Polhem.Chat.Blazor.ChatView.ChatView() -> void
 Polhem.Chat.Blazor.ChatView.Class.get -> string?
 Polhem.Chat.Blazor.ChatView.Class.set -> void
+Polhem.Chat.Blazor.ChatView.Commands.get -> System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?
+Polhem.Chat.Blazor.ChatView.Commands.set -> void
 Polhem.Chat.Blazor.ChatView.Conversation.get -> Polhem.Chat.ChatConversation?
 Polhem.Chat.Blazor.ChatView.Conversation.set -> void
 Polhem.Chat.Blazor.ChatView.CopyAsync(string! text) -> System.Threading.Tasks.Task<bool>!
@@ -32,6 +34,7 @@ Polhem.Chat.Blazor.ChatView.ErrorTemplate.set -> void
 Polhem.Chat.Blazor.ChatView.FollowsLatest.get -> bool
 Polhem.Chat.Blazor.ChatView.HeaderContent.get -> Microsoft.AspNetCore.Components.RenderFragment?
 Polhem.Chat.Blazor.ChatView.HeaderContent.set -> void
+Polhem.Chat.Blazor.ChatView.IsCommandListOpen.get -> bool
 Polhem.Chat.Blazor.ChatView.IsEditingPrompt.get -> bool
 Polhem.Chat.Blazor.ChatView.IsGenerating.get -> bool
 Polhem.Chat.Blazor.ChatView.IsGenerating.set -> void
