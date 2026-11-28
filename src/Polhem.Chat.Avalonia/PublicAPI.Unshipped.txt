@@ -1,5 +1,1 @@
 #nullable enable
-Polhem.Chat.Avalonia.ChatView.Commands.get -> System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?
-Polhem.Chat.Avalonia.ChatView.Commands.set -> void
-Polhem.Chat.Avalonia.ChatView.IsCommandListOpen.get -> bool
-static readonly Polhem.Chat.Avalonia.ChatView.CommandsProperty -> Avalonia.StyledProperty<System.Collections.Generic.IEnumerable<Polhem.Chat.PromptCommand!>?>!

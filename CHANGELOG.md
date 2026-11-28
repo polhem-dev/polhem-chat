@@ -9,9 +9,13 @@ versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-28
+
+Details and migration steps: [docs/en/changelogs/0.4.0.md](docs/en/changelogs/0.4.0.md)
+
 - Both views take `Commands`, prompts the host offers in the prompt box: typing `/` at the start of the box lists the `PromptCommand` items whose name matches, the arrow keys and Enter choose one with the keyboard alone, and a screen reader announces the selected one. A command fills the box for the user to finish, or sends at once with `SendsImmediately`. The host can change the list at any time; nothing changes for a host that provides none.
 - `PromptContext` sends text with a prompt that the user did not type, such as the selected text of a document: a `MessageSending` handler adds it to `MessageSendingEventArgs.Context`. The model receives it before the prompt in the same text block, and both views show only its label on the prompt, like a file. `SaveHistory` and `LoadHistory` keep it, and regenerating or editing the last prompt sends it again. Nothing changes for an application that adds none.
-- The views take `Polhem.Markdown.Avalonia` and `Polhem.Markdown.Blazor` 0.5.0, and so `Polhem.Markdown` 0.5.0. An application that references one of them itself takes 0.5.0 too.
+- **Changed:** The views take `Polhem.Markdown.Avalonia` and `Polhem.Markdown.Blazor` 0.5.0, and so `Polhem.Markdown` 0.5.0. An application that references one of them itself takes 0.5.0 too.
 
 ## [0.3.0] - 2026-11-27
 
@@ -80,7 +84,8 @@ Details: [docs/en/changelogs/0.1.0.md](docs/en/changelogs/0.1.0.md)
 - The prompt box sends on Enter and ignores the Enter that confirms an input method's composition.
 - English and Traditional Chinese texts, and a theme for Fluent and Semi, light and dark.
 
-[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/polhem-dev/polhem-chat/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/polhem-dev/polhem-chat/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/polhem-dev/polhem-chat/compare/v0.1.2...v0.2.0
