@@ -98,9 +98,13 @@ public class CommandListTests : BunitContext
     public void Click_ChoosesCommand()
     {
         var view = Hosted([s_shorter, s_translate]);
-        view.Find(".pch-prompt-box").Input("/");
+        // NOTE: A change to the prompt also asks the view's render throttle for a render 50 ms later, which replaces the
+        // event handlers. On a slow machine it lands between finding an element and raising its event, so each pair runs
+        // in one call on the renderer.
+        view.InvokeAsync(() => view.Find(".pch-prompt-box").Input("/"));
+        view.WaitForElement(".pch-commands");
 
-        view.FindAll(".pch-command")[1].Click();
+        view.InvokeAsync(() => view.FindAll(".pch-command")[1].Click());
 
         view.WaitForAssertion(() => Assert.Equal(["Translate to English."], _submitted));
     }
